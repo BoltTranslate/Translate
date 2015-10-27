@@ -1,0 +1,17 @@
+## Locale Fallback
+#fallback:
+#    type: all            # none, partial or all (default: none)
+#    locale: en_GB        # optional (default: bolt default locale)
+
+default_locale:
+    iso: en_GB           # optional (default: first locale)
+    hide: true           # hide slug of default locale (default: true)
+
+locales:
+    en_GB:
+        label: English
+        slug: en
+	de_AT:               # ISO 3166-1 code
+	    label: Deutsch
+#        slug: de         # optional (default: ISO 3166-1 code)
+#        enabled: true    # enable/disable locale in frontend (default: true)

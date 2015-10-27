@@ -1,0 +1,9 @@
+<ul>
+	{% for iso, locale in locales if locale.enabled is not defined or locale.enabled %}
+	<li>
+		<a href="{{ url(app.request.get('_route'), {_locale: locale.slug}) }}" data-locale="{{ iso }}"{% if locale.slug == app.request.get('_locale') %} class="active"{% endif %}>
+			{{ locale.label }}
+		</a>
+	</li>
+	{% endfor %}
+</ul>

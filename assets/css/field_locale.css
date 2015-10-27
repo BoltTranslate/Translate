@@ -1,0 +1,32 @@
+[data-fieldtype="locale"] {
+	/*display: none;*/
+}
+#locale-select button {
+	border-radius: 4px 4px 0 0;
+	padding: 5px 12px;
+	line-height: 1.42857;
+	margin-bottom: -1px;
+}
+#locale-select button a {
+	border: 0;
+	background-color: transparent!important;
+}
+#locale-select .dropdown-menu > li {
+	margin-left: 0;
+}
+#locale-select .dropdown-menu > li > a {
+	padding: 3px 20px;
+	color: #333;
+	background-color: transparent;
+	border: 0;
+}
+#locale-select .dropdown-menu > li > a:hover {
+	background-color: #DDD !important;
+}
+#locale-select .dropdown-menu > .disabled > a {
+	color: #777;
+	cursor: default;
+}
+#locale-select .dropdown-menu > .disabled > a:hover {
+	background-color: transparent !important;
+}

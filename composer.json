@@ -1,0 +1,24 @@
+{
+	"name": "animal/translate",
+	"description": "Provides translation for contenttypes.",
+	"type": "bolt-extension",
+	"require": {
+		"bolt/bolt": ">=2.0.0,<3.0.0"
+	},
+	"keywords": [
+		"Translation",
+		"Frontend"
+	],
+	"authors": [{
+		"name": "Animal Design OG",
+		"email": "studio@animal.at"
+	}],
+	"autoload": {
+		"files": [
+			"init.php"
+		],
+		"psr-4": {
+			"Bolt\\Extension\\Animal\\Translate\\": ["", "src/"]
+		}
+	}
+}
