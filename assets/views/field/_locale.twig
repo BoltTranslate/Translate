@@ -9,6 +9,7 @@
 
 <fieldset class="locale">
 	<div class="col-sm-12">
+		{% if app.request.get('id') is not empty %}
 		<div class="dropdown pull-right" id="locale-select">
 			<button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
 				<span class="selected">{{ ext.config.locales[ext.config.default_locale.iso].label }}</span>
@@ -22,6 +23,7 @@
 			{% endfor %}
 			</ul>
 		</div>
+		{% endif %}
 		<input type="hidden" id="translatable-fields" value="{{ translatable|join(',') }}">
 		<input type="hidden" id="locale" name="{{ name }}" value="{{ ext.config.default_locale.iso }}">
 	</div>

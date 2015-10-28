@@ -54,9 +54,9 @@ tba.
 - [x] Save on update, depending on locale (Event: PRE_SAVE)
 - [x] Add icons to mark translatable fields
 - [x] Move locale selector to tab navigation
-- [ ] Hide Locale selector on content type creation
+- [x] Hide Locale selector on content type creation
 - [ ] Reset locale selector to default language or don't reset content of fields after save/update
-- Cleanup on delete (blocked by [bolt/bolt/#4269](https://github.com/bolt/bolt/issues/4269))
+- [ ] Cleanup on delete (blocked by [bolt/bolt/#4269](https://github.com/bolt/bolt/issues/4269))
 
 ### Frontend
 
@@ -67,12 +67,10 @@ tba.
 ## Links
 
 - https://docs.bolt.cm/howto/building-multilingual-websites
-
 - https://github.com/bolt/bolt/issues/513
 - https://github.com/bolt/bolt/issues/234
 - https://github.com/bolt/bolt/issues/2484
 - https://github.com/bolt/bolt/issues/3933
-
 - https://vivait.co.uk/labs/updating-entities-when-an-insert-has-a-duplicate-key-in-doctrine
 - https://dev.mysql.com/doc/refman/5.0/en/insert-on-duplicate.html
 - http://stackoverflow.com/questions/1132571/implementing-update-if-exists-in-doctrine-orm

@@ -46,18 +46,20 @@ class Extension extends BaseExtension
     public function beforeCallback(Request $request)
     {
         if (Zone::isBackend($request)) {
-            $this->addCss(new Stylesheet('assets/css/field_locale.css'));
-            
-            $localeJs = new JavaScript('assets/js/field_locale.js');
-            $localeJs
-                ->setLate(true)
-                ->setPriority(99);
-            
-            $this->addJavascript($localeJs);
+            $routeParams = $request->get('_route_params');
+            if(array_key_exists('contenttypeslug', $routeParams)) {
+                $this->addCss(new Stylesheet('assets/css/field_locale.css'));
+                
+                if(!empty($routeParams['id'])) {
+                    $localeJs = new JavaScript('assets/js/field_locale.js');
+                    $localeJs
+                        ->setLate(true)
+                        ->setPriority(99);
+                    
+                    $this->addJavascript($localeJs);
+                }
+            }
         }
-
-        // $routeParams = $request->get('_route_params');
-        // $_locale = $routeParams['_locale'];
     }
 
     /**
