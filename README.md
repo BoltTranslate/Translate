@@ -1,5 +1,7 @@
 # Translation plugin for Bolt CMS (Work in progress)
 
+![Screenshot, Backend](https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png)
+
 ## Setup
 
 First add the locale field to your contenttype in `contenttypes.yml`:
