@@ -6,16 +6,16 @@
 
 First add the locale field to your contenttype in `contenttypes.yml`:
 
-````
+```
 locale:
 	type: locale
     group: content
 [...]
-````
+```
 
 Add the `isTranslatable` argument to all translatable fields:
 
-````
+```
 [...]
 title:
 	type: text
@@ -23,21 +23,39 @@ title:
 	group: content
 	isTranslatable: true
 [...]
-````
+```
+
+Setup routing in `routing.yml`:
+
+```
+tba.
+```
 
 Use the `localeswitcher` twig-function to render a locale switcher in your theme:
 
-````
+```
 {{ localeswitcher()|raw }}
-````
+```
 or
-````
+```
 {{ localeswitcher('_my_localeswitcher_template.twig')|raw }}
-````
+```
 
 ## Configuration
 
-tba.
+```
+default_locale:
+    iso: en_GB           # optional (default: first locale)
+
+locales:
+    en_GB:
+        label: English
+        slug: en
+	de_AT:               # ISO 3166-1 code
+	    label: Deutsch
+        slug: de         # optional (default: ISO 3166-1 code)
+        enabled: true    # enable/disable locale in frontend (default: true)
+```
 
 ## State of the Extension
 
