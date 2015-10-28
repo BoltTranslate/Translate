@@ -23,6 +23,6 @@
 			</ul>
 		</div>
 		<input type="hidden" id="translatable-fields" value="{{ translatable|join(',') }}">
-		<input type="hidden" id="locale" name="{{ name }}" value="{{ app.locale }}">
+		<input type="hidden" id="locale" name="{{ name }}" value="{{ ext.config.default_locale.iso }}">
 	</div>
 </fieldset>
