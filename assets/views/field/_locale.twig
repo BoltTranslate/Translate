@@ -1,4 +1,4 @@
-{% set ext = app.extensions.enabled.translate.config %}
+{% set ext = app.extensions.enabled.Translate %}
 
 {% set translatable = [] %}
 {% for name, field in context.contenttype.fields %}
@@ -11,18 +11,15 @@
 	<div class="col-sm-12">
 		<div class="dropdown pull-right" id="locale-select">
 			<button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
-				<span class="selected">{{ ext.default_locale.label }}</span>
+				<span class="selected">{{ ext.config.locales[ext.config.default_locale.iso].label }}</span>
 				<span class="caret"></span>
 			</button>
 			<ul class="dropdown-menu">
-				<li class="disabled">
-					<a href="{{ paths.bolt }}async/translate/get" data-locale="{{ app.locale }}">{{ ext.default_locale.label }}</a>
-				</li>
-				{% for locale_code, locale in ext.locales if locale_code != app.locale %}
-				<li>
+				{% for locale_code, locale in ext.config.locales %}
+				<li{% if locale_code == ext.config.default_locale.iso %} class="disabled"{% endif %}>
 					<a href="{{ paths.bolt }}async/translate/get" data-locale="{{ locale_code }}">{{ locale.label }}</a>
 				</li>
-				{% endfor %}
+			{% endfor %}
 			</ul>
 		</div>
 		<input type="hidden" id="translatable-fields" value="{{ translatable|join(',') }}">
