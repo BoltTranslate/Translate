@@ -9,6 +9,9 @@ use Symfony\Component\HttpFoundation\Request;
 use Bolt\Events\StorageEvents;
 use Bolt\Events\StorageEvent;
 use Bolt\Events\HydrationEvent;
+use Bolt\Asset\File\JavaScript;
+use Bolt\Asset\File\Stylesheet;
+use Bolt\Controller\Zone;
 
 class Extension extends BaseExtension
 {
@@ -18,12 +21,15 @@ class Extension extends BaseExtension
     public function initialize()
     {
         $this->app['config']->getFields()->addField(new Field\LocaleField());
-        $this->app['twig.loader.filesystem']->prependPath(__DIR__.'/assets/views');
+        $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
         $this->app->mount(
             $this->app['config']->get('general/branding/path').'/async/translate',
             new Controller\AsyncController($this->app, $this->config)
         );
+        
+        $this->app->before(array($this, 'beforeCallback'));
+        //$this->app->before(array($this, 'beforeEarlyCallback'), BoltApplication::EARLY_EVENT);
 
         // Locale switcher for frontend
         $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
@@ -33,27 +39,25 @@ class Extension extends BaseExtension
         $this->app['dispatcher']->addListener(StorageEvents::PRE_HYDRATE, array($this, 'preHydrateCallback'));
 
         if ($this->app['config']->getWhichEnd() == 'backend') {
-            $this->addCss('assets/css/field_locale.css');
-            $this->addJavascript('assets/js/field_locale.js', true);
-
             $this->checkDb();
-        }
-
-        if ($this->app['config']->getWhichEnd() == 'frontend') {
-            //$this->app->before(array($this, 'beforeEarlyCallback'), BoltApplication::EARLY_EVENT);
-            //$this->app->before(array($this, 'beforeCallback'));
         }
     }
 
     public function beforeCallback(Request $request)
     {
+        if (Zone::isBackend($request)) {
+            $this->addCss(new Stylesheet('assets/css/field_locale.css'));
+            
+            $localeJs = new JavaScript('assets/js/field_locale.js');
+            $localeJs
+                ->setLate(true)
+                ->setPriority(99);
+            
+            $this->addJavascript($localeJs);
+        }
+
         // $routeParams = $request->get('_route_params');
         // $_locale = $routeParams['_locale'];
-        // 
-        // if ($this->config['default_locale']['hide'] === true) {
-        //     var_dump('####');
-        // }
-        // exit;
     }
 
     /**
