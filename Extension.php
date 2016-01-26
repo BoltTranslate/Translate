@@ -3,29 +3,41 @@
 namespace Bolt\Extension\Animal\Translate;
 
 use Bolt\BaseExtension;
-use Silex\Application as BoltApplication;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\HttpFoundation\Request;
 use Bolt\Events\StorageEvents;
 use Bolt\Events\StorageEvent;
-use Bolt\Events\HydrationEvent;
-use Bolt\Asset\File\JavaScript;
-use Bolt\Asset\File\Stylesheet;
-use Bolt\Controller\Zone;
+use Bolt\Library as Lib;
 
 class Extension extends BaseExtension
 {
     /** @var string */
     protected $defaultLocale;
+    
+    private $serializedFieldTypes = array(
+            'geolocation',
+            'imagelist',
+            'image',
+            'file',
+            'filelist',
+            'video',
+            'select',
+            'templateselect',
+            'checkbox'
+        );
+    
 
     public function initialize()
     {
+        
+        $this->config = ['fallback' => $this->app['config']->get('general/fallback'), 'locales' => $this->app['config']->get('general/locales')];
+
         $this->app['config']->getFields()->addField(new Field\LocaleField());
         $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
         $this->app->mount(
             $this->app['config']->get('general/branding/path').'/async/translate',
-            new Controller\AsyncController($this->app, $this->config)
+            new Controller\AsyncController($this->app, ['fallback' => $this->app['config']->get('general/fallback'), 'locales' => $this->app['config']->get('general/locales')])
         );
         
         $this->app->before(array($this, 'beforeCallback'));
@@ -33,10 +45,12 @@ class Extension extends BaseExtension
 
         // Locale switcher for frontend
         $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
+        
+        $this->addTwigFunction('get_slug_from_locale', 'getSlugFromLocale');
 
         $this->app['dispatcher']->addListener(StorageEvents::PRE_SAVE, array($this, 'preSaveCallback'));
         $this->app['dispatcher']->addListener(StorageEvents::POST_DELETE, array($this, 'postDeleteCallback'));
-        $this->app['dispatcher']->addListener(StorageEvents::PRE_HYDRATE, array($this, 'preHydrateCallback'));
+        //$this->app['dispatcher']->addListener(StorageEvents::PRE_HYDRATE, array($this, 'preHydrateCallback'));
 
         if ($this->app['config']->getWhichEnd() == 'backend') {
             $this->checkDb();
@@ -45,18 +59,13 @@ class Extension extends BaseExtension
 
     public function beforeCallback(Request $request)
     {
-        if (Zone::isBackend($request)) {
+        if ($this->app['config']->getWhichEnd() == 'backend') {
             $routeParams = $request->get('_route_params');
             if(array_key_exists('contenttypeslug', $routeParams)) {
-                $this->addCss(new Stylesheet('assets/css/field_locale.css'));
+                $this->addCss('assets/css/field_locale.css');
                 
                 if(!empty($routeParams['id'])) {
-                    $localeJs = new JavaScript('assets/js/field_locale.js');
-                    $localeJs
-                        ->setLate(true)
-                        ->setPriority(99);
-                    
-                    $this->addJavascript($localeJs);
+                    $this->addJavascript('assets/js/field_locale.js', true);
                 }
             }
         }
@@ -70,6 +79,7 @@ class Extension extends BaseExtension
      */
     public function preSaveCallback(StorageEvent $event)
     {
+        
         $default_locale = $this->app['config']->get('general/locale', 'en_GB');
         $prefix = $this->app['config']->get('general/database/prefix', 'bolt_');
 
@@ -95,8 +105,13 @@ class Extension extends BaseExtension
         $default_content = $this->app['db']->fetchAssoc($query, array(
             ':content_type_id' => $content_type_id,
         ));
-
+        $this->app['logger.system']->info(json_encode($content), array('event' => 'authentication'));
         foreach ($translatable_fields as $translatable_field) {
+            $fieldtype = $content_type_config['fields'][$translatable_field]['type']; 
+            if(in_array($fieldtype, $this->serializedFieldTypes) && !is_string($content[$translatable_field])){
+                $content[$translatable_field] = json_encode($content[$translatable_field]);
+            }
+            $content_type_config['fields'][$translatable_field];
             // Create/update translation entries
             $query = 'REPLACE INTO '.$prefix.'translation (locale, field, content_type_id, content_type, value) VALUES (?, ?, ?, ?, ?)';
             $this->app['db']->executeQuery($query, array(
@@ -104,7 +119,7 @@ class Extension extends BaseExtension
                 $translatable_field,
                 $content_type_id,
                 $content_type,
-                $content[$translatable_field],
+                (string)$content[$translatable_field],
             ));
 
             // Reset values to english
@@ -140,32 +155,89 @@ class Extension extends BaseExtension
         // );
     }
 
-    /**
-     * preHydrateCallback.
-     *
-     * This callback is used to load translated content into the object.
-     * It is called by the event dispatcher.
-     */
-    public function preHydrateCallback(HydrationEvent $event)
+    public function localeHydrate($content = "")
     {
-        $subject = $event->getSubject();
-        $entity = $event->getArgument('entity');
-        $repository = $event->getArgument('repository');
-
-        $_locale = $this->app['request']->get('_locale');
-        //$content_type = $request->query->get('content_type');
-        $content_type_id = $subject['id'];
-
-        // if _locale == default locale
-            // return
-
-        // load translated fields
-        // replace object content
-
-
-        //echo json_encode($content_type_id);
-        //echo '<br><br>';
-        //echo json_encode($repository);
+        $locales = $this->app['config']->get('general/locales');
+        if($locales){
+            $defaultLocaleSlug = $locales[0]['slug'];
+            $matchedLocales = array_filter(
+                $locales,
+                function ($e) {
+                    return $e['slug'] == $this->app['request']->get('_locale');
+                }
+            );
+                
+            if($this->app['request']->get('_locale') != $defaultLocaleSlug || !empty($matchedLocales)){
+                
+                
+                $locale = key($matchedLocales);
+                
+                if(is_a($content, "Bolt\Content")){
+                    $this->localeHydrateRecord($content, $locale);
+                }elseif(is_array($content)){
+                    foreach ($content as &$record) {
+                        $record = $this->localeHydrateRecord($record, $locale);
+                    }
+        
+                }
+            }
+        }
+        return $content;
+    }
+    
+    public function getSlugFromLocale($content, $locale)
+    {
+        if(is_a($content, "Bolt\Content")){
+            $query = "select value from bolt_translation where field = 'slug' and locale = ? and content_type = ? and content_type_id = ? ";
+            $stmt = $this->app['db']->prepare($query);
+            $stmt->bindValue(1, $locale);
+            $stmt->bindValue(2, $content->contenttype['slug']);
+            $stmt->bindValue(3, $content->id);
+            $stmt->execute();
+            $slug =  $stmt->fetch();
+            if(!empty($slug)){
+                return $slug['value'];
+            }
+            return $content->delocalizedValues['slug'];
+        }
+        return false;
+    }
+    
+    public function matchSlug($contenttypeslug, $slug = '')
+    {
+        $locales = $this->app['config']->get('general/locales');
+        $defaultLocaleSlug = $locales[0]['slug'];
+        $matchedLocales = array_filter(
+            $locales,
+            function ($e) {
+                return $e['slug'] == $this->app['request']->get('_locale');
+            }
+        );
+        
+        $locale = key($matchedLocales);
+        $query = "select content_type_id from bolt_translation where field = 'slug' and locale = ? and content_type = ? and value = ? ";
+        $stmt = $this->app['db']->prepare($query);
+        $stmt->bindValue(1, $locale);
+        $stmt->bindValue(2, $contenttypeslug);
+        $stmt->bindValue(3, $slug);
+        $stmt->execute();
+        return $stmt->fetch();
+    }
+    
+    private function localeHydrateRecord($record, $locale){
+        $query = "select field, value from bolt_translation where locale = ? and content_type = ? and content_type_id = ?";
+        $stmt = $this->app['db']->prepare($query);
+        $stmt->bindValue(1, $locale);
+        $stmt->bindValue(2, $record->contenttype['slug']);
+        $stmt->bindValue(3, $record->id);
+        $stmt->execute();
+        $record->delocalizedValues = [];
+        while ($row = $stmt->fetch()) {
+            $record->delocalizedValues[$row['field']] = $record->values[$row['field']];
+            $record->values[$row['field']] = $row['value'];
+        }
+        
+        return $record;
     }
 
     /**
@@ -178,9 +250,8 @@ class Extension extends BaseExtension
         if($template === null) {
             $template = '/twig/_localeswitcher.twig';
         }
-
         return $this->app['twig']->render($template, array(
-            'locales' => $this->config['locales']
+            'locales' => $this->app['config']->get('general/locales')
         ));
     }
 
