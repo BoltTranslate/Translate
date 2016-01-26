@@ -1,8 +1,10 @@
 <?php
 
-namespace Bolt\Extension\Animal\Translate;
+namespace Bolt\Extension\Animal\Translate\Content;
 
-class Content extends \Bolt\Content
+use Bolt\Library as Lib;
+
+class LocalizedContent extends \Bolt\Content
 {
   public function setValues(array $values){
         // Since Bolt 1.4, we use 'ownerid' instead of 'username' in the DB tables. If we get an array that has an
