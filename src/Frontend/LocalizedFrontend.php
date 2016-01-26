@@ -1,7 +1,8 @@
 <?php
 
-namespace Bolt\Extension\Animal\Translate;
+namespace Bolt\Extension\Animal\Translate\Frontend;
 
+use Bolt\Library as Lib;
 
 Class LocalizedFrontend extends \Bolt\Controllers\Frontend
 {
