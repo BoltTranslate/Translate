@@ -7,7 +7,11 @@ $(function() {
 	
 	// Move locale switcher to tab navigation
 	$("#locale-select").detach().appendTo('#filtertabs');
-
+	
+	$(Bolt).on('done.bolt.content.save', function(){
+		$('#locale-select li:first-child a').trigger('click');
+	});
+	
 	$('#locale-select a').click(function(e) {
 		e.preventDefault();
 
@@ -38,8 +42,21 @@ $(function() {
 			content_type: $('#contenttype').val(),
 			content_type_id: $('#id').val()
 		}, function(data) {
+			console.log(data)
 			$.each(data, function() {
-				setValue(this.field, this.value);
+				if(this.field == "templatefields"){
+					try{
+						var val = JSON.parse(this.value);
+						for (var field in val) {
+							setValue('templatefields-' + field, val[field]);
+						}
+						console.log(val)
+					} catch (e) {
+						console.log(e)
+					}
+				}else{
+					setValue(this.field, this.value);
+				}
 			})
 			$('#locale').val(locale);
 			lockInputFields(false);
@@ -69,6 +86,8 @@ function setValue(field, value) {
 	var boltField = $('[data-bolt-field="slug"]');
 	var fconf = boltField.data('bolt-fconf');
 	switch (type) {
+		case 'integer':
+		case 'float':
 		case 'textarea':
 		case 'text':
 			el.val(value);
@@ -181,6 +200,9 @@ function setValue(field, value) {
 			}
 			break;
 		case 'grid':
+			if(value == "" || value == "[]"){
+				value = "[[],[]]"
+			}
 			el.val(value);
 			document.getElementById('hot-'+field).hot.loadData(JSON.parse(value));
 			break;
@@ -193,7 +215,6 @@ function setValue(field, value) {
 			el.colorpicker('setValue', value);
 			break;
 		default:
-			console.log(el, parent, type, field, value)
 			try {
 				value = JSON.parse(value);
 				if ($.type(value) === 'object') {
