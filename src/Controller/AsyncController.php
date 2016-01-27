@@ -78,7 +78,9 @@ class AsyncController implements ControllerProviderInterface
         $translatable = array();
 
         foreach($fields as $name => $field) {
-            if(isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
+            if (isset($field['isTranslatable'])  && $field['isTranslatable'] === true && $field['type'] === 'templateselect') {
+                $translatable[] = 'templatefields';
+            }elseif(isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
                 $translatable[] = $name;
             }
         }

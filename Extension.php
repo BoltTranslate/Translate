@@ -30,14 +30,14 @@ class Extension extends BaseExtension
     public function initialize()
     {
         
-        $this->config = ['fallback' => $this->app['config']->get('general/fallback'), 'locales' => $this->app['config']->get('general/locales')];
+        $this->config = ['locales' => $this->app['config']->get('general/locales')];
 
         $this->app['config']->getFields()->addField(new Field\LocaleField());
         $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
         $this->app->mount(
             $this->app['config']->get('general/branding/path').'/async/translate',
-            new Controller\AsyncController($this->app, ['fallback' => $this->app['config']->get('general/fallback'), 'locales' => $this->app['config']->get('general/locales')])
+            new Controller\AsyncController($this->app, ['locales' => $this->app['config']->get('general/locales')])
         );
         
         $this->app->before(array($this, 'beforeCallback'));
@@ -65,7 +65,7 @@ class Extension extends BaseExtension
                 $this->addCss('assets/css/field_locale.css');
                 
                 if(!empty($routeParams['id'])) {
-                    $this->addJavascript('assets/js/field_locale.js', true);
+                    $this->addJavascript('assets/js/field_locale.js', array('late' => true));
                 }
             }
         }
@@ -105,9 +105,16 @@ class Extension extends BaseExtension
         $default_content = $this->app['db']->fetchAssoc($query, array(
             ':content_type_id' => $content_type_id,
         ));
-        $this->app['logger.system']->info(json_encode($content), array('event' => 'authentication'));
+        
+        
         foreach ($translatable_fields as $translatable_field) {
-            $fieldtype = $content_type_config['fields'][$translatable_field]['type']; 
+            
+            $fieldtype = $content_type_config['fields'][$translatable_field]['type'];
+            
+            if(is_a($content[$translatable_field], 'Bolt\\Content')){
+                $content[$translatable_field] = json_encode($content[$translatable_field]->getValues(true, true));
+                
+            }
             if(in_array($fieldtype, $this->serializedFieldTypes) && !is_string($content[$translatable_field])){
                 $content[$translatable_field] = json_encode($content[$translatable_field]);
             }
@@ -296,7 +303,9 @@ class Extension extends BaseExtension
         $translatable = array();
 
         foreach ($fields as $name => $field) {
-            if (isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
+            if (isset($field['isTranslatable'])  && $field['isTranslatable'] === true && $field['type'] === 'templateselect') {
+                $translatable[] = 'templatefields';
+            }elseif (isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
                 $translatable[] = $name;
             }
         }
