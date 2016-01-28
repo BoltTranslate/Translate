@@ -47,6 +47,8 @@ class Extension extends BaseExtension
 
         // Locale switcher for frontend
         $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
+        
+        $this->addTwigFunction('get_slug_from_locale', 'getSlugFromLocale');
 
         $this->app['dispatcher']->addListener(StorageEvents::PRE_SAVE, array($this, 'preSaveCallback'));
         $this->app['dispatcher']->addListener(StorageEvents::POST_DELETE, array($this, 'postDeleteCallback'));
@@ -77,7 +79,7 @@ class Extension extends BaseExtension
                 $locales = $this->app['config']->get('general/locales');
                 foreach($locales as $isolocale => $locale) {
                     if ($locale['slug'] == $routeParams['_locale']) {
-                        $foundLocale = $locale['slug'];
+                        $foundLocale = $isolocale;
                     }
                 }
                 if (isset($foundLocale)) {
@@ -247,6 +249,29 @@ class Extension extends BaseExtension
         return $this->app['twig']->render($template, array(
             'locales' => $this->app['config']->get('general/locales')
         ));
+    }
+
+    /**
+     * getSlugFromLocale.
+     *
+     * Twig function to get the slug for a record in a different locale
+     */
+    public function getSlugFromLocale($content, $locale)
+    {
+        if(is_a($content, "Bolt\Content")){
+            $query = "select value from bolt_translation where field = 'slug' and locale = ? and content_type = ? and content_type_id = ? ";
+            $stmt = $this->app['db']->prepare($query);
+            $stmt->bindValue(1, $locale);
+            $stmt->bindValue(2, $content->contenttype['slug']);
+            $stmt->bindValue(3, $content->id);
+            $stmt->execute();
+            $slug =  $stmt->fetch();
+            if(!empty($slug)){
+                return $slug['value'];
+            }
+            return $content->delocalizedValues['slug'];
+        }
+        return false;
     }
 
     private function checkDb()
