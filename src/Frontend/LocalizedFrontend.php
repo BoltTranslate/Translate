@@ -27,8 +27,7 @@ Class LocalizedFrontend extends \Bolt\Controllers\Frontend
 
         if (!$content && !is_numeric($slug)) {
             // And otherwise try getting it by translated slugs
-            $extension  = new \Bolt\Extension\Animal\Translate\Extension($app);
-            $match = $extension->matchSlug($contenttype['slug'], $slug);
+            $match = $this->matchTranslatedSlug($contenttype['slug'], $slug);
             if(!empty($match)){
                 $content = $app['storage']->getContent($contenttype['slug'], array('id' => $match['content_type_id'], 'returnsingle' => true));
             }
@@ -68,8 +67,27 @@ Class LocalizedFrontend extends \Bolt\Controllers\Frontend
         // Render the template and return.
         return $this->render($app, $template, $content->getTitle());
     }
+    
+    private function matchTranslatedSlug($contenttypeslug, $slug = '')
+    {
+        $prefix = $app['config']->get('general/database/prefix', 'bolt_');
+        $locales = $app['config']->get('general/locales');
+        $defaultLocaleSlug = $locales[0]['slug'];
+        $matchedLocales = array_filter(
+            $locales,
+            function ($e) {
+                return $e['slug'] == $app['request']->get('_locale');
+            }
+        );
         
-    public function homepageRedirect(\Silex\Application $app){
-        return $app->redirect(reset($app['config']->get('general/locales'))['slug']);
+        $locale = key($matchedLocales);
+        $query = 'select content_type_id from '.$prefix.'translation where field = "slug" and locale = ? and content_type = ? and value = ?';
+        $stmt = $app['db']->prepare($query);
+        $stmt->bindValue(1, $locale);
+        $stmt->bindValue(2, $contenttypeslug);
+        $stmt->bindValue(3, $slug);
+        $stmt->execute();
+        return $stmt->fetch();
     }
+    
 }
