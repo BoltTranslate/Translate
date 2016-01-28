@@ -25,10 +25,17 @@ title:
 [...]
 ```
 
-Setup routing in `routing.yml`:
+Setup routing in `routing.yml` like below, a full example can be found in the `routing.yml.dist` in this dir:
 
 ```
-tba.
+contentlink:
+    path: '/{_locale}/{contenttypeslug}/{slug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
+    requirements:
+        contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
+        _locale: "^[a-zA-Z_]{2,5}$"
 ```
 
 Use the `localeswitcher` twig-function to render a locale switcher in your theme:
@@ -43,10 +50,10 @@ or
 
 ## Configuration
 
-```
-default_locale:
-    iso: en_GB           # optional (default: first locale)
+Add the `locales` block to the main configuration with your locales,
+the first one is the default locale:
 
+```
 locales:
     en_GB:
         label: English
@@ -54,7 +61,6 @@ locales:
 	de_AT:               # ISO 3166-1 code
 	    label: Deutsch
         slug: de         # optional (default: ISO 3166-1 code)
-        enabled: true    # enable/disable locale in frontend (default: true)
 ```
 
 ## State of the Extension
@@ -62,9 +68,9 @@ locales:
 ### System
 
 - [x] Setup configuration
-- [ ] Dynamically extend routing (/{_locale}/route)
+- [ ] Dynamically extend routing (/{_locale}/route) (wontfix?)
 - [x] Database: New Table for translations (bolt_translation)
-- [ ] Set system language in frontend ($this->app['session']->set('lang', $lang) ?)
+- [x] Set system language in frontend ($this->app['session']->set('lang', $lang) ?)
 
 ### Backend
 
@@ -75,13 +81,13 @@ locales:
 - [x] Add icons to mark translatable fields
 - [x] Move locale selector to tab navigation
 - [x] Hide Locale selector on content type creation
-- [ ] Reset locale selector to default language or don't reset content of fields after save/update
-- [ ] Cleanup on delete (blocked by [bolt/bolt/#4269](https://github.com/bolt/bolt/issues/4269))
+- [x] Reset locale selector to default language or don't reset content of fields after save/update
+- [x] Cleanup on delete
 
 ### Frontend
 
-- [ ] Load content in correct language (Event: preHydrate)
-- [ ] Language fallback, if not exists (Event: EARLY_EVENT or preHydrate)
+- [x] Load content in correct language (Event: preHydrate)
+- [x] Language fallback, if not exists ("fixed" by redirecting to default language)
 - [x] Basic locale switcher (twig function)
 
 ## Links
