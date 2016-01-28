@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Animal\Translate\Frontend;
 
+use Symfony\Component\HttpFoundation\Response;
 use Bolt\Library as Lib;
 
 Class LocalizedFrontend extends \Bolt\Controllers\Frontend
@@ -27,7 +28,7 @@ Class LocalizedFrontend extends \Bolt\Controllers\Frontend
 
         if (!$content && !is_numeric($slug)) {
             // And otherwise try getting it by translated slugs
-            $match = $this->matchTranslatedSlug($contenttype['slug'], $slug);
+            $match = $this->matchTranslatedSlug($app, $contenttype['slug'], $slug);
             if(!empty($match)){
                 $content = $app['storage']->getContent($contenttype['slug'], array('id' => $match['content_type_id'], 'returnsingle' => true));
             }
@@ -68,18 +69,19 @@ Class LocalizedFrontend extends \Bolt\Controllers\Frontend
         return $this->render($app, $template, $content->getTitle());
     }
     
-    private function matchTranslatedSlug($contenttypeslug, $slug = '')
+    private function matchTranslatedSlug($app, $contenttypeslug, $slug = '')
     {
         $prefix = $app['config']->get('general/database/prefix', 'bolt_');
         $locales = $app['config']->get('general/locales');
-        $defaultLocaleSlug = $locales[0]['slug'];
+        $currentLocale = $app['request']->get('_locale');
+
         $matchedLocales = array_filter(
             $locales,
-            function ($e) {
-                return $e['slug'] == $app['request']->get('_locale');
+            function ($e) use ($currentLocale) {
+                return $e['slug'] === $currentLocale;
             }
         );
-        
+
         $locale = key($matchedLocales);
         $query = 'select content_type_id from '.$prefix.'translation where field = "slug" and locale = ? and content_type = ? and value = ?';
         $stmt = $app['db']->prepare($query);
