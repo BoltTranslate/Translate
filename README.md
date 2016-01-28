@@ -33,7 +33,9 @@ title:
 [...]
 ```
 
-Setup routing in `routing.yml` like below, a full example can be found in the `routing.yml.dist` in this dir:
+Setup routing in `routing.yml` like below but replacing `sv` with your
+preferred default locale, a full example can be found in the
+`routing.yml.dist` in this dir:
 
 ```
 contentlink:
@@ -46,7 +48,8 @@ contentlink:
         _locale: "^[a-zA-Z_]{2,5}$"
 ```
 
-Use the `localeswitcher` twig-function to render a locale switcher in your theme:
+Use the `localeswitcher` twig-function to render a locale switcher in your
+theme:
 
 ```
 {{ localeswitcher()|raw }}
@@ -58,8 +61,8 @@ or
 
 ## Configuration
 
-Add the `locales` block to the main configuration with your locales,
-the first one is the default locale:
+Add the `locales` block to the main configuration with your locales, the first
+one is the default locale:
 
 ```
 locales:
@@ -78,7 +81,7 @@ locales:
 - [x] Setup configuration
 - [ ] Dynamically extend routing (/{_locale}/route) (wontfix?)
 - [x] Database: New Table for translations (bolt_translation)
-- [x] Set system language in frontend ($this->app['session']->set('lang', $lang) ?)
+- [x] Set system language in frontend
 
 ### Backend
 
@@ -97,6 +100,7 @@ locales:
 - [x] Load content in correct language (Event: preHydrate)
 - [x] Language fallback, if not exists ("fixed" by redirecting to default language)
 - [x] Basic locale switcher (twig function)
+- [x] Override menu to account for translated slugs and locales
 
 ## Links
 

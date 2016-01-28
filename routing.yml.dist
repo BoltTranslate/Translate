@@ -5,8 +5,6 @@
 # ------------------------------------------------------------------------------
 # Place your own routes here, that have a HIGHER priority than the default routes.
 
-# routing.yml
-
 homepage:
     path: '/{_locale}'
     defaults:
@@ -22,6 +20,7 @@ sitemapxml_with_locale:
         _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemapXml'
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
+
 sitemaphtml_with_locale:
     path: /{_locale}/sitemap
     defaults:
@@ -29,6 +28,7 @@ sitemaphtml_with_locale:
         _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemap'
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
+
 # ------------------------------------------------------------------------------
 # These are the routes defining the default behaviour of Bolt's frontend.
 # Changing these might give unexpected results or even break your website. If
@@ -41,6 +41,7 @@ search:
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::search'
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
+
 preview:
     path: '/{_locale}/preview/{contenttypeslug}'
     defaults:
@@ -49,6 +50,7 @@ preview:
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
+
 contentlink:
     path: '/{_locale}/{contenttypeslug}/{slug}'
     defaults:
@@ -57,6 +59,7 @@ contentlink:
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
+
 taxonomylink:
     path: '/{_locale}/{taxonomytype}/{slug}'
     defaults:
@@ -65,6 +68,7 @@ taxonomylink:
     requirements:
         taxonomytype: 'Bolt\Controllers\Routing::getAnyTaxonomyTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
+
 contentlisting:
     path: '/{_locale}/{contenttypeslug}'
     defaults:
@@ -73,6 +77,7 @@ contentlisting:
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getPluralContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
+
 # ------------------------------------------------------------------------------
 # Place your own routes here, that have a LOWER priority than the default routes.
 
@@ -85,6 +90,7 @@ pagebinding:
     contenttype: sidor
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
+
 # ------------------------------------------------------------------------------
 # Routes examples:
 
