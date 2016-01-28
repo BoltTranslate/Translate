@@ -4,22 +4,24 @@ $(function() {
 	$($('#translatable-fields').val()).closest('fieldset').each(function(i, el){
 		$(el).find('label').first().prepend('<i class="fa fa-language icon"></i> ');
 	})
-	
+
 	// Move locale switcher to tab navigation
 	$("#locale-select").detach().appendTo('#filtertabs');
-	
-	var currentLocale;
-	
-	$(Bolt).on('done.bolt.content.save', function(){
-		$('#locale-select [data-locale="'+currentLocale+'"]').trigger('click', true);
+
+	var locale;
+
+	$(Bolt).on('start.bolt.content.save', function(){
+		$('[data-fieldtype="slug"] .unlocked .btn-default.lock').trigger('click');
 	});
-	
+
+	$(Bolt).on('done.bolt.content.save', function(){
+		$('#locale-select [data-locale="'+locale+'"]').trigger('click', true);
+	});
+
 	$('#locale-select a').click(function(e, force) {
 		e.preventDefault();
-		var el = $(this),
-			locale = el.data('locale');
-			
-		currentLocale = locale;
+		var el = $(this);
+		locale = el.data('locale');
 
 		if(el.parent().hasClass('disabled') && !force) {
 			return false;
@@ -33,13 +35,7 @@ $(function() {
 			.addClass('disabled')
 			.siblings()
 			.removeClass('disabled');
-		
-		var boltField = $('[data-bolt-field="slug"]');
-		var fconf = boltField.data('bolt-fconf');
-		$.each(fconf.uses, function (i, name) {
-			$('#' + name).off('propertychange.bolt input.bolt change.bolt');
-		});
-		
+
 		$.get(el.attr('href'), {
 			locale: locale,
 			content_type: $('#contenttype').val(),
@@ -63,7 +59,6 @@ $(function() {
 			})
 			$('#locale').val(locale);
 			lockInputFields(false);
-			//Bolt.app.run()
 		})
 		.fail(function() {
 			// show warning
@@ -79,6 +74,10 @@ function lockInputFields(status) {
 	});
 }
 
+function logerror(field, type) {
+	console.log('not valid json for ' + type + ' field ' + field)
+}
+
 function setValue(field, value) {
 	var el = $('#' + field + ', #field-' + field + ', [data-bolt-field="' + field + '"], #' + field + '-video, #gridfield-' + field);
 	var parent = el.closest('.form-group[data-fieldtype]');
@@ -86,8 +85,6 @@ function setValue(field, value) {
 		parent = $('#seo').closest('.tab-pane').find('[data-fieldtype="seo"]')
 	}
 	var type = parent.attr('data-fieldtype');
-	var boltField = $('[data-bolt-field="slug"]');
-	var fconf = boltField.data('bolt-fconf');
 	switch (type) {
 		case 'integer':
 		case 'float':
@@ -109,19 +106,8 @@ function setValue(field, value) {
 			}
 			break;
 		case 'slug':
-			if (value.trim() == ''){
-				fconf.isEmpty = true;
-			} else {
-				fconf.isEmpty = false;
-				parent.find('.input-group').removeClass('unlocked').addClass('locked');
-				$.each(fconf.uses, function (i, name) {
-					$('#' + name).off('propertychange.bolt input.bolt change.bolt');
-				});
-			}
-			boltField.get(0).dataset.boltFconf = JSON.stringify(fconf);
 			parent.find('input').val(value);
 			parent.find('em').html(value);
-			Bolt.fields.slug.init(boltField, fconf);
 			break;
 		case 'datetime':
 		case 'date':
@@ -129,14 +115,11 @@ function setValue(field, value) {
 			Bolt.datetime.update();
 			break;
 		case 'select':
-			if(fconf.uses.indexOf(field)){
-				el.off('propertychange.bolt input.bolt change.bolt');
-			}
 			if(el.attr('multiple')){
 				try {
 					el.val(JSON.parse(value))
 				} catch (e) {
-					console.log('not valid json for field ' + field)
+					logerror(field, type)
 				}
 			}else{
 				el.val(value);
@@ -150,7 +133,7 @@ function setValue(field, value) {
 					$('[name="'+field+'['+key+']"]').val(value[key]).trigger('input')
 				}
 			} catch (e) {
-				console.log('not valid json for field ' + field)
+				logerror(field, type)
 			}
 			break;
 		case 'image':
@@ -164,7 +147,7 @@ function setValue(field, value) {
                             encodeURI(value.file) + '" width="200" height="150">');
 			} catch (e) {
 				parent.find('.content-preview img').attr('src','/app/view/img/default_empty_4x3.png')
-				console.log('not valid json for field ' + field)
+				logerror(field, type)
 			}
 			break;
 		case 'video':
@@ -173,7 +156,7 @@ function setValue(field, value) {
 				$('[name="'+field+'[url]"]').val(value.url).trigger('input');
 			} catch (e) {
 				$('[name="'+field+'[url]"]').val('').trigger('input');
-				console.log('not valid json for field ' + field)
+				logerror(field, type)
 			}
 			break;
 		case 'filelist':
@@ -186,9 +169,8 @@ function setValue(field, value) {
 					Bolt[type][field].add(value[key].filename, value[key].title)
 				}
 			} catch (e) {
-				console.log('not valid json for field ' + field)
+				logerror(field, type)
 			}
-			
 			break;
 		case 'seo':
 			try {
@@ -198,8 +180,8 @@ function setValue(field, value) {
 				});
 				el.val(value).trigger('input').trigger('blur');
 			} catch (e) {
-				console.log('Error on SEO field: ', field, value);
 				el.val(value);
+				logerror(field, type)
 			}
 			break;
 		case 'grid':
@@ -233,9 +215,4 @@ function setValue(field, value) {
 			}
 			break;
 	}
-}
-
-// See http://stackoverflow.com/a/9116746/709769
-$.fn.getType = function() {
-	return this[0].tagName == 'INPUT' ? this[0].type.toLowerCase() : this[0].tagName.toLowerCase();
 }
