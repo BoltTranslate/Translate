@@ -4,12 +4,20 @@
 
 ## Setup
 
-First add the locale field to your contenttype in `contenttypes.yml`:
+First set your contenttype to use the `LocalizedContent` class 
+and add the locale field in `contenttypes.yml`:
 
 ```
-locale:
-	type: locale
-    group: content
+pages:
+    name: Pages
+    slug: pages
+    singular_name: Page
+    singular_slug: page
+    class: Bolt\Extension\Animal\Translate\Content\LocalizedContent
+    fields:
+        locale:
+            type: locale
+            group: content
 [...]
 ```
 
@@ -58,9 +66,9 @@ locales:
     en_GB:
         label: English
         slug: en
-	de_AT:               # ISO 3166-1 code
+	de_AT:
 	    label: Deutsch
-        slug: de         # optional (default: ISO 3166-1 code)
+        slug: de
 ```
 
 ## State of the Extension
