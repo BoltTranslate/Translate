@@ -83,6 +83,7 @@ class Extension extends BaseExtension
                     }
                 }
                 if (isset($foundLocale)) {
+                    setlocale(LC_ALL, $foundLocale);
                     $this->app['config']->set('general/locale', $foundLocale);
                 } else {
                     $routeParams['_locale'] = reset($locales)['slug'];
