@@ -2,11 +2,16 @@
 
 namespace Bolt\Extension\Animal\Translate\Content;
 
+use Bolt\Extension\Animal\Translate\Extension as Extension;
 use Bolt\Library as Lib;
 
 class LocalizedContent extends \Bolt\Content
 {
-  public function setValues(array $values){
+
+    /** @var boolean Whether this is a "real" contenttype or an embedded ones */
+    private $isRootType;
+
+    public function setValues(array $values){
         // Since Bolt 1.4, we use 'ownerid' instead of 'username' in the DB tables. If we get an array that has an
         // empty 'ownerid', attempt to set it from the 'username'. In $this->setValue the user will be set, regardless
         // of ownerid is an 'id' or a 'username'.
@@ -86,5 +91,5 @@ class LocalizedContent extends \Bolt\Content
                 $this->setValue('templatefields', $values['templatefields']);
             }
         }
-  }
+    }
 }

@@ -8,17 +8,20 @@ $(function() {
 	// Move locale switcher to tab navigation
 	$("#locale-select").detach().appendTo('#filtertabs');
 	
+	var currentLocale;
+	
 	$(Bolt).on('done.bolt.content.save', function(){
-		$('#locale-select li:first-child a').trigger('click');
+		$('#locale-select [data-locale="'+currentLocale+'"]').trigger('click', true);
 	});
 	
-	$('#locale-select a').click(function(e) {
+	$('#locale-select a').click(function(e, force) {
 		e.preventDefault();
-
 		var el = $(this),
 			locale = el.data('locale');
+			
+		currentLocale = locale;
 
-		if(el.parent().hasClass('disabled')) {
+		if(el.parent().hasClass('disabled') && !force) {
 			return false;
 		}
 
