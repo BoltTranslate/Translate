@@ -1,6 +1,8 @@
 <ul>
 	{% for iso, locale in locales %}
-		{% set newslug = get_slug_from_locale(record, iso) %}
+		{% if app.request.get('_route') != 'homepage' %}
+			{% set newslug = get_slug_from_locale(record, iso) %}
+		{% endif %}
 		<li>
 			<a href="{{ url(
 				app.request.get('_route'), 
