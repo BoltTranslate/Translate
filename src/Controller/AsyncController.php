@@ -2,9 +2,11 @@
 
 namespace Bolt\Extension\Animal\Translate\Controller;
 
-use Symfony\Component\HttpFoundation\Request;
 use Silex\Application;
 use Silex\ControllerProviderInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Bolt\Translation\Translator as Trans;
 
 class AsyncController implements ControllerProviderInterface
 {
@@ -29,6 +31,10 @@ class AsyncController implements ControllerProviderInterface
 
         $content_type_config = $app['config']->get('contenttypes/'.$content_type);
         $translatable_fields = $this->getTranslatableFields($content_type_config['fields']);
+
+        if (!$app['users']->isAllowed('contenttype:'.$content_type.':edit')) {
+            return new Response(Trans::__('Permission denied'), Response::HTTP_FORBIDDEN);
+        }
 
         $response = array();
 
