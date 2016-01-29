@@ -106,6 +106,11 @@ function setValue(field, value) {
 			}
 			break;
 		case 'slug':
+			if (value.trim() == ''){
+				parent.find('.input-group.locked .btn-default.lock').trigger('click', true);
+			} else {
+				parent.find('.input-group.unlocked .btn-default.lock').trigger('click');
+			}
 			parent.find('input').val(value);
 			parent.find('em').html(value);
 			break;
