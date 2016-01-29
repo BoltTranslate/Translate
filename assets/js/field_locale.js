@@ -194,7 +194,7 @@ function setValue(field, value) {
 				value = "[[],[]]"
 			}
 			el.val(value);
-			document.getElementById('hot-'+field).hot.loadData(JSON.parse(value));
+			$('#hot-'+field).get(0).hot.loadData(JSON.parse(value));
 			break;
 		case 'faiconpicker':
 			el.val(value);
