@@ -1,8 +1,8 @@
 <?php
 
-namespace Bolt\Extension\Animal\Translate\Content;
+namespace Bolt\Extension\sahassar\translate\Content;
 
-use Bolt\Extension\Animal\Translate\Extension as Extension;
+use Bolt\Extension\sahassar\translate\Extension as Extension;
 use Bolt\Library as Lib;
 
 class LocalizedContent extends \Bolt\Content
