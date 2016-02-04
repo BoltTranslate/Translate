@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\Animal\Translate\Field;
+namespace Bolt\Extension\sahassar\translate\Field;
 
 use Bolt\Field\FieldInterface;
 

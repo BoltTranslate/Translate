@@ -1,5 +1,5 @@
 <?php
 
-use Bolt\Extension\Animal\Translate\Extension;
+use Bolt\Extension\sahassar\translate\Extension;
 
 $app['extensions']->register(new Extension($app));
