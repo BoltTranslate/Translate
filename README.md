@@ -1,4 +1,7 @@
-# Translation plugin for Bolt CMS (Work in progress)
+# Translation plugin for Bolt CMS
+
+This plugin handles translation of content within bolt. It is recomended to be
+used in combination with the labels extension. 
 
 ![Screenshot, Backend](https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png)
 
@@ -34,7 +37,7 @@ pages:
 [...]
 ```
 
-Add the `isTranslatable` argument to all translatable fields:
+Add the `isTranslatable` argument to all fields you want to be translatable:
 
 ```
 [...]
@@ -47,8 +50,7 @@ title:
 ```
 
 Setup routing in `routing.yml` like below but replacing `sv` with your
-preferred default locale, a full example can be found in the
-`routing.yml.dist` in this dir:
+preferred default locale, a full example is at the bottom of this file:
 
 ```
 contentlink:
@@ -72,38 +74,9 @@ or
 {{ localeswitcher('_my_localeswitcher_template.twig')|raw }}
 ```
 
-
 To translate a boltform you can add `{% set form = translate_form(form) %}`
-at the top of a form template. This requires the labels extension.
-
-
-## State of the Extension
-
-### System
-
-- [x] Setup configuration
-- [ ] Dynamically extend routing (/{_locale}/route) (wontfix?)
-- [x] Database: New Table for translations (bolt_translation)
-- [x] Set system language in frontend
-
-### Backend
-
-- [x] Field Type Locale (to include locale switcher)
-- [x] Field attribute to mark translatable fields (isTranslatable)
-- [x] Ajax Controller to load translated content
-- [x] Save on update, depending on locale (Event: PRE_SAVE)
-- [x] Add icons to mark translatable fields
-- [x] Move locale selector to tab navigation
-- [x] Hide Locale selector on content type creation
-- [x] Reset locale selector to default language or don't reset content of fields after save/update
-- [x] Cleanup on delete
-
-### Frontend
-
-- [x] Load content in correct language (Event: preHydrate)
-- [x] Language fallback, if not exists ("fixed" by redirecting to default language)
-- [x] Basic locale switcher (twig function)
-- [x] Override menu to account for translated slugs and locales
+at the top of a form template. This requires the labels extension. (the current
+solution is very hacky, WIP)
 
 ## Links
 
@@ -116,11 +89,89 @@ at the top of a form template. This requires the labels extension.
 - https://dev.mysql.com/doc/refman/5.0/en/insert-on-duplicate.html
 - http://stackoverflow.com/questions/1132571/implementing-update-if-exists-in-doctrine-orm
 
-
 ## About
 
-Started by [ANIMAL](http://animal.at), finished by SahAssar
+Started by [ANIMAL](http://animal.at), finished by SahAssar (see commit history)
 
----
+## Full routing example:
+```
+homepage:
+    path: '/{_locale}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::homepage'
+    requirements:
+        _locale: "^[a-zA-Z_]{2,5}$"
 
-„We build it“ — [ANIMAL](http://animal.at)
+# The next two routes are for when you use the sitemap extension
+
+sitemapxml_with_locale:
+    path: /{_locale}/sitemap.xml
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemapXml'
+    requirements:
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+sitemaphtml_with_locale:
+    path: /{_locale}/sitemap
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemap'
+    requirements:
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+search:
+    path: '/{_locale}/search'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::search'
+    requirements:
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+preview:
+    path: '/{_locale}/preview/{contenttypeslug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::preview'
+    requirements:
+        contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+contentlink:
+    path: '/{_locale}/{contenttypeslug}/{slug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
+    requirements:
+        contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+taxonomylink:
+    path: '/{_locale}/{taxonomytype}/{slug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::taxonomy'
+    requirements:
+        taxonomytype: 'Bolt\Controllers\Routing::getAnyTaxonomyTypeRequirement'
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+contentlisting:
+    path: '/{_locale}/{contenttypeslug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::listing'
+    requirements:
+        contenttypeslug: 'Bolt\Controllers\Routing::getPluralContentTypeRequirement'
+        _locale: "^[a-zA-Z_]{2,5}$"
+
+pagebinding:
+    path: '/{_locale}/{slug}'
+    defaults:
+        _locale: sv
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
+        contenttypeslug: 'sida'
+    contenttype: sidor
+    requirements:
+        _locale: "^[a-zA-Z_]{2,5}$"
+```
