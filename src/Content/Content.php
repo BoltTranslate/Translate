@@ -39,9 +39,11 @@ class LocalizedContent extends \Bolt\Content
             'templateselect',
             'checkbox'
         );
+        
+        // replace the values with their translated counterparts
+        $this->localeHydrate();
+
         // Check if the values need to be unserialized, and pre-processed.
-        $extension  = new Extension($this->app);
-        $extension->localeHydrate($this);
         foreach ($this->values as $key => $value) {
             if ((in_array($this->fieldtype($key), $serializedFieldTypes)) || ($key == 'templatefields')) {
                 if (!empty($value) && is_string($value) && (substr($value, 0, 2) == "a:" || $value[0] === '[' || $value[0] === '{')) {
@@ -89,6 +91,44 @@ class LocalizedContent extends \Bolt\Content
                 $this->setValue('templatefields', array());
             } else {
                 $this->setValue('templatefields', $values['templatefields']);
+            }
+        }
+    }
+    /**
+     * localeHydrate
+     *
+     * This method replaces values with their translated counterparts
+     * in a single record.
+     */
+    private function localeHydrate($content = "")
+    {
+        $locales = $this->app['config']->get('general/locales');
+        if($locales){
+            $defaultLocaleSlug = reset($locales)['slug'];
+            $matchedLocales = array_filter(
+                $locales,
+                function ($e) {
+                    return $e['slug'] == $this->app['request']->get('_locale');
+                }
+            );
+
+            if($this->app['request']->get('_locale') != $defaultLocaleSlug || !empty($matchedLocales)){
+
+                $locale = key($matchedLocales);
+
+                $prefix = $this->app['config']->get('general/database/prefix', 'bolt_');
+
+                $query = 'SELECT field, value FROM '.$prefix.'translation where locale = :locale and content_type = :contenttype and content_type_id = :id';
+                $stmt = $this->app['db']->prepare($query);
+                $stmt->bindValue('locale', $locale);
+                $stmt->bindValue('contenttype', $this->contenttype['slug']);
+                $stmt->bindValue('id', $this->id);
+                $stmt->execute();
+                $this->delocalizedValues = [];
+                while ($row = $stmt->fetch()) {
+                    $this->delocalizedValues[$row['field']] = $this->values[$row['field']];
+                    $this->setValue($row['field'],$row['value']);
+                }
             }
         }
     }

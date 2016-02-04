@@ -69,9 +69,11 @@ $(function() {
 
 function lockInputFields(status) {
 	$('#editcontent').find('input, select, textarea').prop('disabled', status);
-	$.each(CKEDITOR.instances, function() {
-		this.setReadOnly(status);
-	});
+	if(typeof CKEDITOR !== 'undefined'){
+		$.each(CKEDITOR.instances, function() {
+			this.setReadOnly(status);
+		});
+	}
 }
 
 function logerror(field, type) {
@@ -79,7 +81,7 @@ function logerror(field, type) {
 }
 
 function setValue(field, value) {
-	var el = $('#' + field + ', #field-' + field + ', [data-bolt-field="' + field + '"], #' + field + '-video, #gridfield-' + field);
+	var el = $('#' + field + ', #field-' + field + ', [data-bolt-field="' + field + '"], #' + field + '-video, [name="' + field + '"], #gridfield-' + field);
 	var parent = el.closest('.form-group[data-fieldtype]');
 	if(parent.length == 0 && field == 'seo'){
 		parent = $('#seo').closest('.tab-pane').find('[data-fieldtype="seo"]')
