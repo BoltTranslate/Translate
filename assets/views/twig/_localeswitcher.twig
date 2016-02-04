@@ -1,14 +1,14 @@
-<ul>
+<ul class="localeswitcher">
 	{% for iso, locale in locales %}
 		{% if app.request.get('_route') != 'homepage' %}
 			{% set newslug = get_slug_from_locale(record, iso) %}
 		{% endif %}
-		<li>
+		<li {% if locale.slug == app.request.get('_locale') %}class="active"{% endif %}>
 			<a href="{{ url(
 				app.request.get('_route'), 
 				app.request.get('_route_params')|merge(
 					(newslug ? {_locale: locale.slug, slug: newslug} : {_locale: locale.slug})
-				))}}" {% if locale.slug == app.request.get('_locale') %} class="active"{% endif %}>
+				))}}">
 				{{ locale.label }}
 			</a>
 	{% endfor %}

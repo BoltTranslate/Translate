@@ -4,6 +4,19 @@
 
 ## Setup
 
+Add the `locales` block to the main configuration with your locales, the first
+one is the default locale:
+
+```
+locales:
+    en_GB:
+        label: English
+        slug: en
+	de_AT:
+	    label: Deutsch
+        slug: de
+```
+
 First set your contenttype to use the `LocalizedContent` class 
 and add the locale field in `contenttypes.yml`:
 
@@ -59,20 +72,10 @@ or
 {{ localeswitcher('_my_localeswitcher_template.twig')|raw }}
 ```
 
-## Configuration
 
-Add the `locales` block to the main configuration with your locales, the first
-one is the default locale:
+To translate a boltform you can add `{% set form = translate_form(form) %}`
+at the top of a form template. This requires the labels extension.
 
-```
-locales:
-    en_GB:
-        label: English
-        slug: en
-	de_AT:
-	    label: Deutsch
-        slug: de
-```
 
 ## State of the Extension
 
@@ -115,5 +118,9 @@ locales:
 
 
 ## About
+
+Started by [ANIMAL](http://animal.at), finished by SahAssar
+
+---
 
 „We build it“ — [ANIMAL](http://animal.at)
