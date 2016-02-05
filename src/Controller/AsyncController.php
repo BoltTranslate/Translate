@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\sahassar\translate\Controller;
+namespace Bolt\Extension\Animal\Translate\Controller;
 
 use Silex\Application;
 use Silex\ControllerProviderInterface;

@@ -1,5 +1,5 @@
 <?php
-namespace Bolt\Extension\sahassar\translate\Menu;
+namespace Bolt\Extension\Animal\Translate\Menu;
 
 use Bolt\Application;
 use Bolt\Library as Lib;

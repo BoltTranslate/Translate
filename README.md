@@ -29,7 +29,7 @@ pages:
     slug: pages
     singular_name: Page
     singular_slug: page
-    class: Bolt\Extension\sahassar\translate\Content\LocalizedContent
+    class: Bolt\Extension\Animal\Translate\Content\LocalizedContent
     fields:
         locale:
             type: locale
@@ -57,7 +57,7 @@ contentlink:
     path: '/{_locale}/{contenttypeslug}/{slug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::record'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
@@ -99,7 +99,7 @@ homepage:
     path: '/{_locale}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::homepage'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::homepage'
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
 
@@ -125,7 +125,7 @@ search:
     path: '/{_locale}/search'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::search'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::search'
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
 
@@ -133,7 +133,7 @@ preview:
     path: '/{_locale}/preview/{contenttypeslug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::preview'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::preview'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
@@ -142,7 +142,7 @@ contentlink:
     path: '/{_locale}/{contenttypeslug}/{slug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::record'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
@@ -151,7 +151,7 @@ taxonomylink:
     path: '/{_locale}/{taxonomytype}/{slug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::taxonomy'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::taxonomy'
     requirements:
         taxonomytype: 'Bolt\Controllers\Routing::getAnyTaxonomyTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
@@ -160,7 +160,7 @@ contentlisting:
     path: '/{_locale}/{contenttypeslug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::listing'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::listing'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getPluralContentTypeRequirement'
         _locale: "^[a-zA-Z_]{2,5}$"
@@ -169,7 +169,7 @@ pagebinding:
     path: '/{_locale}/{slug}'
     defaults:
         _locale: sv
-        _controller: 'Bolt\Extension\sahassar\translate\Frontend\LocalizedFrontend::record'
+        _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
         contenttypeslug: 'sida'
     contenttype: sidor
     requirements:

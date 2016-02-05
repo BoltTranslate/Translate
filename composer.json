@@ -1,5 +1,5 @@
 {
-	"name": "sahassar/translate",
+	"name": "animal/translate",
 	"description": "Provides translation for contenttypes.",
 	"type": "bolt-extension",
 	"require": {
@@ -21,7 +21,7 @@
 			"init.php"
 		],
 		"psr-4": {
-			"Bolt\\Extension\\sahassar\\translate\\": ["", "src/"]
+			"Bolt\\Extension\\Animal\\Translate\\": ["", "src/"]
 		}
 	}
 }
