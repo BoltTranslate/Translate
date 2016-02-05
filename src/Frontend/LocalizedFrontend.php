@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\sahassar\translate\Frontend;
+namespace Bolt\Extension\Animal\Translate\Frontend;
 
 use Symfony\Component\HttpFoundation\Response;
 use Bolt\Library as Lib;

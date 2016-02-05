@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\sahassar\translate;
+namespace Bolt\Extension\Animal\Translate;
 
 use Bolt\BaseExtension;
 use Doctrine\DBAL\Schema\Schema;
