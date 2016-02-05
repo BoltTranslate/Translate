@@ -3,60 +3,100 @@
 namespace Bolt\Extension\Animal\Translate;
 
 use Bolt\BaseExtension;
-use Silex\Application as BoltApplication;
 use Doctrine\DBAL\Schema\Schema;
 use Symfony\Component\HttpFoundation\Request;
 use Bolt\Events\StorageEvents;
 use Bolt\Events\StorageEvent;
-use Bolt\Events\HydrationEvent;
-use Bolt\Asset\File\JavaScript;
-use Bolt\Asset\File\Stylesheet;
-use Bolt\Controller\Zone;
+use Bolt\Library as Lib;
+
+use Bolt\Extension\Bolt\Labels;
 
 class Extension extends BaseExtension
 {
-    /** @var string */
-    protected $defaultLocale;
+    
+    private $serializedFieldTypes = array(
+            'geolocation',
+            'imagelist',
+            'image',
+            'file',
+            'filelist',
+            'video',
+            'select',
+            'templateselect',
+            'checkbox'
+        );
+    
 
     public function initialize()
     {
-        $this->app['config']->getFields()->addField(new Field\LocaleField());
-        $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
-        $this->app->mount(
-            $this->app['config']->get('general/branding/path').'/async/translate',
-            new Controller\AsyncController($this->app, $this->config)
-        );
-        
-        $this->app->before(array($this, 'beforeCallback'));
-        //$this->app->before(array($this, 'beforeEarlyCallback'), BoltApplication::EARLY_EVENT);
+        $locales = $this->app['config']->get('general/locales');
 
-        // Locale switcher for frontend
-        $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
+        if($locales){
+            $this->app['config']->getFields()->addField(new Field\LocaleField());
+            $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
-        $this->app['dispatcher']->addListener(StorageEvents::PRE_SAVE, array($this, 'preSaveCallback'));
-        $this->app['dispatcher']->addListener(StorageEvents::POST_DELETE, array($this, 'postDeleteCallback'));
-        $this->app['dispatcher']->addListener(StorageEvents::PRE_HYDRATE, array($this, 'preHydrateCallback'));
+            $this->app->mount(
+                $this->app['config']->get('general/branding/path').'/async/translate',
+                new Controller\AsyncController($this->app)
+            );
 
-        if ($this->app['config']->getWhichEnd() == 'backend') {
-            $this->checkDb();
+            $this->app->before(array($this, 'beforeCallback'));
+
+            // Locale switcher for frontend
+            $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
+
+            // Twig function to get the translated slug for a specific record, used in localeswitcher
+            $this->addTwigFunction('get_slug_from_locale', 'getSlugFromLocale');
+
+            // Twig function to translate/add labels to a forms placeholder and label attributes
+            $this->addTwigFunction('translate_form', 'translateForm');
+
+            $this->app['dispatcher']->addListener(StorageEvents::PRE_SAVE, array($this, 'preSaveCallback'));
+            $this->app['dispatcher']->addListener(StorageEvents::POST_DELETE, array($this, 'postDeleteCallback'));
+    
+            if ($this->app['config']->getWhichEnd() == 'backend') {
+                $this->checkDb();
+            }
         }
     }
-
+    
+    /**
+     * beforeCallback.
+     *
+     * This callback adds the CSS/JS for the localeswitcher on the backend
+     * and checks that we are on a valid locale when on the frontend
+     */
     public function beforeCallback(Request $request)
     {
-        if (Zone::isBackend($request)) {
-            $routeParams = $request->get('_route_params');
-            if(array_key_exists('contenttypeslug', $routeParams)) {
-                $this->addCss(new Stylesheet('assets/css/field_locale.css'));
-                
+        $routeParams = $request->get('_route_params');
+        if ($this->app['config']->getWhichEnd() == 'backend') {
+            if (array_key_exists('contenttypeslug', $routeParams)) {
+                $this->addCss('assets/css/field_locale.css');
                 if(!empty($routeParams['id'])) {
-                    $localeJs = new JavaScript('assets/js/field_locale.js');
-                    $localeJs
-                        ->setLate(true)
-                        ->setPriority(99);
-                    
-                    $this->addJavascript($localeJs);
+                    $this->addJavascript('assets/js/field_locale.js', array('late' => true));
+                }
+            }
+        } else {
+            if (isset($routeParams['_locale'])) {
+                $this->app['menu'] = $this->app->share(
+                    function ($app) {
+                        $builder = new Menu\LocalizedMenuBuilder($app);
+                        return $builder;
+                    }
+                );
+                $locales = $this->app['config']->get('general/locales');
+                foreach($locales as $isolocale => $locale) {
+                    if ($locale['slug'] == $routeParams['_locale']) {
+                        $foundLocale = $isolocale;
+                    }
+                }
+                if (isset($foundLocale)) {
+                    setlocale(LC_ALL, $foundLocale);
+                    $this->app['config']->set('general/locale', $foundLocale);
+                } else {
+                    $routeParams['_locale'] = reset($locales)['slug'];
+                    return $this->app->redirect(Lib::path($request->get('_route'), $routeParams));
                 }
             }
         }
@@ -97,6 +137,23 @@ class Extension extends BaseExtension
         ));
 
         foreach ($translatable_fields as $translatable_field) {
+            $fieldtype = $content_type_config['fields'][$translatable_field]['type'];
+
+            if(is_a($content[$translatable_field], 'Bolt\\Content')){
+                $content[$translatable_field] = json_encode($content[$translatable_field]->getValues(true, true));
+            }
+
+            if($fieldtype === "video"){
+                $content[$translatable_field]['html'] = (string)$content[$translatable_field]['html'];
+                $content[$translatable_field]['responsive'] = (string)$content[$translatable_field]['responsive'];
+            }
+
+            if(in_array($fieldtype, $this->serializedFieldTypes) && !is_string($content[$translatable_field])){
+                $content[$translatable_field] = json_encode($content[$translatable_field]);
+            }
+
+            $content_type_config['fields'][$translatable_field];
+
             // Create/update translation entries
             $query = 'REPLACE INTO '.$prefix.'translation (locale, field, content_type_id, content_type, value) VALUES (?, ?, ?, ?, ?)';
             $this->app['db']->executeQuery($query, array(
@@ -104,7 +161,7 @@ class Extension extends BaseExtension
                 $translatable_field,
                 $content_type_id,
                 $content_type,
-                $content[$translatable_field],
+                (string)$content[$translatable_field],
             ));
 
             // Reset values to english
@@ -123,49 +180,13 @@ class Extension extends BaseExtension
      */
     public function postDeleteCallback(StorageEvent $event)
     {
-        $prefix = $this->app['config']->get('general/database/prefix', 'bolt_');
-        $translation_table_name = $prefix.'translation';
-
         $subject = $event->getSubject();
 
-        //var_dump($event->getId()); 
-        //$entity = $event->getArgument('entity');
-        //exit;
-
-        // $app['db']->delete($prefix.$translation_table_name,
-        //     array(
-        //         'content_type' => 1,
-        //         'content_type_id' => $subject['id']
-        //     )
-        // );
-    }
-
-    /**
-     * preHydrateCallback.
-     *
-     * This callback is used to load translated content into the object.
-     * It is called by the event dispatcher.
-     */
-    public function preHydrateCallback(HydrationEvent $event)
-    {
-        $subject = $event->getSubject();
-        $entity = $event->getArgument('entity');
-        $repository = $event->getArgument('repository');
-
-        $_locale = $this->app['request']->get('_locale');
-        //$content_type = $request->query->get('content_type');
-        $content_type_id = $subject['id'];
-
-        // if _locale == default locale
-            // return
-
-        // load translated fields
-        // replace object content
-
-
-        //echo json_encode($content_type_id);
-        //echo '<br><br>';
-        //echo json_encode($repository);
+        $query = 'DELETE FROM '.$prefix.'translation where content_type = ? and content_type_id = ?';
+        $stmt = $this->app['db']->prepare($query);
+        $stmt->bindValue(1, $event->getArgument('contenttype'));
+        $stmt->bindValue(2, $subject['id']);
+        $stmt->execute();
     }
 
     /**
@@ -178,10 +199,50 @@ class Extension extends BaseExtension
         if($template === null) {
             $template = '/twig/_localeswitcher.twig';
         }
-
         return $this->app['twig']->render($template, array(
-            'locales' => $this->config['locales']
+            'locales' => $this->app['config']->get('general/locales')
         ));
+    }
+    
+    /**
+     * translateForm.
+     *
+     * Badly hacked way to replace labels and placeholders in forms.
+     */
+    public function translateForm($form = null)
+    {
+        foreach($form->children as $key => $value){
+            if($value->vars['label']){
+                $value->vars['label'] = $this->app['twig']->render('/twig/trans.twig', ['value' => $value->vars['label'] ]);
+            }
+            if($value->vars['attr']['placeholder']){
+                $value->vars['attr']['placeholder'] = $this->app['twig']->render('/twig/trans.twig', ['value' => $value->vars['attr']['placeholder'] ]);
+            }
+        }
+        return $form;
+    }
+
+    /**
+     * getSlugFromLocale.
+     *
+     * Twig function to get the slug for a record in a different locale
+     */
+    public function getSlugFromLocale($content, $locale)
+    {
+        if(is_a($content, "Bolt\Content")){
+            $query = "select value from bolt_translation where field = 'slug' and locale = ? and content_type = ? and content_type_id = ? ";
+            $stmt = $this->app['db']->prepare($query);
+            $stmt->bindValue(1, $locale);
+            $stmt->bindValue(2, $content->contenttype['slug']);
+            $stmt->bindValue(3, $content->id);
+            $stmt->execute();
+            $slug =  $stmt->fetch();
+            if(!empty($slug)){
+                return $slug['value'];
+            }
+            return $content->delocalizedValues['slug'];
+        }
+        return false;
     }
 
     private function checkDb()
@@ -203,18 +264,6 @@ class Extension extends BaseExtension
             }
         );
     }
-
-    /**
-     * Set the defaults for configuration parameters.
-     *
-     * @return array
-     */
-    protected function getDefaultConfig()
-    {
-        return array(
-        );
-    }
-
     public function getName()
     {
         return 'Translate';
@@ -225,7 +274,9 @@ class Extension extends BaseExtension
         $translatable = array();
 
         foreach ($fields as $name => $field) {
-            if (isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
+            if (isset($field['isTranslatable'])  && $field['isTranslatable'] === true && $field['type'] === 'templateselect') {
+                $translatable[] = 'templatefields';
+            }elseif (isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
                 $translatable[] = $name;
             }
         }

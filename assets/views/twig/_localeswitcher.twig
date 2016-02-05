@@ -1,9 +1,15 @@
-<ul>
-	{% for iso, locale in locales if locale.enabled is not defined or locale.enabled %}
-	<li>
-		<a href="{{ url(app.request.get('_route'), {_locale: locale.slug}) }}" data-locale="{{ iso }}"{% if locale.slug == app.request.get('_locale') %} class="active"{% endif %}>
-			{{ locale.label }}
-		</a>
-	</li>
+<ul class="localeswitcher">
+	{% for iso, locale in locales %}
+		{% if app.request.get('_route') != 'homepage' %}
+			{% set newslug = get_slug_from_locale(record, iso) %}
+		{% endif %}
+		<li {% if locale.slug == app.request.get('_locale') %}class="active"{% endif %}>
+			<a href="{{ url(
+				app.request.get('_route'), 
+				app.request.get('_route_params')|merge(
+					(newslug ? {_locale: locale.slug, slug: newslug} : {_locale: locale.slug})
+				))}}">
+				{{ locale.label }}
+			</a>
 	{% endfor %}
 </ul>
