@@ -29,7 +29,7 @@ pages:
     slug: pages
     singular_name: Page
     singular_slug: page
-    class: Bolt\Extension\Animal\Translate\Content\LocalizedContent
+    class: \Bolt\Extension\Animal\Translate\Content\LocalizedContent
     fields:
         locale:
             type: locale

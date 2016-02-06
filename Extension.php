@@ -32,6 +32,8 @@ class Extension extends BaseExtension
 
         $locales = $this->app['config']->get('general/locales');
 
+        $this->app['htmlsnippets'] = true;
+
         if($locales){
             $this->app['config']->getFields()->addField(new Field\LocaleField());
             $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
@@ -229,17 +231,20 @@ class Extension extends BaseExtension
      */
     public function getSlugFromLocale($content, $locale)
     {
-        if(is_a($content, "Bolt\Content")){
-            $query = "select value from bolt_translation where field = 'slug' and locale = ? and content_type = ? and content_type_id = ? ";
-            $stmt = $this->app['db']->prepare($query);
-            $stmt->bindValue(1, $locale);
-            $stmt->bindValue(2, $content->contenttype['slug']);
-            $stmt->bindValue(3, $content->id);
-            $stmt->execute();
-            $slug =  $stmt->fetch();
-            if(!empty($slug)){
-                return $slug['value'];
-            }
+        if(!isset($content->contenttype['slug'])){
+            return false;
+        }
+        $query = "select value from bolt_translation where field = 'slug' and locale = ? and content_type = ? and content_type_id = ? ";
+        $stmt = $this->app['db']->prepare($query);
+        $stmt->bindValue(1, $locale);
+        $stmt->bindValue(2, $content->contenttype['slug']);
+        $stmt->bindValue(3, $content->id);
+        $stmt->execute();
+        $slug =  $stmt->fetch();
+        if(isset($slug['value'])){
+            return $slug['value'];
+        }
+        if(isset($content->delocalizedValues['slug'])){
             return $content->delocalizedValues['slug'];
         }
         return false;

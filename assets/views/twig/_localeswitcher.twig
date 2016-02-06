@@ -6,9 +6,8 @@
 		<li {% if locale.slug == app.request.get('_locale') %}class="active"{% endif %}>
 			<a href="{{ url(
 				app.request.get('_route'), 
-				app.request.get('_route_params')|merge(
-					(newslug ? {_locale: locale.slug, slug: newslug} : {_locale: locale.slug})
-				))}}">
+				app.request.get('_route_params')|merge({_locale: locale.slug, slug: newslug ?: record.slug})
+				)}}">
 				{{ locale.label }}
 			</a>
 	{% endfor %}
