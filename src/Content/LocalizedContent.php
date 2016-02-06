@@ -2,7 +2,6 @@
 
 namespace Bolt\Extension\Animal\Translate\Content;
 
-use Bolt\Extension\Animal\Translate\Extension as Extension;
 use Bolt\Library as Lib;
 
 class LocalizedContent extends \Bolt\Content
