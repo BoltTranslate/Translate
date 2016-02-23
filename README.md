@@ -9,7 +9,8 @@ used in combination with the labels extension.
 
 1. Add the `locales` block to the main configuration with your locales, the first
 one is the default locale and must be the same as bolts own locale:
-```
+
+    ```
     locales:
         en_GB:
             label: English
@@ -17,11 +18,13 @@ one is the default locale and must be the same as bolts own locale:
         de_AT:
             label: Deutsch
             slug: de
-```
+    ```
+
 2. Do a database update.
 3. Set your contenttype to use the `LocalizedContent` class 
 and add the locale field in `contenttypes.yml`:
-```
+
+    ```
     pages:
         name: Pages
         slug: pages
@@ -33,9 +36,11 @@ and add the locale field in `contenttypes.yml`:
                 type: locale
                 group: content
     [...]
-```
+    ```
+
 4. Add the `isTranslatable` argument to all fields you want to be translatable:
-```
+
+    ```
     [...]
     title:
         type: text
@@ -43,10 +48,12 @@ and add the locale field in `contenttypes.yml`:
         group: content
         isTranslatable: true
     [...]
-```
+    ```
+
 5. Setup routing in `routing.yml` like below but replacing `en` with your
 preferred default locale, a full example is at the bottom of this file:
-```
+
+    ```
     contentlink:
         path: '/{_locale}/{contenttypeslug}/{slug}'
         defaults:
@@ -55,7 +62,8 @@ preferred default locale, a full example is at the bottom of this file:
         requirements:
             contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
             _locale: "^[a-zA-Z_]{2,5}$"
-```
+    ```
+
 6. Use the `localeswitcher` twig-function to render a locale switcher in your
 theme: `{{ localeswitcher()|raw }}` or `{{ localeswitcher('_my_localeswitcher_template.twig')|raw }}`
 7. Activate/install the labels extension, set your languages in it's config
@@ -83,8 +91,8 @@ in your menu template.
 Started by [ANIMAL](http://animal.at), finished by SahAssar (see commit history)
 
 ## Full routing example:
-```
 
+```
 homepageredir:
     path: '/'
     defaults:
