@@ -92,4 +92,8 @@ Class LocalizedFrontend extends \Bolt\Controllers\Frontend
         return $stmt->fetch();
     }
     
+    public function homepageRedirect(\Silex\Application $app){
+        return $app->redirect(reset($app['config']->get('general/locales'))['slug']);
+    }
+    
 }
