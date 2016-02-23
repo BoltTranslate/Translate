@@ -33,10 +33,27 @@ class Extension extends BaseExtension
         $locales = $this->app['config']->get('general/locales');
 
         $this->app['htmlsnippets'] = true;
+        
+        // Locale switcher for frontend
+        $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
 
-        if($locales){
+        // Twig function to get the translated slug for a specific record, used in localeswitcher
+        $this->addTwigFunction('get_slug_from_locale', 'getSlugFromLocale');
+
+        // Twig function to translate/add labels to a forms placeholder and label attributes
+        $this->addTwigFunction('translate_form', 'translateForm');
+        
+        $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
+
+        if($locales && is_array($locales)){
+            
+            reset($locales);
+            
+            if(key($locales) !== $this->app['config']->get('general/locale')){
+                $this->app['session']->getFlashBag()->set('error', 'Your default locale and bolt\'s locale don\'t match, please edit config.yml to fix this.');
+            }
+            
             $this->app['config']->getFields()->addField(new Field\LocaleField());
-            $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
 
             $this->app->mount(
                 $this->app['config']->get('general/branding/path').'/async/translate',
@@ -44,15 +61,6 @@ class Extension extends BaseExtension
             );
 
             $this->app->before(array($this, 'beforeCallback'));
-
-            // Locale switcher for frontend
-            $this->addTwigFunction('localeswitcher', 'renderLocaleSwitcher');
-
-            // Twig function to get the translated slug for a specific record, used in localeswitcher
-            $this->addTwigFunction('get_slug_from_locale', 'getSlugFromLocale');
-
-            // Twig function to translate/add labels to a forms placeholder and label attributes
-            $this->addTwigFunction('translate_form', 'translateForm');
 
             $this->app['dispatcher']->addListener(StorageEvents::PRE_SAVE, array($this, 'preSaveCallback'));
             $this->app['dispatcher']->addListener(StorageEvents::POST_DELETE, array($this, 'postDeleteCallback'));
