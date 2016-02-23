@@ -271,7 +271,7 @@ class Extension extends BaseExtension
                 $table->addColumn('content_type_id', 'integer');
                 $table->addColumn('field',           'string', array('length' => 32, 'default' => ''));
                 $table->addColumn('value',           'text');
-                $table->setPrimaryKey(array('locale', 'field', 'content_type_id'));
+                $table->setPrimaryKey(array('locale', 'field', 'content_type_id', 'content_type'));
 
                 return $table;
             }
