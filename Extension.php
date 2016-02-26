@@ -105,7 +105,8 @@ class Extension extends BaseExtension
                     setlocale(LC_ALL, $foundLocale);
                     $this->app['config']->set('general/locale', $foundLocale);
                 } else {
-                    $routeParams['_locale'] = reset($locales)['slug'];
+                    $locale = reset($locales);
+                    $routeParams['_locale'] = $locale['slug'];
                     return $this->app->redirect(Lib::path($request->get('_route'), $routeParams));
                 }
             }
@@ -192,6 +193,8 @@ class Extension extends BaseExtension
     {
         $subject = $event->getSubject();
 
+        $prefix = $this->app['config']->get('general/database/prefix', 'bolt_');
+
         $query = 'DELETE FROM '.$prefix.'translation where content_type = ? and content_type_id = ?';
         $stmt = $this->app['db']->prepare($query);
         $stmt->bindValue(1, $event->getArgument('contenttype'));
@@ -223,10 +226,10 @@ class Extension extends BaseExtension
     {
         foreach($form->children as $key => $value){
             if($value->vars['label']){
-                $value->vars['label'] = $this->app['twig']->render('/twig/trans.twig', ['value' => $value->vars['label'] ]);
+                $value->vars['label'] = $this->app['twig']->render('/twig/trans.twig', array('value' => $value->vars['label']));
             }
             if($value->vars['attr']['placeholder']){
-                $value->vars['attr']['placeholder'] = $this->app['twig']->render('/twig/trans.twig', ['value' => $value->vars['attr']['placeholder'] ]);
+                $value->vars['attr']['placeholder'] = $this->app['twig']->render('/twig/trans.twig', array('value' => $value->vars['attr']['placeholder']));
             }
         }
         return $form;
