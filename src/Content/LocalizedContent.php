@@ -103,11 +103,13 @@ class LocalizedContent extends \Bolt\Content
     {
         $locales = $this->app['config']->get('general/locales');
         if($locales){
-            $defaultLocaleSlug = reset($locales)['slug'];
+            $locale = reset($locales);
+            $defaultLocaleSlug = $locale['slug'];
+            $currentLocale = $this->app['request']->get('_locale');
             $matchedLocales = array_filter(
                 $locales,
-                function ($e) {
-                    return $e['slug'] == $this->app['request']->get('_locale');
+                function ($e) use ($currentLocale) {
+                    return $e['slug'] == $currentLocale;
                 }
             );
 
@@ -123,7 +125,7 @@ class LocalizedContent extends \Bolt\Content
                 $stmt->bindValue('contenttype', $this->contenttype['slug']);
                 $stmt->bindValue('id', $this->id);
                 $stmt->execute();
-                $this->delocalizedValues = [];
+                $this->delocalizedValues = array();
                 while ($row = $stmt->fetch()) {
                     $this->delocalizedValues[$row['field']] = $this->values[$row['field']];
                     $this->setValue($row['field'],$row['value']);

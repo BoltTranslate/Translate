@@ -13,7 +13,7 @@ class AsyncController implements ControllerProviderInterface
     public function connect(Application $app)
     {
         $router = $app['controllers_factory'];
-        $router->match('/get', [$this, 'getTranslationAction'])
+        $router->match('/get', array($this, 'getTranslationAction'))
             ->method('GET');
 
         return $router;
