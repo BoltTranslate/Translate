@@ -173,8 +173,8 @@ pagebinding:
     defaults:
         _locale: en
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
-        contenttypeslug: 'sida'
-    contenttype: sidor
+        contenttypeslug: 'page'
+    contenttype: pages
     requirements:
         _locale: "^[a-zA-Z_]{2,5}$"
 ```
