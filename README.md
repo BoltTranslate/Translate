@@ -61,7 +61,7 @@ preferred default locale, a full example is at the bottom of this file:
             _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
         requirements:
             contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
-            _locale: "^[a-zA-Z_]{2,5}$"
+            _locale: "^[a-z]{2}(_[A-Z]{2})?$"
     ```
 
 6. Use the `localeswitcher` twig-function to render a locale switcher in your
@@ -104,7 +104,7 @@ homepage:
         _locale: en
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::homepage'
     requirements:
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 # The next two routes are for when you use the sitemap extension
 
@@ -114,7 +114,7 @@ sitemapxml_with_locale:
         _locale: en
         _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemapXml'
     requirements:
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 sitemaphtml_with_locale:
     path: /{_locale}/sitemap
@@ -122,7 +122,7 @@ sitemaphtml_with_locale:
         _locale: en
         _controller: 'Bolt\Extension\Bolt\Sitemap\Extension::sitemap'
     requirements:
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 search:
     path: '/{_locale}/search'
@@ -130,7 +130,7 @@ search:
         _locale: en
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::search'
     requirements:
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 preview:
     path: '/{_locale}/preview/{contenttypeslug}'
@@ -139,7 +139,7 @@ preview:
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::preview'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 contentlink:
     path: '/{_locale}/{contenttypeslug}/{slug}'
@@ -148,7 +148,7 @@ contentlink:
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::record'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getAnyContentTypeRequirement'
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 taxonomylink:
     path: '/{_locale}/{taxonomytype}/{slug}'
@@ -157,7 +157,7 @@ taxonomylink:
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::taxonomy'
     requirements:
         taxonomytype: 'Bolt\Controllers\Routing::getAnyTaxonomyTypeRequirement'
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 contentlisting:
     path: '/{_locale}/{contenttypeslug}'
@@ -166,7 +166,7 @@ contentlisting:
         _controller: 'Bolt\Extension\Animal\Translate\Frontend\LocalizedFrontend::listing'
     requirements:
         contenttypeslug: 'Bolt\Controllers\Routing::getPluralContentTypeRequirement'
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 
 pagebinding:
     path: '/{_locale}/{slug}'
@@ -176,5 +176,5 @@ pagebinding:
         contenttypeslug: 'page'
     contenttype: pages
     requirements:
-        _locale: "^[a-zA-Z_]{2,5}$"
+        _locale: "^[a-z]{2}(_[A-Z]{2})?$"
 ```
