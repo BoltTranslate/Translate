@@ -38,7 +38,9 @@ and add the locale field in `contenttypes.yml`:
     [...]
     ```
 
-4. Add the `isTranslatable` argument to all fields you want to be translatable:
+4. Add the `isTranslatable` argument to all fields you want to be translatable.
+To translate tempaltefields you simply tag the templateselect with 
+`isTranslatable` and all the templatefields will be translateable.
 
     ```
     [...]
