@@ -47,7 +47,7 @@ $(function() {
 					try{
 						var val = JSON.parse(this.value);
 						for (var field in val) {
-							setValue('templatefields-' + field, val[field]);
+							setValue('templatefields[' + field + ']', val[field]);
 						}
 						console.log(val)
 					} catch (e) {
