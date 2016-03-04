@@ -10,6 +10,69 @@ class LocalizedContent extends \Bolt\Content
     /** @var boolean Whether this is a "real" contenttype or an embedded ones */
     private $isRootType;
 
+    /**
+     * @param \Silex\Application $app
+     * @param string             $contenttype
+     * @param array              $values
+     * @param boolean            $isRootType
+     */
+    public function __construct(\Bolt\Application $app, $contenttype = '', $values = array(), $isRootType = true)
+    {
+        $this->app = $app;
+        $this->isRootType = $isRootType;
+        if (!empty($contenttype)) {
+            // Set the contenttype
+            $this->setContenttype($contenttype);
+            // If this contenttype has a taxonomy with 'grouping', initialize the group.
+            if (isset($this->contenttype['taxonomy'])) {
+                foreach ($this->contenttype['taxonomy'] as $taxonomytype) {
+                    if ($this->app['config']->get('taxonomy/' . $taxonomytype . '/behaves_like') == 'grouping') {
+                        $this->setGroup('', '', $taxonomytype);
+                    }
+                    // add support for taxonomy default value when options is set
+                    $defaultValue = $this->app['config']->get('taxonomy/' . $taxonomytype . '/default');
+                    $options = $this->app['config']->get('taxonomy/' . $taxonomytype . '/options');
+                    if (isset($options) &&
+                            isset($defaultValue) &&
+                            array_search($defaultValue, array_keys($options)) !== false) {
+                        $this->setTaxonomy($taxonomytype, $defaultValue);
+                        $this->sortTaxonomy();
+                    }
+                }
+            }
+        }
+        $this->user = $this->app['users']->getCurrentUser();
+        if (!empty($values)) {
+            $this->setValues($values);
+        } else {
+            // Ininitialize fields with empty values.
+            if ((is_array($this->contenttype) && is_array($this->contenttype['fields']))) {
+                foreach ($this->contenttype['fields'] as $key => $parameters) {
+                    // Set the default values.
+                    if (isset($parameters['default'])) {
+                        $values[$key] = $parameters['default'];
+                    } else {
+                        $values[$key] = '';
+                    }
+                }
+            }
+            if (!empty($this->contenttype['singular_name'])) {
+                $contenttypename = $this->contenttype['singular_name'];
+            } else {
+                $contenttypename = "unknown";
+            }
+            // Specify an '(undefined contenttype)'.
+            $values['name'] = "(undefined $contenttypename)";
+            $values['title'] = "(undefined $contenttypename)";
+            $this->setValues($values);
+        }
+    }
+
+    /**
+     * Set a Contenttype record's values.
+     *
+     * @param array $values
+     */
     public function setValues(array $values){
         // Since Bolt 1.4, we use 'ownerid' instead of 'username' in the DB tables. If we get an array that has an
         // empty 'ownerid', attempt to set it from the 'username'. In $this->setValue the user will be set, regardless
@@ -38,7 +101,7 @@ class LocalizedContent extends \Bolt\Content
             'templateselect',
             'checkbox'
         );
-        
+
         // replace the values with their translated counterparts
         $this->localeHydrate();
 
@@ -83,6 +146,7 @@ class LocalizedContent extends \Bolt\Content
                 }
             }
         }
+
         // Template fields need to be done last
         // As the template has to have been selected
         if ($this->isRootType) {
@@ -93,13 +157,89 @@ class LocalizedContent extends \Bolt\Content
             }
         }
     }
+
+    /**
+     * Set a Contenttype record's individual value.
+     *
+     * @param string $key
+     * @param mixed  $value
+     */
+    public function setValue($key, $value)
+    {
+        // Don't set templateFields if not a real contenttype
+        if (($key === 'templatefields') && (!$this->isRootType)) {
+            return;
+        }
+        // Check if the value need to be unserialized.
+        if (is_string($value) && substr($value, 0, 2) === "a:") {
+            try {
+                $unserdata = Lib::smartUnserialize($value);
+            } catch (\Exception $e) {
+                $unserdata = false;
+            }
+            if ($unserdata !== false) {
+                $value = $unserdata;
+            }
+        }
+        if ($key == 'id') {
+            $this->id = $value;
+        }
+        // Set the user in the object.
+        if ($key === 'ownerid' && !empty($value)) {
+            $this->user = $this->app['users']->getUser($value);
+        }
+        // Only set values if they have are actually a field.
+        $allowedcolumns = self::getBaseColumns();
+        $allowedcolumns[] = 'taxonomy';
+        if (!isset($this->contenttype['fields'][$key]) && !in_array($key, $allowedcolumns)) {
+            return;
+        }
+        if (in_array($key, array('datecreated', 'datechanged', 'datepublish', 'datedepublish'))) {
+            if (!preg_match("/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/", $value)) {
+                // @todo Try better date-parsing, instead of just setting it to
+                // 'now' (or 'the past' for datedepublish)
+                if ($key == 'datedepublish') {
+                    $value = null;
+                } else {
+                    $value = date('Y-m-d H:i:s');
+                }
+            }
+        }
+        if ($key === 'templatefields') {
+            if ((is_string($value)) || (is_array($value))) {
+                if (is_string($value)) {
+                    try {
+                        $unserdata = Lib::smartUnserialize($value);
+                    } catch (\Exception $e) {
+                        $unserdata = false;
+                    }
+                } else {
+                    $unserdata = $value;
+                }
+                if (is_array($unserdata)) {
+                    $templateContent = new LocalizedContent($this->app, $this->getTemplateFieldsContentType(), array(), false);
+                    $value = $templateContent;
+                    $this->populateTemplateFieldsContenttype($value);
+                    $templateContent->setValues($unserdata);
+                } else {
+                    $value = null;
+                }
+            }
+        }
+        if (!isset($this->values['datechanged']) ||
+            !preg_match("/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2}):(\d{2})/", $this->values['datechanged'])) {
+            $this->values['datechanged'] = date("Y-m-d H:i:s");
+        }
+        $this->values[$key] = $value;
+    }
+
     /**
      * localeHydrate
      *
      * This method replaces values with their translated counterparts
      * in a single record.
      */
-    private function localeHydrate($content = "")
+    private function localeHydrate()
     {
         $locales = $this->app['config']->get('general/locales');
         if($locales){
