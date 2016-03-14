@@ -74,6 +74,9 @@ class LocalizedContent extends \Bolt\Content
      * @param array $values
      */
     public function setValues(array $values){
+        // replace the values with their translated counterparts
+        $values = $this->localeHydrate($values);
+
         // Since Bolt 1.4, we use 'ownerid' instead of 'username' in the DB tables. If we get an array that has an
         // empty 'ownerid', attempt to set it from the 'username'. In $this->setValue the user will be set, regardless
         // of ownerid is an 'id' or a 'username'.
@@ -102,8 +105,6 @@ class LocalizedContent extends \Bolt\Content
             'checkbox'
         );
 
-        // replace the values with their translated counterparts
-        $this->localeHydrate();
 
         // Check if the values need to be unserialized, and pre-processed.
         foreach ($this->values as $key => $value) {
@@ -239,7 +240,7 @@ class LocalizedContent extends \Bolt\Content
      * This method replaces values with their translated counterparts
      * in a single record.
      */
-    private function localeHydrate()
+    private function localeHydrate($values)
     {
         $locales = $this->app['config']->get('general/locales');
         if($locales){
@@ -249,7 +250,7 @@ class LocalizedContent extends \Bolt\Content
             $matchedLocales = array_filter(
                 $locales,
                 function ($e) use ($currentLocale) {
-                    return $e['slug'] == $currentLocale;
+                    return $e['slug'] === $currentLocale;
                 }
             );
 
@@ -263,14 +264,15 @@ class LocalizedContent extends \Bolt\Content
                 $stmt = $this->app['db']->prepare($query);
                 $stmt->bindValue('locale', $locale);
                 $stmt->bindValue('contenttype', $this->contenttype['slug']);
-                $stmt->bindValue('id', $this->id);
+                $stmt->bindValue('id', $values['id']);
                 $stmt->execute();
-                $this->delocalizedValues = array();
+                $values['delocalizedValues'] = array();
                 while ($row = $stmt->fetch()) {
-                    $this->delocalizedValues[$row['field']] = $this->values[$row['field']];
-                    $this->setValue($row['field'],$row['value']);
+                    $values['delocalizedValues'][$row['field']] = $this->values[$row['field']];
+                    $values[$row['field']] = $row['value'];
                 }
             }
         }
+        return $values;
     }
 }
