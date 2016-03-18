@@ -139,8 +139,10 @@ class Extension extends BaseExtension
             return;
         }
 
+        $content_type_db_table = str_replace('-', '_', $content_type);
+
         $translatable_fields = $this->getTranslatableFields($content_type_config['fields']);
-        $query = 'SELECT * FROM '.$prefix.$content_type.' WHERE id = :content_type_id';
+        $query = 'SELECT * FROM '.$prefix.$content_type_db_table.' WHERE id = :content_type_id';
         $default_content = $this->app['db']->fetchAssoc($query, array(
             ':content_type_id' => $content_type_id,
         ));
