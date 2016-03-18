@@ -268,7 +268,7 @@ class LocalizedContent extends \Bolt\Content
                 $stmt->execute();
                 $values['delocalizedValues'] = array();
                 while ($row = $stmt->fetch()) {
-                    $values['delocalizedValues'][$row['field']] = $this->values[$row['field']];
+		            $this->values['delocalizedValues'][$row['field']] = $values[$row['field']];
                     $values[$row['field']] = $row['value'];
                 }
             }
