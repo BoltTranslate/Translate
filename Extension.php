@@ -255,8 +255,8 @@ class Extension extends BaseExtension
         if(isset($slug['value'])){
             return $slug['value'];
         }
-        if(isset($content->delocalizedValues['slug'])){
-            return $content->delocalizedValues['slug'];
+        if(isset($content->values['delocalizedValues']['slug'])){
+            return $content->values['delocalizedValues']['slug'];
         }
         return false;
     }
