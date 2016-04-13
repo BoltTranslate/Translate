@@ -67,12 +67,12 @@ preferred default locale, a full example is at the bottom of this file:
     ```
 
 6. Use the `localeswitcher` twig-function to render a locale switcher in your
-theme: `{{ localeswitcher()|raw }}` or `{{ localeswitcher('_my_localeswitcher_template.twig')|raw }}`
+theme: `{{ localeswitcher() }}` or `{{ localeswitcher('_my_localeswitcher_template.twig') }}`
 7. Activate/install the labels extension, set your languages in it's config
 and mark any hardcoded text in your templates with `{{l("Your text here")}}`.
-8. Translate your boltforms by adding `{% set form = translate_form(form) %}`
-at the top of a form template. This requires the labels extension. (the current
-solution is very hacky, WIP)
+8. Translate your boltforms by switching `{% form_theme form 'boltforms_custom.twig' %}`
+to `{% form_theme form 'twig/boltforms_theme_translated.twig' %}` at the top of
+a form template. This requires the labels extension.
 9. If you use the menueditor extension it will automatically add fields for
 translated labels, use these by adding `{{ item[app.request.get('_locale')~'label'] ?: item.label|default('-') }}`
 in your menu template. 
