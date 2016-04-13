@@ -212,9 +212,10 @@ class Extension extends BaseExtension
         if($template === null) {
             $template = '/twig/_localeswitcher.twig';
         }
-        return $this->app['twig']->render($template, array(
+        $html = $this->app['twig']->render($template, array(
             'locales' => $this->app['config']->get('general/locales')
         ));
+        return new \Twig_Markup($html, 'UTF-8');
     }
     
     /**
