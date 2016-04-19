@@ -43,7 +43,7 @@ class Extension extends BaseExtension
         // Twig function to translate/add labels to a forms placeholder and label attributes
         $this->addTwigFunction('translate_form', 'translateForm');
 
-        $this->app['twig.loader.filesystem']->addPath(__DIR__.'/assets/views');
+        $this->app['twig.loader.filesystem']->addPath(__DIR__.'/views');
 
         $this->app['config']->getFields()->addField(new Field\LocaleField());
 

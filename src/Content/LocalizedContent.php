@@ -243,7 +243,7 @@ class LocalizedContent extends \Bolt\Content
     private function localeHydrate($values)
     {
         $locales = $this->app['config']->get('general/locales');
-        if($locales){
+        if($locales && isset($values['id'])){
             $locale = reset($locales);
             $defaultLocaleSlug = $locale['slug'];
             $currentLocale = $this->app['request']->get('_locale');

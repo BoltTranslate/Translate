@@ -12,7 +12,7 @@
 	"authors": [{
 		"name": "Svante Richter",
 		"email": "svante.richter@gmail.com"
-	},{
+	}, {
 		"name": "Animal Design OG",
 		"email": "studio@animal.at"
 	}],
@@ -23,5 +23,8 @@
 		"psr-4": {
 			"Bolt\\Extension\\Animal\\Translate\\": ["", "src/"]
 		}
-	}
+	},
+    "extra": {
+        "bolt-assets": "assets"
+    }
 }
