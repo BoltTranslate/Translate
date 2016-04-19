@@ -1,0 +1,16 @@
+<ul class="localeswitcher">
+    {% for iso, locale in locales %}
+        {% if app.request.get('slug') and app.request.get('_route') == 'contentlink' or app.request.get('_route') == 'pagebinding' %}
+            {% set newslug = get_slug_from_locale(record, iso) ?: record.slug %}
+        {% else %}
+            {% set newslug = app.request.get('slug') %}
+        {% endif %}
+        <li {% if locale.slug == app.request.get('_locale') %}class="active"{% endif %}>
+            <a title="{{ locale.label }}" href="{{ url(
+                 app.request.get('_route'), 
+                 app.request.get('_route_params')|merge({_locale: locale.slug, slug: newslug })
+                 )}}">
+                 {{ locale.label }}
+            </a>
+    {% endfor %}
+</ul>
