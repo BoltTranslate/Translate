@@ -95,7 +95,7 @@ function setValue(field, value) {
 			el.val(value);
 			break;
 		case 'html':
-			CKEDITOR.instances[el.attr('name')].setData(value);
+			CKEDITOR.instances[el.attr('name').replace('[','-').replace(']','')].setData(value);
 			break;
 		case 'markdown':
 			parent.find('.CodeMirror').get(0).CodeMirror.setValue(value);
