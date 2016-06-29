@@ -5,7 +5,8 @@ namespace Bolt\Extension\Animal\Translate\Field;
 use Bolt\Field\FieldInterface;
 
 class LocaleField implements FieldInterface
-{    
+{
+
     public function getName()
     {
         return 'locale';
@@ -13,7 +14,7 @@ class LocaleField implements FieldInterface
 
     public function getTemplate()
     {
-        return 'field/_locale.twig';
+        return 'fields/_locale.twig';
     }
 
     public function getStorageType()
@@ -23,6 +24,7 @@ class LocaleField implements FieldInterface
 
     public function getStorageOptions()
     {
-        return array('default' => '');
+        return ['default' => ''];
     }
+
 }

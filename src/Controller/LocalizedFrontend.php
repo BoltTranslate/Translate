@@ -8,7 +8,7 @@ use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\Request;
 
-class AsyncController implements ControllerProviderInterface
+class LocalizedFrontend implements ControllerProviderInterface
 {
     private $config;
 

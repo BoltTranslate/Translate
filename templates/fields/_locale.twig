@@ -1,9 +1,9 @@
 {% set locales = app.config.get('general/locales') %}
 {% set translatable = [] %}
 {% for name, field in context.contenttype.fields %}
-{% if field.isTranslatable is defined and field.isTranslatable == true %}
-{% set translatable = translatable|merge(['#'~name]) %}
-{% endif %}
+    {% if field.isTranslatable is defined and field.isTranslatable == true %}
+        {% set translatable = translatable|merge(['#'~name]) %}
+    {% endif %}
 {% endfor %}
 
 
