@@ -27,6 +27,7 @@ class TranslateExtension extends SimpleExtension
         $this->app = $app;
         $this->config = $this->getConfig();
         $this->registerContentTableSchema($app);
+        $this->registerLegacyStorage($app);
         
         $app['translate'] = $app->share(
             function () {
@@ -104,8 +105,6 @@ class TranslateExtension extends SimpleExtension
         $localeJson = json_encode($localeValues);
         $record->set($localeSlug.'_data', $localeJson);
 
-        dump($localeValues);
-        dump($record->get($localeSlug.'_slug'));
     }
 
     /**
@@ -155,6 +154,23 @@ class TranslateExtension extends SimpleExtension
                     });
                 }
                 return $contentTables;
+            }
+        );
+    }
+
+    /**
+     * Register own table schema class for the content tables
+     * to add all custom fields
+     *
+     * @param Application $app
+     */
+    private function registerLegacyStorage(Application $app)
+    {
+        $config = $this->getConfig();
+        $this->app['storage.legacy'] = $app->extend(
+            'storage.legacy',
+            function ($storage) use ($app) {
+                return new Storage\Legacy($app);
             }
         );
     }
