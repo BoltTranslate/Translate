@@ -120,8 +120,8 @@ class TranslateExtension extends SimpleExtension
         if(get_class($entity) !== "Bolt\Storage\Entity\Content"){
             return;
         }
-
-        $localeSlug = $this->app['request']->get('_locale');
+        $default = array_values($this->config['locales'])[0]['slug'];
+        $localeSlug = $app['request']->get('_locale', $default);
 
         if(isset($subject[$localeSlug.'_data'])){
             $localeData = json_decode($subject[$localeSlug.'_data']);
