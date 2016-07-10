@@ -13,7 +13,7 @@ use Bolt\Events\StorageEvents;
 /**
  * Translate extension class.
  *
- * @author Your Name <you@example.com>
+ * @author Svante Richter <svante.richter@gmail.com>
  */
 class TranslateExtension extends SimpleExtension
 {
@@ -33,10 +33,7 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * @inheritdoc
-     *
-     * @param Request $request
-     * @param Application $app
+     * Before handler that only sets the localeSlug for future use
      */
     public function before()
     {
@@ -67,7 +64,10 @@ class TranslateExtension extends SimpleExtension
             'templates' => ['position' => 'prepend', 'namespace' => 'bolt']
         ];
     }
-    
+
+    /**
+     * {@inheritdoc}
+     */
     protected function registerTwigFunctions()
     {
         return [
@@ -75,7 +75,7 @@ class TranslateExtension extends SimpleExtension
             'get_slug_from_locale' => 'getSlugFromLocale'
         ];
     }
-    
+
     /**
      * {@inheritdoc}
      */
@@ -176,8 +176,7 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * Register own table schema class for the content tables
-     * to add locale columns
+     * Register translate services/values on the app container
      *
      * @param Application $app
      */
@@ -213,7 +212,7 @@ class TranslateExtension extends SimpleExtension
                 return new Storage\Legacy($app);
             }
         );
-        
+
         $app['controller.frontend'] = $app->share(
             function ($app) {
                 $frontend = new Frontend\LocalizedFrontend();
@@ -221,13 +220,13 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
-        
+
         $app['menu'] = $app->share(
             function ($app) {
                 return new Frontend\LocalizedMenuBuilder($app);
             }
         );
-        
+
         $config = $this->getConfig();
         $app['schema.content_tables'] = $app->extend(
             'schema.content_tables',
@@ -266,9 +265,9 @@ class TranslateExtension extends SimpleExtension
     }
     
     /**
-     * localeSwitcher.
+     * Twig helper to render a locale switcher on the frontend
      *
-     * Function to render a locale switcher on the frontend
+     * @param String $template
      */
     public function localeSwitcher($template = null)
     {
@@ -281,12 +280,18 @@ class TranslateExtension extends SimpleExtension
         return new \Twig_Markup($html, 'UTF-8');
     }
     
+    /**
+     * Twig helper to get a localized slug
+     *
+     * @param Bolt\Legacy\Content $content
+     * @param String $locale
+     */
     public function getSlugFromLocale($content, $locale)
     {
         if(!isset($content->contenttype['slug']) || !in_array($locale, array_column($this->config['locales'], 'slug'))){
             return false;
         }
-        
+
         $repo = $this->app['storage']->getRepository($content->contenttype['slug']);
         $qb = $repo->createQueryBuilder();
         $qb->select($locale.'_slug')
@@ -296,5 +301,4 @@ class TranslateExtension extends SimpleExtension
         $result = $qb->execute()->fetch();
         return array_values($result)[0];
     }
-    
 }
