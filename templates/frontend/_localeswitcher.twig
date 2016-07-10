@@ -1,7 +1,7 @@
 <ul class="localeswitcher">
     {% for iso, locale in locales %}
         {% if app.request.get('slug') and app.request.get('_route') == 'contentlink' or app.request.get('_route') == 'pagebinding' %}
-            {% set newslug = get_slug_from_locale(record, iso) ?: record.slug %}
+            {% set newslug = get_slug_from_locale(record, locale.slug) ?: record.slug %}
         {% else %}
             {% set newslug = app.request.get('slug') %}
         {% endif %}

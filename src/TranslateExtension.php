@@ -17,6 +17,7 @@ use Bolt\Events\StorageEvents;
  */
 class TranslateExtension extends SimpleExtension
 {
+
     /**
      * @inheritdoc
      *
@@ -26,33 +27,8 @@ class TranslateExtension extends SimpleExtension
     {
         $this->app = $app;
         $this->config = $this->getConfig();
-        $this->registerContentTableSchema($app);
-        $this->registerLegacyStorage($app);
-
-        $app['controller.frontend'] = $app->share(
-            function ($app) {
-                $frontend = new Frontend\LocalizedFrontend();
-                $frontend->connect($app);
-                return $frontend;
-            }
-        );
-        
-        $app['translate'] = $app->share(
-            function () {
-                return $this;
-            }
-        );
-        $app['translate.config'] = $app->share(
-            function () {
-                return $this->config;
-            }
-        );
-        $app['translate.slug'] = $app->share(
-            function () {
-                return $this->localeSlug;
-            }
-        );
-
+        $this->registerTranslateServices($app);
+        $this->registerOverrides($app);
         $app->before([$this, 'before']);
     }
 
@@ -62,7 +38,7 @@ class TranslateExtension extends SimpleExtension
      * @param Request $request
      * @param Application $app
      */
-    public function before(Request $request, Application $app)
+    public function before()
     {
         $defaultSlug = array_column($this->config['locales'], 'slug')[0];
         $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
@@ -89,6 +65,14 @@ class TranslateExtension extends SimpleExtension
     {
         return [
             'templates' => ['position' => 'prepend', 'namespace' => 'bolt']
+        ];
+    }
+    
+    protected function registerTwigFunctions()
+    {
+        return [
+            'localeswitcher' => 'localeSwitcher',
+            'get_slug_from_locale' => 'getSlugFromLocale'
         ];
     }
     
@@ -143,12 +127,12 @@ class TranslateExtension extends SimpleExtension
      */
     public function preSave(StorageEvent $event)
     {
-
         $contenttype = $this->app['config']->get('contenttypes/'.$event->getContentType());
         $translateableFields = $this->getTranslatableFields($contenttype['fields']);
         $record = $event->getContent();
         $values = $record->serialize();
         $localeSlug = $this->localeSlug;
+        $localeValues = [];
         
         if(empty($translateableFields)){
             return;
@@ -159,9 +143,7 @@ class TranslateExtension extends SimpleExtension
             $record->set($localeSlug.'_data', '[]');
             return;
         }
-        
-        $localeValues = [];
-        
+
         $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
         foreach ($translateableFields as $value) {
             $localeValues[$value] = $values[$value];
@@ -178,7 +160,6 @@ class TranslateExtension extends SimpleExtension
      */
     public function postSave(StorageEvent $event)
     {
-
         $subject = $event->getSubject();
         if(get_class($subject) !== "Bolt\Storage\Entity\Content"){
             return;
@@ -200,8 +181,53 @@ class TranslateExtension extends SimpleExtension
      *
      * @param Application $app
      */
-    private function registerContentTableSchema(Application $app)
+    private function registerTranslateServices(Application $app)
     {
+        $app['translate'] = $app->share(
+            function () {
+                return $this;
+            }
+        );
+        $app['translate.config'] = $app->share(
+            function () {
+                return $this->config;
+            }
+        );
+        $app['translate.slug'] = $app->share(
+            function () {
+                return $this->localeSlug;
+            }
+        );
+    }
+
+    /**
+     * Register overrides for bolt's services
+     *
+     * @param Application $app
+     */
+    private function registerOverrides(Application $app)
+    {
+        $this->app['storage.legacy'] = $app->extend(
+            'storage.legacy',
+            function ($storage) use ($app) {
+                return new Storage\Legacy($app);
+            }
+        );
+        
+        $app['controller.frontend'] = $app->share(
+            function ($app) {
+                $frontend = new Frontend\LocalizedFrontend();
+                $frontend->connect($app);
+                return $frontend;
+            }
+        );
+        
+        $app['menu'] = $app->share(
+            function ($app) {
+                return new Frontend\LocalizedMenuBuilder($app);
+            }
+        );
+        
         $config = $this->getConfig();
         $app['schema.content_tables'] = $app->extend(
             'schema.content_tables',
@@ -217,22 +243,6 @@ class TranslateExtension extends SimpleExtension
                     });
                 }
                 return $contentTables;
-            }
-        );
-    }
-
-    /**
-     * Register own legacy storage class to fake hydration events on frontend.
-     *
-     * @param Application $app
-     */
-    private function registerLegacyStorage(Application $app)
-    {
-        $config = $this->getConfig();
-        $this->app['storage.legacy'] = $app->extend(
-            'storage.legacy',
-            function ($storage) use ($app) {
-                return new Storage\Legacy($app);
             }
         );
     }
@@ -254,4 +264,37 @@ class TranslateExtension extends SimpleExtension
         }
         return $translatable;
     }
+    
+    /**
+     * localeSwitcher.
+     *
+     * Function to render a locale switcher on the frontend
+     */
+    public function localeSwitcher($template = null)
+    {
+        if($template === null) {
+            $template = '@bolt/frontend/_localeswitcher.twig';
+        }
+        $html = $this->app['twig']->render($template, [
+            'locales' => $this->config['locales']
+        ]);
+        return new \Twig_Markup($html, 'UTF-8');
+    }
+    
+    public function getSlugFromLocale($content, $locale)
+    {
+        if(!isset($content->contenttype['slug']) || !in_array($locale, array_column($this->config['locales'], 'slug'))){
+            return false;
+        }
+        
+        $repo = $this->app['storage']->getRepository($content->contenttype['slug']);
+        $qb = $repo->createQueryBuilder();
+        $qb->select($locale.'_slug')
+            ->where('id = ?')
+            ->setParameter(0, $content->get('id'))
+            ->setMaxResults(1);
+        $result = $qb->execute()->fetch();
+        return array_values($result)[0];
+    }
+    
 }
