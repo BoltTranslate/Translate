@@ -2,13 +2,13 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
+use Silex\Application;
+use Bolt\Extension\SimpleExtension;
+use Symfony\Component\HttpFoundation\Request;
+
 use Bolt\Events\HydrationEvent;
 use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
-
-use Bolt\Extension\SimpleExtension;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Silex\Application;
 
 /**
  * Translate extension class.
@@ -39,7 +39,30 @@ class TranslateExtension extends SimpleExtension
                 return $this->config;
             }
         );
+        $app['translate.slug'] = $app->share(
+            function () {
+                return $this->localeSlug;
+            }
+        );
+
+        $app->before([$this, 'before']);
     }
+
+    /**
+     * @inheritdoc
+     *
+     * @param Request $request
+     * @param Application $app
+     */
+    public function before(Request $request, Application $app)
+    {
+        $defaultSlug = array_values($this->config['locales'])[0]['slug'];
+        $this->localeSlug = $this->app['request']->get('_locale', $defaultSlug);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getServiceProviders()
     {
         return [
@@ -48,6 +71,9 @@ class TranslateExtension extends SimpleExtension
         ];
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function registerTwigPaths()
     {
         return [
@@ -68,43 +94,12 @@ class TranslateExtension extends SimpleExtension
             StorageEvents::PRE_SAVE => [
                 ['preSave', 0],
             ],
+            StorageEvents::POST_SAVE => [
+                ['postSave', 0],
+            ]
         ];
 
         return $parentEvents + $localEvents;
-    }
-    
-    /**
-     * AccessControlEvents::LOGIN_SUCCESS event callback.
-     *
-     * @param AccessControlEvent $event
-     */
-    public function preSave(StorageEvent $event)
-    {
-        $contenttype = $this->app['config']->get('contenttypes/'.$event->getContentType());
-        $translateableFields = $this->getTranslatableFields($contenttype['fields']);
-        if(empty($translateableFields)){
-            return;
-        }
-        $record = $event->getContent();
-        $values = $record->serialize();
-        
-        if($values['locale'] == array_keys($this->config['locales'])[0]){
-            return;
-        }
-
-        $localeSlug = $this->config['locales'][$values['locale']]['slug'];
-        
-        $localeValues = [];
-        
-        $record->set($localeSlug.'_slug', $values['slug']);
-        $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
-        foreach ($translateableFields as $value) {
-            $localeValues[$value] = $values[$value];
-            $record->set($value, $defaultContent[$value]);
-        }
-        $localeJson = json_encode($localeValues);
-        $record->set($localeSlug.'_data', $localeJson);
-
     }
 
     /**
@@ -116,12 +111,11 @@ class TranslateExtension extends SimpleExtension
     {
         $entity = $event->getArgument('entity');
         $subject = $event->getSubject();
-
-        if(get_class($entity) !== "Bolt\Storage\Entity\Content"){
+        if(get_class($entity) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === "true"){
             return;
         }
-        $default = array_values($this->config['locales'])[0]['slug'];
-        $localeSlug = $app['request']->get('_locale', $default);
+
+        $localeSlug = $this->localeSlug;
 
         if(isset($subject[$localeSlug.'_data'])){
             $localeData = json_decode($subject[$localeSlug.'_data']);
@@ -132,8 +126,60 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
+     * StorageEvents::POST_SAVE event callback.
+     *
+     * @param StorageEvent $event
+     */
+    public function preSave(StorageEvent $event)
+    {
+
+        $contenttype = $this->app['config']->get('contenttypes/'.$event->getContentType());
+        $translateableFields = $this->getTranslatableFields($contenttype['fields']);
+        $record = $event->getContent();
+        $values = $record->serialize();
+        if(empty($translateableFields) || $values['locale'] == array_keys($this->config['locales'])[0]){
+            return;
+        }
+
+        $localeSlug = $this->localeSlug;
+        $localeValues = [];
+        
+        $record->set($localeSlug.'_slug', $values['slug']);
+        $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
+        foreach ($translateableFields as $value) {
+            $localeValues[$value] = $values[$value];
+            $record->set($value, $defaultContent[$value]);
+        }
+        $localeJson = json_encode($localeValues);
+        $record->set($localeSlug.'_data', $localeJson);
+    }
+
+    /**
+     * StorageEvents::POST_SAVE event callback.
+     *
+     * @param StorageEvent $event
+     */
+    public function postSave(StorageEvent $event)
+    {
+
+        $subject = $event->getSubject();
+        if(get_class($subject) !== "Bolt\Storage\Entity\Content"){
+            return;
+        }
+        
+        $localeSlug = $this->localeSlug;
+                
+        if(isset($subject[$localeSlug.'_data'])){
+            $localeData = json_decode($subject[$localeSlug.'_data']);
+            foreach ($localeData as $key => $value) {
+                $subject->set($key, $value);
+            }
+        }
+    }
+
+    /**
      * Register own table schema class for the content tables
-     * to add all custom fields
+     * to add locale columns
      *
      * @param Application $app
      */
@@ -159,8 +205,7 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * Register own table schema class for the content tables
-     * to add all custom fields
+     * Register own legacy storage class to fake hydration events on frontend.
      *
      * @param Application $app
      */
@@ -175,6 +220,11 @@ class TranslateExtension extends SimpleExtension
         );
     }
 
+    /**
+     * Helper to check for translatable fields in a contenttype
+     *
+     * @param Array $fields
+     */
     private function getTranslatableFields($fields)
     {
         $translatable = [];

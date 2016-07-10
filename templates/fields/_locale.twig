@@ -13,8 +13,9 @@
 	{% set current = option.slug == app.request.get('_locale') ? option : current %}
 	{% set currentkey = option.slug == app.request.get('_locale') ? key : currentkey %}
 {% endfor %}
-
 <input name="locale" type="hidden" value="{{currentkey}}">
+<input name="_locale" type="hidden" value="{{current.slug}}">
+<input name="no_locale_hydrate" type="hidden" value="true">
 
 <fieldset class="locale">
 	<div class="col-sm-12">
