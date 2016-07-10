@@ -3,11 +3,13 @@
 namespace Bolt\Extension\Animal\Translate\Storage;
 
 use Bolt\Legacy\Storage;
-use Silex\Application;
 use Bolt\Legacy\Content;
 
 class Legacy extends Storage
 {
+    /**
+     * Override to set localized values before hydration in legacy storage
+     */
     public function getContentObject($contenttype, $values = [])
     {
         $reflection = new \ReflectionClass($this);
@@ -15,20 +17,19 @@ class Legacy extends Storage
         $prop->setAccessible(true);
         $app = $prop->getValue($this);
         
-        $default = array_values($app['translate.config']['locales'])[0]['slug'];
-        $localeSlug = $app['request']->get('_locale', $default);
+        $localeSlug = $app['translate.slug'];
         if(isset($values[$localeSlug.'_data'])){
             $localeData = json_decode($values[$localeSlug.'_data']);
             foreach ($localeData as $key => $value) {
                 $values[$key] = $value;
             }
         }
-        
+
         // Make sure $contenttype is an array, and not just the slug.
         if (!is_array($contenttype)) {
             $contenttype = $this->getContentType($contenttype);
         }
-        
+
         // If the contenttype has a 'class' specified, and the class exists,
         // Initialize the content as an object of that class.
         if (!empty($contenttype['class']) && class_exists($contenttype['class'])) {
