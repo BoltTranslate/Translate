@@ -76,4 +76,4 @@ Started by [ANIMAL](http://animal.at), finished by SahAssar (see commit history)
 
 ### License
 
-This Bolt extension is open-sourced software licensed under the [Your preferred License]
+This Bolt extension is open-sourced software licensed under the MIT License.
