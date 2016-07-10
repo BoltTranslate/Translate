@@ -126,7 +126,7 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * StorageEvents::POST_SAVE event callback.
+     * StorageEvents::PRE_SAVE event callback.
      *
      * @param StorageEvent $event
      */
