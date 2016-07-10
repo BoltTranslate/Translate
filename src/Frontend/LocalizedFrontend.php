@@ -13,8 +13,10 @@ class LocalizedFrontend extends Frontend
     {
         $routes = $this->app['config']->get('routing', []);
         foreach ($routes as $name => &$route) {
-            $route['path'] = '/{_locale}'.$route['path'];
-            $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
+            if($name !== "preview"){
+                $route['path'] = '/{_locale}'.$route['path'];
+                $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
+            }
         }
         $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
         return $routes;
