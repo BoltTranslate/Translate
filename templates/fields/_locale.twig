@@ -45,7 +45,10 @@
 		// Prepend translation icons to translatable fields.
 		$('{{translatable|join(",")}}').closest('fieldset').each(function(i, el){
 			$(el).find('label').first().prepend('<i class="fa fa-language icon"></i> ');
-		})
+		});
+		
+		// Fix preview link
+		$('#sidebarpreviewbutton').attr('data-url', "{{ path('preview', {'contenttypeslug': context.contenttype.singular_slug, _locale: current.slug}) }}");
 
 		// Move locale switcher to tab navigation
 		$("#locale-select").detach().appendTo('#filtertabs');

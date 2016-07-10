@@ -28,6 +28,14 @@ class TranslateExtension extends SimpleExtension
         $this->config = $this->getConfig();
         $this->registerContentTableSchema($app);
         $this->registerLegacyStorage($app);
+
+        $app['controller.frontend'] = $app->share(
+            function ($app) {
+                $frontend = new Frontend\LocalizedFrontend();
+                $frontend->connect($app);
+                return $frontend;
+            }
+        );
         
         $app['translate'] = $app->share(
             function () {
@@ -56,8 +64,11 @@ class TranslateExtension extends SimpleExtension
      */
     public function before(Request $request, Application $app)
     {
-        $defaultSlug = array_values($this->config['locales'])[0]['slug'];
-        $this->localeSlug = $this->app['request']->get('_locale', $defaultSlug);
+        $defaultSlug = array_column($this->config['locales'], 'slug')[0];
+        $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
+        if(in_array($localeSlug, array_column($this->config['locales'], 'slug'))){
+            $this->localeSlug = $localeSlug;
+        }
     }
 
     /**
@@ -137,14 +148,20 @@ class TranslateExtension extends SimpleExtension
         $translateableFields = $this->getTranslatableFields($contenttype['fields']);
         $record = $event->getContent();
         $values = $record->serialize();
-        if(empty($translateableFields) || $values['locale'] == array_keys($this->config['locales'])[0]){
+        $localeSlug = $this->localeSlug;
+        
+        if(empty($translateableFields)){
             return;
         }
-
-        $localeSlug = $this->localeSlug;
-        $localeValues = [];
         
         $record->set($localeSlug.'_slug', $values['slug']);
+        if($values['locale'] == array_keys($this->config['locales'])[0]){
+            $record->set($localeSlug.'_data', '[]');
+            return;
+        }
+        
+        $localeValues = [];
+        
         $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
         foreach ($translateableFields as $value) {
             $localeValues[$value] = $values[$value];
