@@ -86,6 +86,9 @@ class TranslateExtension extends SimpleExtension
             StorageEvents::PRE_HYDRATE => [
                 ['preHydrate', 0],
             ],
+            StorageEvents::POST_HYDRATE => [
+                ['postHydrate', 0],
+            ],
             StorageEvents::PRE_SAVE => [
                 ['preSave', 0],
             ],
@@ -110,12 +113,46 @@ class TranslateExtension extends SimpleExtension
             return;
         }
 
-        $localeSlug = $this->localeSlug;
+        $contentTypeName = $entity->getContentType();
 
+        $contentType = $this->app['config']->get('contenttypes/'.$contentTypeName);
+        $localeSlug = $this->localeSlug;
+        //$subject[$key]->addFromArray($value);
         if(isset($subject[$localeSlug.'_data'])){
             $localeData = json_decode($subject[$localeSlug.'_data']);
             foreach ($localeData as $key => $value) {
-                $subject[$key] = $value;
+                if ($contentType['fields'][$key]['type'] !== 'repeater'){
+                    $subject[$key] = is_array($value) ? json_encode($value) : $value;
+                }
+            }
+        }
+    }
+
+    /**
+     * StorageEvents::POST_HYDRATE event callback.
+     *
+     * @param HydrationEvent $event
+     */
+    public function postHydrate(HydrationEvent $event)
+    {
+        $subject = $event->getSubject();
+        if(get_class($subject) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === "true"){
+            return;
+        }
+        $contentTypeName = $subject->getContentType();
+
+        $contentType = $this->app['config']->get('contenttypes/'.$contentTypeName);
+        $localeSlug = $this->localeSlug;
+
+        if(isset($subject[$localeSlug.'_data'])){
+            $localeData = json_decode($subject[$localeSlug.'_data'], true);
+            foreach ($localeData as $key => $value) {
+                if ($contentType['fields'][$key]['type'] === 'repeater'){
+                    $subject[$key]->clear();
+                    foreach ($value as $subValue) {
+                        $subject[$key]->addFromArray($subValue);
+                    }
+                }
             }
         }
     }
@@ -145,9 +182,9 @@ class TranslateExtension extends SimpleExtension
         }
 
         $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
-        foreach ($translateableFields as $value) {
-            $localeValues[$value] = $values[$value];
-            $record->set($value, $defaultContent[$value]);
+        foreach ($translateableFields as $field) {
+            $localeValues[$field] = $values[$field];
+            $record->set($field, $defaultContent[$field]);
         }
         $localeJson = json_encode($localeValues);
         $record->set($localeSlug.'_data', $localeJson);

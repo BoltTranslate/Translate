@@ -16,6 +16,7 @@ class Legacy extends Storage
         $prop = $reflection->getParentClass()->getProperty('app');
         $prop->setAccessible(true);
         $app = $prop->getValue($this);
+        $this->localeValues = $values;
         
         $localeSlug = $app['translate.slug'];
         if(isset($values[$localeSlug.'_data'])){
@@ -42,5 +43,50 @@ class Legacy extends Storage
             $content = new Content($app, $contenttype, $values);
         }
         return $content;
+    }
+
+    public function getContent($textquery, $parameters = '', &$pager = [], $whereparameters = [])
+    {
+        $result = parent::getContent($textquery, $parameters, $pager, $whereparameters);
+
+        if($result){
+            $reflection = new \ReflectionClass($this);
+            $prop = $reflection->getParentClass()->getProperty('app');
+            $prop->setAccessible(true);
+            $app = $prop->getValue($this);
+
+            if(is_array($result)){
+                foreach ($result as &$record) {
+                    $this->repeaterhydrate($record, $app);
+                }
+            }else{
+                $this->repeaterhydrate($result, $app);
+            }
+        }
+        return $result;
+    }
+
+    private function repeaterhydrate($record, $app) {
+
+        $contentTypeName = $record->contenttype['slug'];
+
+        $contentType = $app['config']->get('contenttypes/'.$contentTypeName);
+        
+        $values = $this->localeValues;
+        $localeSlug = $app['translate.slug'];
+
+        if(isset($values[$localeSlug.'_data'])){
+            $localeData = json_decode($values[$localeSlug.'_data'], true);
+            
+            foreach ($localeData as $key => $value) {
+                
+                if ($contentType['fields'][$key]['type'] === 'repeater'){
+                    $record[$key]->clear();
+                    foreach ($value as $subValue) {
+                        $record[$key]->addFromArray($subValue);
+                    }
+                }
+            }
+        }
     }
 }
