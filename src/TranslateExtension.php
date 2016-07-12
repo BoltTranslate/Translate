@@ -39,7 +39,9 @@ class TranslateExtension extends SimpleExtension
     {
         $defaultSlug = array_column($this->config['locales'], 'slug')[0];
         $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
-        if(in_array($localeSlug, array_column($this->config['locales'], 'slug'))){
+        if(isset($this->config['locales'][$localeSlug])){
+            $this->localeSlug = $this->config['locales'][$localeSlug]['slug'];
+        } elseif (in_array($localeSlug, array_column($this->config['locales'], 'slug'))){
             $this->localeSlug = $localeSlug;
         }
     }
