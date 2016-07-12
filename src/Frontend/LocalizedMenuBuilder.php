@@ -1,70 +1,28 @@
 <?php
-namespace Bolt\Extension\Animal\Translate\Menu;
 
-use Bolt\Application;
-use Bolt\Library as Lib;
-use Bolt\Translation\Translator as Trans;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+namespace Bolt\Extension\Animal\Translate\Frontend;
 
-use Bolt\Helpers\Menu;
+use Bolt\Menu\MenuBuilder;
+use Bolt\Menu\Menu;
 
-Class LocalizedMenuBuilder extends \Bolt\Helpers\MenuBuilder
+class LocalizedMenuBuilder extends MenuBuilder
 {
+    private $prefix = "";
     
-    /** @var Application */
-    private $app;
-
-    /**
-     * @param Application $app
-     */
-    public function __construct(Application $app)
-    {
-        $this->app = $app;
-    }
-
-    public function menu($identifier = null, $resolved = true)
-    {
-        $menus = $this->app['config']->get('menu');
-
-        if (!empty($identifier) && isset($menus[$identifier])) {
-            $name = strtolower($identifier);
-            $menu = $menus[$identifier];
-        } else {
-            $name = strtolower(\utilphp\util::array_first_key($menus));
-            $menu = \utilphp\util::array_first($menus);
-        }
-
-        if (!is_array($menu)) {
-            $menu = array();
-        }
-
-        if (!$resolved) {
-            return new Menu($name, $menu);
-        }
-
-        return new Menu($name, $this->resolve($menu), true);
-    }
-    
-    /**
-     * Return a named menu
-     *
-     * @param array $menu
-     *
-     * @return array
-     */
     public function resolve(array $menu)
     {
+        $reflection = new \ReflectionClass($this);
+        $prop = $reflection->getParentClass()->getProperty('app');
+        $prop->setAccessible(true);
+        $this->app = $prop->getValue($this);
+        
+        if(isset($this->app['translate.slug'])){
+            $this->prefix = $this->app['translate.slug'] . '/';
+        }
+        
         return $this->menuBuilder($menu);
     }
-
-    /**
-     * Recursively scans the passed array to ensure everything gets the
-     * menuHelper() treatment.
-     *
-     * @param array $menu
-     *
-     * @return array
-     */
+    
     private function menuBuilder(array $menu)
     {
         foreach ($menu as $key => $item) {
@@ -73,43 +31,29 @@ Class LocalizedMenuBuilder extends \Bolt\Helpers\MenuBuilder
                 $menu[$key]['submenu'] = $this->menuBuilder($item['submenu']);
             }
         }
-
         return $menu;
     }
-
-    /**
-     * Updates a menu item to have at least a 'link' key.
-     *
-     * @param array $item
-     *
-     * @return array Keys 'link' and possibly 'label', 'title' and 'path'
-     */
+    
     private function menuHelper($item)
     {
         // recurse into submenu's
         if (isset($item['submenu']) && is_array($item['submenu'])) {
             $item['submenu'] = $this->menuHelper($item['submenu']);
         }
-
         if (isset($item['route'])) {
             $param = !empty($item['param']) ?: array();
             $add = !empty($item['add']) ?: '';
-
             $item['link'] = Lib::path($item['route'], $param, $add);
         } elseif (isset($item['path'])) {
             $item = $this->resolvePathToContent($item);
         }
-
         return $item;
     }
     
-    public function resolvePathToContent(array $item)
+    private function resolvePathToContent(array $item)
     {
-        $request = $this->app['request'];
-        $locale = $request->get('_locale');
-        
         if ($item['path'] === 'homepage') {
-            $item['link'] = $this->app['resources']->getUrl('root') . $locale;
+            $item['link'] = $this->app['resources']->getUrl('root') . $this->prefix;
 
             return $item;
         }
@@ -120,9 +64,9 @@ Class LocalizedMenuBuilder extends \Bolt\Helpers\MenuBuilder
             $this->app['logger.system']->error(
                 Trans::__(
                     'Invalid menu path (%PATH%) set in menu.yml. Probably should be a link: instead!',
-                    array('%PATH%' => $item['path'])
+                    ['%PATH%' => $item['path']]
                 ),
-                array('event' => 'config')
+                ['event' => 'config']
             );
 
             return $item;
@@ -131,18 +75,18 @@ Class LocalizedMenuBuilder extends \Bolt\Helpers\MenuBuilder
         // Get a copy of the path minus trailing/leading slash
         $path = ltrim(rtrim($item['path'], '/'), '/');
 
+
         // Pre-set our link in case the match() throws an exception
-        $item['link'] = $this->app['resources']->getUrl('root') . $locale . '/' . $path;
+        $item['link'] = $this->app['resources']->getUrl('root') . $this->prefix . $path;
 
         try {
             // See if we have a 'content/id' or 'content/slug' path
             if (preg_match('#^([a-z0-9_-]+)/([a-z0-9_-]+)$#i', $path)) {
-
                 // Determine if the provided path first matches any routes
                 // that we have, this will catch any valid configured
                 // contenttype slug and record combination, or throw a
                 // ResourceNotFoundException exception otherwise
-                $this->app['url_matcher']->match('/'.$locale.'/' . $path);
+                $this->app['url_matcher']->match('/' . $this->prefix . $path);
 
                 // If we found a valid routing match then we're still here,
                 // attempt to retrieve the actual record and use its values.
@@ -152,27 +96,20 @@ Class LocalizedMenuBuilder extends \Bolt\Helpers\MenuBuilder
             $this->app['logger.system']->error(
                 Trans::__(
                     'Invalid menu path (%PATH%) set in menu.yml. Does not match any configured contenttypes or routes.',
-                    array('%PATH%' => $item['path'])
+                    ['%PATH%' => $item['path']]
                 ),
-                array('event' => 'config')
+                ['event' => 'config']
             );
+        } catch (MethodNotAllowedException $e) {
+            // Route is probably a GET and we're currently in a POST
         }
 
         return $item;
     }
-    
-    /**
-     * Populate a single menu item.
-     *
-     * @param array  $item
-     * @param string $path
-     *
-     * @return string
-     */
     private function populateItemFromRecord(array $item, $path)
     {
-        /** @var \Bolt\Content $content */
-        $content = $this->app['storage']->getContent($path);
+        /** @var \Bolt\Legacy\Content $content */
+        $content = $this->app['storage']->getContent($path, ['hydrate' => false]);
 
         if ($content) {
             if (empty($item['label'])) {

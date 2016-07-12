@@ -1,0 +1,104 @@
+{% set locales = app['translate.config'].locales %}
+{% set current = locales|first %}
+{% set currentkey = locales|keys|first %}
+{% set translatable = [] %}
+
+{% for name, field in context.contenttype.fields %}
+	{% if field.isTranslatable is defined and field.isTranslatable == true %}
+		{% set translatable = translatable|merge(['#'~name]) %}
+	{% endif %}
+{% endfor %}
+
+{% for key, option in locales %}
+	{% set current = option.slug == app.request.get('_locale') ? option : current %}
+	{% set currentkey = option.slug == app.request.get('_locale') ? key : currentkey %}
+{% endfor %}
+<input name="locale" type="hidden" value="{{currentkey}}">
+<input name="_locale" type="hidden" value="{{current.slug}}">
+<input name="no_locale_hydrate" type="hidden" value="true">
+
+<fieldset class="locale">
+	<div class="col-sm-12">
+		{% if app.request.get('id') is not empty %}
+		<div class="dropdown pull-right" id="locale-select">
+			<button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
+				<span class="selected">{{ current.label }}</span>
+				<span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu">
+				{% for key, option in locales %}
+				<li>
+					<a href="{{ url(
+								app.request.get('_route'),
+								app.request.get('_route_params')|merge({_locale: option.slug })
+							)}}">{{ option.label }}</a>
+				</li>
+			{% endfor %}
+			</ul>
+		</div>
+		{% endif %}
+	</div>
+</fieldset>
+
+<script>
+	$(function() {
+		// Prepend translation icons to translatable fields.
+		$('{{translatable|join(",")}}')
+			.closest('fieldset')
+			.each(function(i, el){
+				$(el).find('label')
+					.first()
+					.prepend('<i class="fa fa-language icon"></i> ');
+			});
+
+		// Move locale switcher to tab navigation
+		$("#locale-select")
+			.detach()
+			.appendTo('#filtertabs');
+
+		// Fix preview link
+		$('#sidebarpreviewbutton')
+			.attr(
+				'data-url',
+				"{{ path('preview', {'contenttypeslug': context.contenttype.singular_slug, _locale: current.slug}) }}"
+			);
+
+		// Fix "view saved" link
+		$('[href="{{ context.content.link }}"]')
+			.attr(
+				'href',
+				"{{ path('contentlink', {'contenttypeslug': context.contenttype.singular_slug, slug: context.content.slug, _locale: current.slug}) }}"
+			);
+	});
+</script>
+<style>
+	#locale-select button {
+		border-radius: 4px 4px 0 0;
+		padding: 5px 12px;
+		line-height: 1.42857;
+		margin-bottom: -1px;
+	}
+	#locale-select button a {
+		border: 0;
+		background-color: transparent!important;
+	}
+	#locale-select .dropdown-menu > li {
+		margin-left: 0;
+	}
+	#locale-select .dropdown-menu > li > a {
+		padding: 3px 20px;
+		color: #333;
+		background-color: transparent;
+		border: 0;
+	}
+	#locale-select .dropdown-menu > li > a:hover {
+		background-color: #DDD !important;
+	}
+	#locale-select .dropdown-menu > .disabled > a {
+		color: #777;
+		cursor: default;
+	}
+	#locale-select .dropdown-menu > .disabled > a:hover {
+		background-color: transparent !important;
+	}
+</style>
