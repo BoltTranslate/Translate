@@ -43,14 +43,32 @@
 <script>
 	$(function() {
 		// Prepend translation icons to translatable fields.
-		$('{{translatable|join(",")}}').closest('fieldset').each(function(i, el){
-			$(el).find('label').first().prepend('<i class="fa fa-language icon"></i> ');
-		});
-		
-		$('#sidebarpreviewbutton').attr('data-url', "{{ path('preview', {'contenttypeslug': context.contenttype.singular_slug, _locale: current.slug}) }}");
+		$('{{translatable|join(",")}}')
+			.closest('fieldset')
+			.each(function(i, el){
+				$(el).find('label')
+					.first()
+					.prepend('<i class="fa fa-language icon"></i> ');
+			});
 
 		// Move locale switcher to tab navigation
-		$("#locale-select").detach().appendTo('#filtertabs');
+		$("#locale-select")
+			.detach()
+			.appendTo('#filtertabs');
+
+		// Fix preview link
+		$('#sidebarpreviewbutton')
+			.attr(
+				'data-url',
+				"{{ path('preview', {'contenttypeslug': context.contenttype.singular_slug, _locale: current.slug}) }}"
+			);
+
+		// Fix "view saved" link
+		$('[href="{{ context.content.link }}"]')
+			.attr(
+				'href',
+				"{{ path('contentlink', {'contenttypeslug': context.contenttype.singular_slug, slug: context.content.slug, _locale: current.slug}) }}"
+			);
 	});
 </script>
 <style>
