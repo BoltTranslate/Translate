@@ -2,10 +2,27 @@
 
 namespace Bolt\Extension\Animal\Translate\Field;
 
-use Bolt\Field\FieldInterface;
+use Bolt\Storage\EntityManager;
+use Bolt\Storage\Field\Type\FieldTypeBase;
+use Bolt\Storage\QuerySet;
 
-class LocaleField implements FieldInterface
-{    
+class LocaleField extends FieldTypeBase
+{
+
+    public function persist(QuerySet $queries, $entity, EntityManager $em = null)
+    {
+        /*$queries[0]->setParameter('title', 'test1');
+        dump($queries, $entity, $em);
+        die();*/
+    }
+    public function hydrate($data, $entity)
+    {
+        
+        
+        /*$this->set($entity, $value);
+        dump($this, $data, $entity);*/
+    }
+
     public function getName()
     {
         return 'locale';
@@ -13,16 +30,17 @@ class LocaleField implements FieldInterface
 
     public function getTemplate()
     {
-        return 'field/_locale.twig';
+        return 'fields/_locale.twig';
     }
 
     public function getStorageType()
     {
-        return 'text';
+        return 'json_array';
     }
 
     public function getStorageOptions()
     {
-        return array('default' => '');
+        return ['default' => '[]'];
     }
+
 }

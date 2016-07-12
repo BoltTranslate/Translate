@@ -1,0 +1,7 @@
+locales:
+    en_GB:
+        label: English
+        slug: en
+    de_AT:
+        label: Deutsch
+        slug: de

@@ -2,100 +2,59 @@
 
 namespace Bolt\Extension\Animal\Translate\Frontend;
 
+use Bolt\Controller\Frontend;
+use Bolt\Storage\Query\SelectQuery;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Bolt\Library as Lib;
 
-Class LocalizedFrontend extends \Bolt\Controllers\Frontend
+class LocalizedFrontend extends Frontend
 {
-    public function record(\Silex\Application $app, $contenttypeslug, $slug = '')
+    protected function getConfigurationRoutes()
     {
-        $contenttype = $app['storage']->getContentType($contenttypeslug);
-
-        // If the contenttype is 'viewless', don't show the record page.
-        if (isset($contenttype['viewless']) && $contenttype['viewless'] === true) {
-            return $app->abort(Response::HTTP_NOT_FOUND, "Page $contenttypeslug/$slug not found.");
-        }
-
-        // Perhaps we don't have a slug. Let's see if we can pick up the 'id', instead.
-        if (empty($slug)) {
-            $slug = $app['request']->get('id');
-        }
-
-        $slug = $app['slugify']->slugify($slug);
-
-        // First, try to get it by slug.
-        $content = $app['storage']->getContent($contenttype['slug'], array('slug' => $slug, 'returnsingle' => true, 'log_not_found' => !is_numeric($slug)));
-
-        if (!$content && !is_numeric($slug)) {
-            // And otherwise try getting it by translated slugs
-            $match = $this->matchTranslatedSlug($app, $contenttype['slug'], $slug);
-            if(!empty($match)){
-                $content = $app['storage']->getContent($contenttype['slug'], array('id' => $match['content_type_id'], 'returnsingle' => true));
+        $routes = $this->app['config']->get('routing', []);
+        foreach ($routes as $name => &$route) {
+            if($name !== "preview"){
+                $route['path'] = '/{_locale}'.$route['path'];
+                $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
             }
         }
-        if (!$content && is_numeric($slug)) {
-            // And otherwise try getting it by ID
-            $content = $app['storage']->getContent($contenttype['slug'], array('id' => $slug, 'returnsingle' => true));
-        }
-
-        // No content, no page!
-        if (!$content) {
-            return $app->abort(Response::HTTP_NOT_FOUND, "Page $contenttypeslug/$slug not found.");
-        }
-
-        // Then, select which template to use, based on our 'cascading templates rules'
-        $template = $app['templatechooser']->record($content);
-
-        $paths = $app['resources']->getPaths();
-
-        // Setting the canonical URL.
-        if ($content->isHome() && ($template == $app['config']->get('general/homepage_template'))) {
-            $app['resources']->setUrl('canonicalurl', $paths['rooturl']);
-        } else {
-            $url = $paths['canonical'] . $content->link();
-            $app['resources']->setUrl('canonicalurl', $url);
-        }
-
-        // Setting the editlink
-        $app['editlink'] = Lib::path('editcontent', array('contenttypeslug' => $contenttype['slug'], 'id' => $content->id));
-        $app['edittitle'] = $content->getTitle();
-
-        // Make sure we can also access it as {{ page.title }} for pages, etc. We set these in the global scope,
-        // So that they're also available in menu's and templates rendered by extensions.
-        $app['twig']->addGlobal('record', $content);
-        $app['twig']->addGlobal($contenttype['singular_slug'], $content);
-
-        // Render the template and return.
-        return $this->render($app, $template, $content->getTitle());
+        $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
+        return $routes;
     }
     
-    private function matchTranslatedSlug($app, $contenttypeslug, $slug = '')
+    public function homepageRedirect(Request $request){
+        return $this->app->redirect($this->app['translate.slug']);
+    }
+    
+    /**
+     * Controller for a single record page, like '/page/about/' or '/entry/lorum'.
+     *
+     * @param Request $request         The request
+     * @param string  $contenttypeslug The content type slug
+     * @param string  $slug            The content slug
+     *
+     * @return BoltResponse
+     */
+    public function record(Request $request, $contenttypeslug, $slug = '')
     {
-        $prefix = $app['config']->get('general/database/prefix', 'bolt_');
-        $locales = $app['config']->get('general/locales');
-        $currentLocale = $app['request']->get('_locale');
+        $contenttype = $this->getContentType($contenttypeslug);
+        $localeSlug = $this->app['translate.slug'];
+        
+        if (!$localeSlug || is_numeric($slug)){
+            return parent::record($request, $contenttypeslug, $slug);
+        }
+        
+        $slug = $this->app['slugify']->slugify($slug);
 
-        $matchedLocales = array_filter(
-            $locales,
-            function ($e) use ($currentLocale) {
-                return $e['slug'] === $currentLocale;
-            }
-        );
+        $repo = $this->app['storage']->getRepository($contenttype['slug']);
+        $qb = $repo->createQueryBuilder();
+        $qb->select('slug')
+            ->where($localeSlug.'_slug = ?')
+            ->setParameter(0, $slug)
+            ->setMaxResults(1);
 
-        $locale = key($matchedLocales);
-        $query = 'select content_type_id from '.$prefix.'translation where field = "slug" and locale = ? and content_type = ? and value = ?';
-        $stmt = $app['db']->prepare($query);
-        $stmt->bindValue(1, $locale);
-        $stmt->bindValue(2, $contenttypeslug);
-        $stmt->bindValue(3, $slug);
-        $stmt->execute();
-        return $stmt->fetch();
+        $result = $qb->execute()->fetch();
+
+        return parent::record($request, $contenttypeslug, $result['slug']);
     }
-    
-    public function homepageRedirect(\Silex\Application $app){
-        $locales = $app['config']->get('general/locales');
-        $locale = reset($locales);
-        return $app->redirect($locale['slug']);
-    }
-    
 }
