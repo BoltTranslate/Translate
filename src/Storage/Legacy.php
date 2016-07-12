@@ -20,9 +20,9 @@ class Legacy extends Storage
         
         $localeSlug = $app['translate.slug'];
         if(isset($values[$localeSlug.'_data'])){
-            $localeData = json_decode($values[$localeSlug.'_data']);
+            $localeData = json_decode($values[$localeSlug.'_data'], true);
             foreach ($localeData as $key => $value) {
-                $values[$key] = $value;
+                $values[$key] = is_array($value) ? json_encode($value) : $value;
             }
         }
 
