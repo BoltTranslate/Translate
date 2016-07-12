@@ -83,7 +83,8 @@ class Legacy extends Storage
                 if ($contentType['fields'][$key]['type'] === 'repeater'){
                     $record[$key]->clear();
                     foreach ($value as $subValue) {
-                        $record[$key]->addFromArray($subValue);
+                        // Commented until #5533 gets fixed
+                        //$record[$key]->addFromArray($subValue);
                     }
                 }
             }
