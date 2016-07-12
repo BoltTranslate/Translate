@@ -121,7 +121,7 @@ class TranslateExtension extends SimpleExtension
         $localeSlug = $this->localeSlug;
         //$subject[$key]->addFromArray($value);
         if(isset($subject[$localeSlug.'_data'])){
-            $localeData = json_decode($subject[$localeSlug.'_data']);
+            $localeData = json_decode($subject[$localeSlug.'_data'], true);
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] !== 'repeater'){
                     $subject[$key] = is_array($value) ? json_encode($value) : $value;
