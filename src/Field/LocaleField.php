@@ -35,12 +35,12 @@ class LocaleField extends FieldTypeBase
 
     public function getStorageType()
     {
-        return 'json_array';
+        return 'string';
     }
 
     public function getStorageOptions()
     {
-        return ['default' => '[]'];
+        return ['default' => ''];
     }
 
 }

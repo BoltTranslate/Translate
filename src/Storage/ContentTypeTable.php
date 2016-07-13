@@ -30,8 +30,8 @@ class ContentTypeTable extends ContentType
     {
         parent::addColumns();
         foreach ($this->config['locales'] as $locale) {
-            $this->table->addColumn($locale['slug'].'_slug', 'string', array('length' => 256, 'default' => ''));
-            $this->table->addColumn($locale['slug'].'_data', 'string', array('default' => '[]'));
+            $this->table->addColumn($locale['slug'].'_slug', 'string', array('length' => 5, 'default' => ''));
+            $this->table->addColumn($locale['slug'].'_data', 'text', array('default' => '[]'));
         }
     }
 
