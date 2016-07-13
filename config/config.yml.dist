@@ -1,3 +1,4 @@
+# The locales the site should be available in
 locales:
     en_GB:
         label: English
@@ -5,3 +6,20 @@ locales:
     de_AT:
         label: Deutsch
         slug: de
+
+# Enable/disable automatic routing.
+# Enabling this will prefix all routes with {_locale} which leads to links like
+# /en/pages/yourpageslug It is reccomended that you leave this on unless you
+# want to build your own routing.
+routing_override: true
+
+# Enable/disable the menubuilder.
+# Enabling this will make the menu output links in the format of the automatic
+# routing. It is reccomended that you leave this on unless you want to build
+# your own localized menus.
+menu_override: true
+
+# Enable/disable translated slugs.
+# Enabling this will use translated slugs instead of using the same slug for
+# all languages. Only set to false if you also don't set your slugs to `is_translateable`. 
+translate_slugs: true

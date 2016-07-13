@@ -259,12 +259,13 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
-
-        $app['menu'] = $app->share(
-            function ($app) {
-                return new Frontend\LocalizedMenuBuilder($app);
-            }
-        );
+        if($this->app['translate.config']['menu_override']){
+            $app['menu'] = $app->share(
+                function ($app) {
+                    return new Frontend\LocalizedMenuBuilder($app);
+                }
+            );
+        }
 
         $config = $this->getConfig();
         $app['schema.content_tables'] = $app->extend(
@@ -294,9 +295,9 @@ class TranslateExtension extends SimpleExtension
     {
         $translatable = [];
         foreach ($fields as $name => $field) {
-            if (isset($field['isTranslatable'])  && $field['isTranslatable'] === true && $field['type'] === 'templateselect') {
+            if (isset($field['is_translateable'])  && $field['is_translateable'] === true && $field['type'] === 'templateselect') {
                 $translatable[] = 'templatefields';
-            }elseif (isset($field['isTranslatable']) && $field['isTranslatable'] === true) {
+            }elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
                 $translatable[] = $name;
             }
         }
@@ -308,12 +309,13 @@ class TranslateExtension extends SimpleExtension
      *
      * @param String $template
      */
-    public function localeSwitcher($template = null)
+    public function localeSwitcher($template = null, $extraclasses = null)
     {
         if($template === null) {
             $template = '@bolt/frontend/_localeswitcher.twig';
         }
         $html = $this->app['twig']->render($template, [
+            'extraclasses' => $extraclasses,
             'locales' => $this->config['locales']
         ]);
         return new \Twig_Markup($html, 'UTF-8');

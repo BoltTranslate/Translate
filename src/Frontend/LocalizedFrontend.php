@@ -12,13 +12,17 @@ class LocalizedFrontend extends Frontend
     protected function getConfigurationRoutes()
     {
         $routes = $this->app['config']->get('routing', []);
-        foreach ($routes as $name => &$route) {
-            if($name !== "preview"){
-                $route['path'] = '/{_locale}'.$route['path'];
-                $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
+
+        if($this->app['translate.config']['routing_override']){
+            foreach ($routes as $name => &$route) {
+                if($name !== "preview"){
+                    $route['path'] = '/{_locale}'.$route['path'];
+                    $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
+                }
             }
+            $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
         }
-        $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
+
         return $routes;
     }
     
@@ -40,10 +44,6 @@ class LocalizedFrontend extends Frontend
         $contenttype = $this->getContentType($contenttypeslug);
         $localeSlug = $this->app['translate.slug'];
         
-        if (!$localeSlug || is_numeric($slug)){
-            return parent::record($request, $contenttypeslug, $slug);
-        }
-        
         $slug = $this->app['slugify']->slugify($slug);
 
         $repo = $this->app['storage']->getRepository($contenttype['slug']);
@@ -54,6 +54,10 @@ class LocalizedFrontend extends Frontend
             ->setMaxResults(1);
 
         $result = $qb->execute()->fetch();
+
+        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs'] || !$result){
+            return parent::record($request, $contenttypeslug, $slug);
+        }
 
         return parent::record($request, $contenttypeslug, $result['slug']);
     }
