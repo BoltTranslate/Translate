@@ -4,7 +4,7 @@
 {% set translatable = [] %}
 
 {% for name, field in context.contenttype.fields %}
-	{% if field.isTranslatable is defined and field.isTranslatable == true %}
+	{% if field.is_translateable is defined and field.is_translateable == true %}
 		{% set translatable = translatable|merge(['#'~name]) %}
 	{% endif %}
 {% endfor %}
@@ -63,12 +63,14 @@
 				"{{ path('preview', {'contenttypeslug': context.contenttype.singular_slug, _locale: current.slug}) }}"
 			);
 
-		// Fix "view saved" link
-		$('[href="{{ context.content.link }}"]')
-			.attr(
-				'href',
-				"{{ path('contentlink', {'contenttypeslug': context.contenttype.singular_slug, slug: context.content.slug, _locale: current.slug}) }}"
-			);
+		{% if context.content.slug|default(false) %}
+			// Fix "view saved" link
+			$('[href="{{ context.content.link }}"]')
+				.attr(
+					'href',
+					"{{ path('contentlink', {'contenttypeslug': context.contenttype.singular_slug, slug: context.content.slug, _locale: current.slug}) }}"
+				);
+		{% endif %}
 	});
 </script>
 <style>

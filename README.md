@@ -16,8 +16,8 @@ used in combination with the labels extension.
 
 ### Configuration
 
-1. Add the `locales` block to the extension configuration with your locales, the first
-one is the default locale and must be the same as bolts own locale:
+1. Modify the `locales` block in the extension configuration to suit your needs.
+The first one is the default locale and must be the same as bolts own locale:
 
     ```
     locales:
@@ -29,8 +29,7 @@ one is the default locale and must be the same as bolts own locale:
             slug: de
     ```
 
-2. Do a database update.
-3. Add the locale field to the contenttypes you want translated in `contenttypes.yml`:
+2. Add the locale field to the contenttypes you want translated in `contenttypes.yml`:
 
     ```
     pages:
@@ -45,9 +44,9 @@ one is the default locale and must be the same as bolts own locale:
     [...]
     ```
 
-4. Add the `isTranslatable` argument to all fields you want to be translatable.
-To translate templatefields you simply tag the templateselect with 
-`isTranslatable` and all the templatefields will be translateable. (untested on 3.0)
+3. Add the `is_translateable` argument to all fields you want to be translatable.
+To translate templatefields you simply tag the templateselect with `is_translateable`
+and all the templatefields will be translateable.
 
     ```
     [...]
@@ -55,22 +54,40 @@ To translate templatefields you simply tag the templateselect with
         type: text
         class: large
         group: content
-        isTranslatable: true
+        is_translateable: true
     [...]
     ```
-5. Use the `localeswitcher` twig-function to render a locale switcher in your
+4. Use the `localeswitcher` twig-function to render a locale switcher in your
 theme: `{{ localeswitcher() }}` or `{{ localeswitcher('_my_localeswitcher_template.twig') }}`
-6. Activate/install the labels extension, set your languages in it's config
+5. (Optional) Activate/install the labels extension, set your languages in it's config
 and mark any hardcoded text in your templates with `{{l("Your text here")}}`.
-7. Translate your boltforms by switching `{% form_theme form 'boltforms_custom.twig' %}`
+6. (Optional) Translate your boltforms by switching `{% form_theme form 'boltforms_custom.twig' %}`
 to `{% form_theme form 'twig/boltforms_theme_translated.twig' %}` at the top of
 a form template. This requires the labels extension.
+
+---
+###Extras/Info
+
+####Localeswitcher in menu
+If you want to include the localeswitcher in your menu you can edit the `_sub_menu.twig`
+file and add the following right before the closing `<ul>`:
+
+```
+<li>Language
+    {{localeswitcher(null, 'menu submenu vertical')}}
+```
+
+####Overrides
+
+This extension overrides bolt in a few different places and sometimes you want
+to revert some of it back to it's default state. You can disable the overrides
+for routing, menus and slug handling in the config.
 
 ---
 
 ## About
 
-Started by [ANIMAL](http://animal.at), finished by SahAssar (see commit history)
+Started by [ANIMAL](http://animal.at), finished/ported to Bolt 3 by SahAssar
 
 ---
 
