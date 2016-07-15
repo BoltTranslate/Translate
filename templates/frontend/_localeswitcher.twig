@@ -6,11 +6,11 @@
             {% set newslug = app.request.get('slug') %}
         {% endif %}
         <li {% if locale.slug == app.request.get('_locale') %}class="active"{% endif %}>
-            <a title="{{ locale.label }}" href="{{ url(
-                 app.request.get('_route'), 
-                 app.request.get('_route_params')|merge({_locale: locale.slug, slug: newslug })
-                 )}}">
-                 {{ locale.label }}
+            <a title="{{ locale.label }}" href="{{ newslug ? url(
+                app.request.get('_route'), 
+                app.request.get('_route_params')|merge({_locale: locale.slug, slug: newslug })
+                ) : '/' ~ locale.slug }}">
+                {{ locale.label }}
             </a>
     {% endfor %}
 </ul>
