@@ -55,7 +55,7 @@ class LocalizedFrontend extends Frontend
 
         $result = $qb->execute()->fetch();
 
-        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs'] || !$result){
+        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs']){
             return parent::record($request, $contenttypeslug, $slug);
         }
 

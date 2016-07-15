@@ -182,11 +182,18 @@ class TranslateExtension extends SimpleExtension
             $record->set($localeSlug.'_data', '[]');
             return;
         }
-
-        $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
+        
+        
+        if($values['id']){
+            $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
+        }
         foreach ($translateableFields as $field) {
             $localeValues[$field] = $values[$field];
-            $record->set($field, $defaultContent[$field]);
+            if($values['id']){
+                $record->set($field, $defaultContent[$field]);
+            }else{
+                $record->set($field, '');
+            }
         }
         $localeJson = json_encode($localeValues);
         $record->set($localeSlug.'_data', $localeJson);
