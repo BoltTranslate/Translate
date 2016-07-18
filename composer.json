@@ -1,6 +1,6 @@
 {
     "name": "animal/translate",
-    "description": "Provides translation of contenttypes.",
+    "description": "This extension provides translation of records. Has support for repeaters, templatefields and extension fieldtypes.",
     "type": "bolt-extension",
     "require": {
         "bolt/bolt": "^3.0.11"
@@ -9,17 +9,18 @@
         "phpunit/phpunit": "^4.7"
     },
     "license": "MIT",
-	"keywords": [
-		"Translation",
-		"Frontend"
-	],
-	"authors": [{
-		"name": "Svante Richter",
-		"email": "svante.richter@gmail.com"
-	}, {
-		"name": "Animal Design OG",
-		"email": "studio@animal.at"
-	}],
+    "keywords": [
+        "Translation",
+        "Frontend",
+        "i18n"
+    ],
+    "authors": [{
+        "name": "Svante Richter",
+        "email": "svante.richter@gmail.com"
+    }, {
+        "name": "Animal Design OG",
+        "email": "studio@animal.at"
+    }],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
@@ -34,6 +35,7 @@
         }
     },
     "extra": {
+        "bolt-icon": "icon-language.png",
         "bolt-class": "Bolt\\Extension\\Animal\\Translate\\TranslateExtension"
     }
 }
