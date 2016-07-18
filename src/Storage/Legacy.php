@@ -4,6 +4,7 @@ namespace Bolt\Extension\Animal\Translate\Storage;
 
 use Bolt\Legacy\Storage;
 use Bolt\Legacy\Content;
+use Bolt\Storage\Field\Collection\RepeatingFieldCollection;
 
 class Legacy extends Storage
 {
@@ -57,16 +58,16 @@ class Legacy extends Storage
 
             if(is_array($result)){
                 foreach ($result as &$record) {
-                    $this->repeaterhydrate($record, $app);
+                    $this->repeaterHydrate($record, $app);
                 }
             }else{
-                $this->repeaterhydrate($result, $app);
+                $this->repeaterHydrate($result, $app);
             }
         }
         return $result;
     }
 
-    private function repeaterhydrate($record, $app) {
+    private function repeaterHydrate($record, $app) {
 
         $contentTypeName = $record->contenttype['slug'];
 
@@ -79,12 +80,15 @@ class Legacy extends Storage
             $localeData = json_decode($values[$localeSlug.'_data'], true);
             
             foreach ($localeData as $key => $value) {
-                
                 if ($contentType['fields'][$key]['type'] === 'repeater'){
-                    $record[$key]->clear();
+                    // Hackish fix until #5533 gets fixed, after that L85-88 can be replaced by L89
+                    $originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
+                    $originalMapping[$key]['type'] = 'repeater';
+                    $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
+                    $record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
+                    //$record[$key]->clear();
                     foreach ($value as $subValue) {
-                        // Commented until #5533 gets fixed
-                        //$record[$key]->addFromArray($subValue);
+                        $record[$key]->addFromArray($subValue);
                     }
                 }
             }
