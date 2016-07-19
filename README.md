@@ -58,7 +58,7 @@ and all the templatefields will be translateable.
     [...]
     ```
 4. Use the `localeswitcher` twig-function to render a locale switcher in your
-theme: `{{ localeswitcher() }}` or `{{ localeswitcher('', '_my_localeswitcher_template.twig') }}`
+theme: `{{ localeswitcher() }}` or `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}`
 5. (Optional) Activate/install the labels extension, set your languages in it's config
 and mark any hardcoded text in your templates with `{{l("Your text here")}}`.
 6. (Optional) Translate your boltforms by switching `{% form_theme form 'boltforms_custom.twig' %}`
@@ -74,7 +74,7 @@ file and add the following right before the closing `<ul>`:
 
 ```
 <li>Language
-    {{localeswitcher('menu submenu vertical')}}
+    {{localeswitcher(classes = 'menu submenu vertical')}}
 ```
 
 ####Overrides
