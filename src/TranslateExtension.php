@@ -73,8 +73,7 @@ class TranslateExtension extends SimpleExtension
     protected function registerTwigFunctions()
     {
         return [
-            'localeswitcher' => 'localeSwitcher',
-            'get_slug_from_locale' => 'getSlugFromLocale'
+            'localeswitcher' => 'localeSwitcher'
         ];
     }
 
@@ -316,37 +315,22 @@ class TranslateExtension extends SimpleExtension
      *
      * @param String $template
      */
-    public function localeSwitcher($template = null, $extraclasses = null)
+    public function localeSwitcher($template = '@bolt/frontend/_localeswitcher.twig', $classes = 'localeswitcher')
     {
-        if($template === null) {
-            $template = '@bolt/frontend/_localeswitcher.twig';
+        $locales = $this->config['locales'];
+        foreach ($locales as $iso => &$locale) {
+            $requestAttributes = $this->app['request']->attributes->get('_route_params');
+            $requestAttributes['_locale'] = $locale['slug'];
+
+            $locale['url'] = $this->app['url_generator']->generate($this->app['request']->get('_route'), $requestAttributes);
+            if ($this->localeSlug === $locale['slug']) {
+                $locale['active'] = true;
+            }
         }
         $html = $this->app['twig']->render($template, [
-            'extraclasses' => $extraclasses,
-            'locales' => $this->config['locales']
+            'classes' => $classes,
+            'locales' => $locales
         ]);
         return new \Twig_Markup($html, 'UTF-8');
-    }
-    
-    /**
-     * Twig helper to get a localized slug
-     *
-     * @param Bolt\Legacy\Content $content
-     * @param String $locale
-     */
-    public function getSlugFromLocale($content, $locale)
-    {
-        if(!isset($content->contenttype['slug']) || !in_array($locale, array_column($this->config['locales'], 'slug'))){
-            return false;
-        }
-
-        $repo = $this->app['storage']->getRepository($content->contenttype['slug']);
-        $qb = $repo->createQueryBuilder();
-        $qb->select($locale.'_slug')
-            ->where('id = ?')
-            ->setParameter(0, $content->get('id'))
-            ->setMaxResults(1);
-        $result = $qb->execute()->fetch();
-        return array_values($result)[0];
     }
 }
