@@ -77,6 +77,12 @@ file and add the following right before the closing `<ul>`:
     {{localeswitcher(classes = 'menu submenu vertical')}}
 ```
 
+####Localeswitcher anywhere/anyhow
+If you want to output the localeswitcher (or some part of it) anywhere you have
+access to an array called `locales` in basically any template that you use.
+Using this you can craft basically any locale selector you want, see #30 for
+more info. To see the structure please dump it by using `{{dump(locales)}}`.
+
 ####Overrides
 
 This extension overrides bolt in a few different places and sometimes you want
