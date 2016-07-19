@@ -313,13 +313,31 @@ class TranslateExtension extends SimpleExtension
     /**
      * Twig helper to render a locale switcher on the frontend
      *
+     * @param String $classes
      * @param String $template
      */
-    public function localeSwitcher($template = '@bolt/frontend/_localeswitcher.twig', $classes = 'localeswitcher')
+    public function localeSwitcher($classes = null, $template = '@bolt/frontend/_localeswitcher.twig')
     {
         $locales = $this->config['locales'];
+
         foreach ($locales as $iso => &$locale) {
             $requestAttributes = $this->app['request']->attributes->get('_route_params');
+
+            if ($this->config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
+                $repo = $this->app['storage']->getRepository('pages');
+                $qb = $repo->createQueryBuilder();
+                $qb->select($locale['slug'].'_slug')
+                    ->where($requestAttributes['_locale'].'_slug = ?')
+                    ->setParameter(0, $this->app['request']->get('slug'))
+                    ->setMaxResults(1);
+                $result = $qb->execute()->fetch();
+                $newSlug = array_values($result)[0];
+                
+                if (!empty($newSlug)) {
+                    $requestAttributes['slug'] = $newSlug;
+                }
+            }
+
             $requestAttributes['_locale'] = $locale['slug'];
 
             $locale['url'] = $this->app['url_generator']->generate($this->app['request']->get('_route'), $requestAttributes);
@@ -327,6 +345,7 @@ class TranslateExtension extends SimpleExtension
                 $locale['active'] = true;
             }
         }
+
         $html = $this->app['twig']->render($template, [
             'classes' => $classes,
             'locales' => $locales
