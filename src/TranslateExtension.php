@@ -73,8 +73,7 @@ class TranslateExtension extends SimpleExtension
     protected function registerTwigFunctions()
     {
         return [
-            'localeswitcher' => 'localeSwitcher',
-            'get_slug_from_locale' => 'getSlugFromLocale'
+            'localeswitcher' => 'localeSwitcher'
         ];
     }
 
@@ -314,39 +313,43 @@ class TranslateExtension extends SimpleExtension
     /**
      * Twig helper to render a locale switcher on the frontend
      *
+     * @param String $classes
      * @param String $template
      */
-    public function localeSwitcher($template = null, $extraclasses = null)
+    public function localeSwitcher($classes = null, $template = '@bolt/frontend/_localeswitcher.twig')
     {
-        if($template === null) {
-            $template = '@bolt/frontend/_localeswitcher.twig';
-        }
-        $html = $this->app['twig']->render($template, [
-            'extraclasses' => $extraclasses,
-            'locales' => $this->config['locales']
-        ]);
-        return new \Twig_Markup($html, 'UTF-8');
-    }
-    
-    /**
-     * Twig helper to get a localized slug
-     *
-     * @param Bolt\Legacy\Content $content
-     * @param String $locale
-     */
-    public function getSlugFromLocale($content, $locale)
-    {
-        if(!isset($content->contenttype['slug']) || !in_array($locale, array_column($this->config['locales'], 'slug'))){
-            return false;
+        $locales = $this->config['locales'];
+
+        foreach ($locales as $iso => &$locale) {
+            $requestAttributes = $this->app['request']->attributes->get('_route_params');
+
+            if ($this->config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
+                $repo = $this->app['storage']->getRepository('pages');
+                $qb = $repo->createQueryBuilder();
+                $qb->select($locale['slug'].'_slug')
+                    ->where($requestAttributes['_locale'].'_slug = ?')
+                    ->setParameter(0, $this->app['request']->get('slug'))
+                    ->setMaxResults(1);
+                $result = $qb->execute()->fetch();
+                $newSlug = array_values($result)[0];
+                
+                if (!empty($newSlug)) {
+                    $requestAttributes['slug'] = $newSlug;
+                }
+            }
+
+            $requestAttributes['_locale'] = $locale['slug'];
+
+            $locale['url'] = $this->app['url_generator']->generate($this->app['request']->get('_route'), $requestAttributes);
+            if ($this->localeSlug === $locale['slug']) {
+                $locale['active'] = true;
+            }
         }
 
-        $repo = $this->app['storage']->getRepository($content->contenttype['slug']);
-        $qb = $repo->createQueryBuilder();
-        $qb->select($locale.'_slug')
-            ->where('id = ?')
-            ->setParameter(0, $content->get('id'))
-            ->setMaxResults(1);
-        $result = $qb->execute()->fetch();
-        return array_values($result)[0];
+        $html = $this->app['twig']->render($template, [
+            'classes' => $classes,
+            'locales' => $locales
+        ]);
+        return new \Twig_Markup($html, 'UTF-8');
     }
 }
