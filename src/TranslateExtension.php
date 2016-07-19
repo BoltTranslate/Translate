@@ -33,7 +33,8 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * Before handler that only sets the localeSlug for future use
+     * Before handler that sets the localeSlug for future use and sets the
+     * locales global in twig.
      */
     public function before()
     {
@@ -44,6 +45,7 @@ class TranslateExtension extends SimpleExtension
         } elseif (in_array($localeSlug, array_column($this->config['locales'], 'slug'))){
             $this->localeSlug = $localeSlug;
         }
+        $this->registerTwigGlobal();
     }
 
     /**
@@ -73,7 +75,7 @@ class TranslateExtension extends SimpleExtension
     protected function registerTwigFunctions()
     {
         return [
-            'localeswitcher' => 'localeSwitcher'
+            'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]]
         ];
     }
 
@@ -171,18 +173,17 @@ class TranslateExtension extends SimpleExtension
         $values = $record->serialize();
         $localeSlug = $this->localeSlug;
         $localeValues = [];
-        
+
         if(empty($translateableFields)){
             return;
         }
-        
+
         $record->set($localeSlug.'_slug', $values['slug']);
         if($values['locale'] == array_keys($this->config['locales'])[0]){
             $record->set($localeSlug.'_data', '[]');
             return;
         }
-        
-        
+
         if($values['id']){
             $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
         }
@@ -293,6 +294,21 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
+     * Register twig global
+     */
+    public function registerTwigGlobal()
+    {
+        $app = $this->app;
+        $app['twig'] = $app->extend(
+            'twig',
+            function ($twig) use ($app) {
+                $twig->addGlobal('locales', $this->getCurrentLocaleStructure());
+                return $twig;
+            }
+        );
+    }
+
+    /**
      * Helper to check for translatable fields in a contenttype
      *
      * @param Array $fields
@@ -309,14 +325,11 @@ class TranslateExtension extends SimpleExtension
         }
         return $translatable;
     }
-    
+
     /**
-     * Twig helper to render a locale switcher on the frontend
-     *
-     * @param String $classes
-     * @param String $template
+     * Helper to get a the current locale structure
      */
-    public function localeSwitcher($classes = null, $template = '@bolt/frontend/_localeswitcher.twig')
+    public function getCurrentLocaleStructure()
     {
         $locales = $this->config['locales'];
 
@@ -346,9 +359,25 @@ class TranslateExtension extends SimpleExtension
             }
         }
 
-        $html = $this->app['twig']->render($template, [
-            'classes' => $classes,
-            'locales' => $locales
+        return $locales;
+    }
+
+    /**
+     * Twig helper to render a locale switcher on the frontend
+     *
+     * @param String $classes
+     * @param String $template
+     */
+    public function localeSwitcher(array $args = [])
+    {
+        $defaults = array(
+              'classes' => '',
+              'template' => '@bolt/frontend/_localeswitcher.twig'
+        );
+        $args = array_merge($defaults, $args);
+
+        $html = $this->app['twig']->render($args['template'], [
+            'classes' => $args['classes']
         ]);
         return new \Twig_Markup($html, 'UTF-8');
     }
