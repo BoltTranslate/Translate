@@ -12,7 +12,7 @@ class LocalizedFrontend extends Frontend
     {
         $routes = $this->app['config']->get('routing', []);
 
-        if ($this->app['translate.config']['routing_override']) {
+        if ($this->app['translate.config']->isRoutingOverride()) {
             foreach ($routes as $name => &$route) {
                 if ($name !== 'preview') {
                     $route['path'] = '/{_locale}' . $route['path'];
@@ -27,12 +27,12 @@ class LocalizedFrontend extends Frontend
 
         return $routes;
     }
-    
+
     public function homepageRedirect(Request $request)
     {
         return $this->app->redirect($this->app['translate.slug']);
     }
-    
+
     /**
      * Controller for a single record page, like '/page/about/' or '/entry/lorum'.
      *
@@ -40,13 +40,13 @@ class LocalizedFrontend extends Frontend
      * @param string  $contenttypeslug The content type slug
      * @param string  $slug            The content slug
      *
-     * @return BoltResponse
+     * @return Response
      */
     public function record(Request $request, $contenttypeslug, $slug = '')
     {
         $contenttype = $this->getContentType($contenttypeslug);
         $localeSlug = $this->app['translate.slug'];
-        
+
         $slug = $this->app['slugify']->slugify($slug);
 
         $repo = $this->app['storage']->getRepository($contenttype['slug']);
@@ -58,7 +58,7 @@ class LocalizedFrontend extends Frontend
 
         $result = $qb->execute()->fetch();
 
-        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs']) {
+        if (is_numeric($slug) || !$this->app['translate.config']->isTranslateSlugs()) {
             return parent::record($request, $contenttypeslug, $slug);
         }
 
