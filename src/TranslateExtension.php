@@ -253,7 +253,11 @@ class TranslateExtension extends SimpleExtension
     protected function getDefaultConfig()
     {
         return [
-            'locales' => [],
+            'locales'          => [],
+            'menu_override'    => true,
+            'routing_override' => true,
+            'translate_slugs'  => true,
+
         ];
     }
 }
