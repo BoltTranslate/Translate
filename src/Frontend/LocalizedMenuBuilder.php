@@ -41,15 +41,35 @@ class LocalizedMenuBuilder extends MenuBuilder
             $item['submenu'] = $this->menuHelper($item['submenu']);
         }
         if (isset($item['route'])) {
-            $param = !empty($item['param']) ?: array();
-            $add = !empty($item['add']) ?: '';
-            $item['link'] = Lib::path($item['route'], $param, $add);
+            $item['link'] = $this->resolveRouteToLink($item);
         } elseif (isset($item['path'])) {
             $item = $this->resolvePathToContent($item);
         }
         return $item;
     }
-    
+   
+    private function resolveRouteToLink(array $item)
+    {
+        $param = !empty($item['param']) ? $item['param'] : [];
+
+        if (isset($item['add'])) {
+            $this->app['logger.system']->warning(
+                Trans::__('Menu item property "add" is deprecated. Use "#" under "param" instead.'),
+                ['event' => 'deprecated']
+            );
+            $add = $item['add'];
+            if (!empty($add) && $add[0] !== '?') {
+                $add = '?' . $add;
+            }
+
+            parse_str(parse_url($add, PHP_URL_QUERY), $query);
+            $param = array_merge($param, $query);
+            $param['#'] = parse_url($add, PHP_URL_FRAGMENT);
+        }
+
+        return $this->app['url_generator']->generate($item['route'], $param);
+    }
+
     private function resolvePathToContent(array $item)
     {
         if ($item['path'] === 'homepage') {
