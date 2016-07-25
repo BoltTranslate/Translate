@@ -7,6 +7,7 @@ use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
 use Bolt\Extension\SimpleExtension;
 use Silex\Application;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * Translate extension class.
@@ -15,6 +16,9 @@ use Silex\Application;
  */
 class TranslateExtension extends SimpleExtension
 {
+    /** @var string */
+    protected $localeSlug;
+
     /**
      * @inheritdoc
      */
@@ -33,19 +37,22 @@ class TranslateExtension extends SimpleExtension
     /**
      * Before handler that sets the localeSlug for future use and sets the
      * locales global in twig.
+     *
+     * @param Request     $request
+     * @param Application $app
      */
-    public function before()
+    public function before(Request $request, Application $app)
     {
         $config = $this->getConfig();
         $defaultSlug = array_column($config['locales'], 'slug')[0];
-        $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
+        $localeSlug = $request->get('_locale', $defaultSlug);
 
         if (isset($config['locales'][$localeSlug])) {
             $this->localeSlug = $config['locales'][$localeSlug]['slug'];
         } elseif (in_array($localeSlug, array_column($config['locales'], 'slug'))) {
             $this->localeSlug = $localeSlug;
         }
-        $this->registerTwigGlobal();
+        $this->registerTwigGlobal($app);
     }
 
     /**
@@ -299,13 +306,14 @@ class TranslateExtension extends SimpleExtension
 
     /**
      * Register twig global
+     *
+     * @param Application $app
      */
-    public function registerTwigGlobal()
+    private function registerTwigGlobal(Application $app)
     {
-        $app = $this->app;
         $app['twig'] = $app->extend(
             'twig',
-            function ($twig) use ($app) {
+            function (\Twig_Environment $twig) use ($app) {
                 $twig->addGlobal('locales', $this->getCurrentLocaleStructure());
 
                 return $twig;
