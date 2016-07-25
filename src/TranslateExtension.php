@@ -276,13 +276,13 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * Register overrides for bolt's services
+     * Register overrides for Bolt's services
      *
      * @param Application $app
      */
     private function registerOverrides(Application $app)
     {
-        $this->app['storage.legacy'] = $app->extend(
+        $app['storage.legacy'] = $app->extend(
             'storage.legacy',
             function ($storage) use ($app) {
                 return new Storage\Legacy($app);
@@ -297,7 +297,7 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
-        if ($this->app['translate.config']['menu_override']) {
+        if ($app['translate.config']['menu_override']) {
             $app['menu'] = $app->share(
                 function ($app) {
                     return new Frontend\LocalizedMenuBuilder($app);
