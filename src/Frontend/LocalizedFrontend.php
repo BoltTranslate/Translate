@@ -3,7 +3,6 @@
 namespace Bolt\Extension\Animal\Translate\Frontend;
 
 use Bolt\Controller\Frontend;
-use Bolt\Storage\Query\SelectQuery;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,11 +12,11 @@ class LocalizedFrontend extends Frontend
     {
         $routes = $this->app['config']->get('routing', []);
 
-        if($this->app['translate.config']['routing_override']){
+        if ($this->app['translate.config']['routing_override']) {
             foreach ($routes as $name => &$route) {
-                if($name !== "preview"){
-                    $route['path'] = '/{_locale}'.$route['path'];
-                    $route['requirements']['_locale'] = "^[a-z]{2}(_[A-Z]{2})?$";
+                if ($name !== 'preview') {
+                    $route['path'] = '/{_locale}' . $route['path'];
+                    $route['requirements']['_locale'] = '^[a-z]{2}(_[A-Z]{2})?$';
 
                     // Using the url generator on a 404 response requires a default _locale to be set
                     $route['defaults']['_locale'] = $this->app['translate.slug'];
@@ -29,7 +28,8 @@ class LocalizedFrontend extends Frontend
         return $routes;
     }
     
-    public function homepageRedirect(Request $request){
+    public function homepageRedirect(Request $request)
+    {
         return $this->app->redirect($this->app['translate.slug']);
     }
     
@@ -52,13 +52,13 @@ class LocalizedFrontend extends Frontend
         $repo = $this->app['storage']->getRepository($contenttype['slug']);
         $qb = $repo->createQueryBuilder();
         $qb->select('slug')
-            ->where($localeSlug.'_slug = ?')
+            ->where($localeSlug . '_slug = ?')
             ->setParameter(0, $slug)
             ->setMaxResults(1);
 
         $result = $qb->execute()->fetch();
 
-        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs']){
+        if (is_numeric($slug) || !$this->app['translate.config']['translate_slugs']) {
             return parent::record($request, $contenttypeslug, $slug);
         }
 

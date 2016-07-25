@@ -2,12 +2,12 @@
 
 namespace Bolt\Extension\Animal\Translate\Frontend;
 
-use Bolt\Menu\MenuBuilder;
 use Bolt\Menu\Menu;
+use Bolt\Menu\MenuBuilder;
 
 class LocalizedMenuBuilder extends MenuBuilder
 {
-    private $prefix = "";
+    private $prefix = '';
     
     public function resolve(array $menu)
     {
@@ -16,7 +16,7 @@ class LocalizedMenuBuilder extends MenuBuilder
         $prop->setAccessible(true);
         $this->app = $prop->getValue($this);
         
-        if(isset($this->app['translate.slug'])){
+        if (isset($this->app['translate.slug'])) {
             $this->prefix = $this->app['translate.slug'] . '/';
         }
         
@@ -31,6 +31,7 @@ class LocalizedMenuBuilder extends MenuBuilder
                 $menu[$key]['submenu'] = $this->menuBuilder($item['submenu']);
             }
         }
+
         return $menu;
     }
     
@@ -45,6 +46,7 @@ class LocalizedMenuBuilder extends MenuBuilder
         } elseif (isset($item['path'])) {
             $item = $this->resolvePathToContent($item);
         }
+
         return $item;
     }
    
@@ -94,7 +96,6 @@ class LocalizedMenuBuilder extends MenuBuilder
 
         // Get a copy of the path minus trailing/leading slash
         $path = ltrim(rtrim($item['path'], '/'), '/');
-
 
         // Pre-set our link in case the match() throws an exception
         $item['link'] = $this->app['resources']->getUrl('root') . $this->prefix . $path;

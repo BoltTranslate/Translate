@@ -8,7 +8,6 @@ use Bolt\Storage\QuerySet;
 
 class LocaleField extends FieldTypeBase
 {
-
     public function persist(QuerySet $queries, $entity, EntityManager $em = null)
     {
         /*$queries[0]->setParameter('title', 'test1');
@@ -42,5 +41,4 @@ class LocaleField extends FieldTypeBase
     {
         return ['default' => ''];
     }
-
 }
