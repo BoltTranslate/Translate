@@ -345,7 +345,9 @@ class TranslateExtension extends SimpleExtension
     /**
      * Helper to check for translatable fields in a contenttype
      *
-     * @param Array $fields
+     * @param array $fields
+     *
+     * @return array
      */
     private function getTranslatableFields($fields)
     {
@@ -363,33 +365,37 @@ class TranslateExtension extends SimpleExtension
 
     /**
      * Helper to get a the current locale structure
+     *
+     * @return array
      */
     public function getCurrentLocaleStructure()
     {
+        $app = $this->getContainer();
         $config = $this->getConfig();
         $locales = $config['locales'];
+        $request = $app['request_stack']->getCurrentRequest();
+        if ($request === null) {
+            return $locales;
+        }
 
         foreach ($locales as $iso => &$locale) {
-            $requestAttributes = $this->app['request']->attributes->get('_route_params');
-
-            if ($config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
-                $repo = $this->app['storage']->getRepository('pages');
+            $requestAttributes = $request->attributes->get('_route_params');
+            if ($config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $request->get('slug')) {
+                $repo = $app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
                 $qb->select($locale['slug'] . '_slug')
                     ->where($requestAttributes['_locale'] . '_slug = ?')
-                    ->setParameter(0, $this->app['request']->get('slug'))
-                    ->setMaxResults(1);
-                $result = $qb->execute()->fetch();
-                $newSlug = array_values($result)[0];
-
-                if (!empty($newSlug)) {
+                    ->setParameter(0, $request->get('slug'))
+                ;
+                $newSlug = $repo->findOneWith($qb);
+                if ($newSlug) {
                     $requestAttributes['slug'] = $newSlug;
                 }
             }
 
             $requestAttributes['_locale'] = $locale['slug'];
+            $locale['url'] = $app['url_generator']->generate($request->get('_route'), $requestAttributes);
 
-            $locale['url'] = $this->app['url_generator']->generate($this->app['request']->get('_route'), $requestAttributes);
             if ($this->localeSlug === $locale['slug']) {
                 $locale['active'] = true;
             }
