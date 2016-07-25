@@ -7,6 +7,7 @@ use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
 use Bolt\Extension\SimpleExtension;
 use Bolt\Storage\Entity\Content;
+use Bolt\Storage\Field\Collection\RepeatingFieldCollection;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -152,24 +153,33 @@ class TranslateExtension extends SimpleExtension
      */
     public function postHydrate(HydrationEvent $event)
     {
-        $subject = $event->getSubject();
-        if (get_class($subject) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === 'true') {
+        $app = $this->getContainer();
+        $request = $app['request_stack']->getCurrentRequest();
+        if ($request === null) {
             return;
         }
-        $contentTypeName = $subject->getContentType();
 
-        $contentType = $this->app['config']->get('contenttypes/' . $contentTypeName);
-        $localeSlug = $this->localeSlug;
+        /** @var Content $subject */
+        $subject = $event->getSubject();
+        if (!$subject instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
+            return;
+        }
 
-        if (isset($subject[$localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$localeSlug . '_data'], true);
-            foreach ($localeData as $key => $value) {
-                if ($contentType['fields'][$key]['type'] === 'repeater') {
-                    $subject[$key]->clear();
-                    foreach ($value as $subValue) {
-                        $subject[$key]->addFromArray($subValue);
-                    }
-                }
+        $contentTypeName = $subject->getContenttype();
+        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
+
+        if (!isset($subject[$this->localeSlug . '_data'])) {
+            return;
+        }
+        $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
+        foreach ($localeData as $key => $value) {
+            if ($contentType['fields'][$key]['type'] !== 'repeater') {
+                continue;
+            }
+            /** @var RepeatingFieldCollection[] $subject */
+            $subject[$key]->clear();
+            foreach ($value as $subValue) {
+                $subject[$key]->addFromArray($subValue);
             }
         }
     }
