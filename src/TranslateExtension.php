@@ -30,6 +30,9 @@ class TranslateExtension extends SimpleExtension
         $this->registerTranslateServices($app);
         $this->registerOverrides($app);
         $app->before([$this, 'before']);
+
+        // Set default localeSlug in the event before() is not called, e.g. a 404
+        $this->localeSlug = array_column($this->config['locales'], 'slug')[0];
     }
 
     /**
