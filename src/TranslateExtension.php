@@ -238,17 +238,16 @@ class TranslateExtension extends SimpleExtension
     public function postSave(StorageEvent $event)
     {
         $subject = $event->getSubject();
-        if (get_class($subject) !== "Bolt\Storage\Entity\Content") {
+        if (!$subject instanceof Content) {
+            return;
+        }
+        if (isset($subject[$this->localeSlug . '_data'])) {
             return;
         }
 
-        $localeSlug = $this->localeSlug;
-
-        if (isset($subject[$localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$localeSlug . '_data']);
-            foreach ($localeData as $key => $value) {
-                $subject->set($key, $value);
-            }
+        $localeData = json_decode($subject[$this->localeSlug . '_data']);
+        foreach ($localeData as $key => $value) {
+            $subject->set($key, $value);
         }
     }
 
