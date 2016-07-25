@@ -191,38 +191,43 @@ class TranslateExtension extends SimpleExtension
      */
     public function preSave(StorageEvent $event)
     {
-        $contenttype = $this->app['config']->get('contenttypes/' . $event->getContentType());
-        $translateableFields = $this->getTranslatableFields($contenttype['fields']);
+        $app = $this->getContainer();
+        $contentType = $app['config']->get('contenttypes/' . $event->getContentType());
+        $translatableFields = $this->getTranslatableFields($contentType['fields']);
+        /** @var Content $record */
         $record = $event->getContent();
         $values = $record->serialize();
-        $localeSlug = $this->localeSlug;
         $localeValues = [];
 
-        if (empty($translateableFields)) {
+        if (empty($translatableFields)) {
             return;
         }
 
         $config = $this->getConfig();
-        $record->set($localeSlug . '_slug', $values['slug']);
+        $record->set($this->localeSlug . '_slug', $values['slug']);
         if ($values['locale'] == array_keys($config['locales'])[0]) {
-            $record->set($localeSlug . '_data', '[]');
+            $record->set($this->localeSlug . '_data', '[]');
 
             return;
         }
 
         if ($values['id']) {
-            $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
+            /** @var Content $defaultContent */
+            $defaultContent = $app['query']->getContent(
+                $event->getContentType(),
+                ['id' => $values['id'], 'returnsingle' => true]
+            );
         }
-        foreach ($translateableFields as $field) {
+        foreach ($translatableFields as $field) {
             $localeValues[$field] = $values[$field];
             if ($values['id']) {
-                $record->set($field, $defaultContent[$field]);
+                $record->set($field, $defaultContent->get($field));
             } else {
                 $record->set($field, '');
             }
         }
         $localeJson = json_encode($localeValues);
-        $record->set($localeSlug . '_data', $localeJson);
+        $record->set($this->localeSlug . '_data', $localeJson);
     }
 
     /**
