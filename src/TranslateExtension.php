@@ -2,13 +2,11 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
-use Silex\Application;
-use Bolt\Extension\SimpleExtension;
-use Symfony\Component\HttpFoundation\Request;
-
 use Bolt\Events\HydrationEvent;
 use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
+use Bolt\Extension\SimpleExtension;
+use Silex\Application;
 
 /**
  * Translate extension class.
@@ -17,7 +15,6 @@ use Bolt\Events\StorageEvents;
  */
 class TranslateExtension extends SimpleExtension
 {
-
     /**
      * @inheritdoc
      *
@@ -43,9 +40,9 @@ class TranslateExtension extends SimpleExtension
     {
         $defaultSlug = array_column($this->config['locales'], 'slug')[0];
         $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
-        if(isset($this->config['locales'][$localeSlug])){
+        if (isset($this->config['locales'][$localeSlug])) {
             $this->localeSlug = $this->config['locales'][$localeSlug]['slug'];
-        } elseif (in_array($localeSlug, array_column($this->config['locales'], 'slug'))){
+        } elseif (in_array($localeSlug, array_column($this->config['locales'], 'slug'))) {
             $this->localeSlug = $localeSlug;
         }
         $this->registerTwigGlobal();
@@ -58,7 +55,7 @@ class TranslateExtension extends SimpleExtension
     {
         return [
             $this,
-            new Provider\FieldProvider()
+            new Provider\FieldProvider(),
         ];
     }
 
@@ -68,7 +65,7 @@ class TranslateExtension extends SimpleExtension
     protected function registerTwigPaths()
     {
         return [
-            'templates' => ['position' => 'prepend', 'namespace' => 'bolt']
+            'templates' => ['position' => 'prepend', 'namespace' => 'bolt'],
         ];
     }
 
@@ -78,7 +75,7 @@ class TranslateExtension extends SimpleExtension
     protected function registerTwigFunctions()
     {
         return [
-            'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]]
+            'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]],
         ];
     }
 
@@ -100,7 +97,7 @@ class TranslateExtension extends SimpleExtension
             ],
             StorageEvents::POST_SAVE => [
                 ['postSave', 0],
-            ]
+            ],
         ];
 
         return $parentEvents + $localEvents;
@@ -115,19 +112,19 @@ class TranslateExtension extends SimpleExtension
     {
         $entity = $event->getArgument('entity');
         $subject = $event->getSubject();
-        if(get_class($entity) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === "true"){
+        if (get_class($entity) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === 'true') {
             return;
         }
 
         $contentTypeName = $entity->getContentType();
 
-        $contentType = $this->app['config']->get('contenttypes/'.$contentTypeName);
+        $contentType = $this->app['config']->get('contenttypes/' . $contentTypeName);
         $localeSlug = $this->localeSlug;
         //$subject[$key]->addFromArray($value);
-        if(isset($subject[$localeSlug.'_data'])){
-            $localeData = json_decode($subject[$localeSlug.'_data'], true);
+        if (isset($subject[$localeSlug . '_data'])) {
+            $localeData = json_decode($subject[$localeSlug . '_data'], true);
             foreach ($localeData as $key => $value) {
-                if ($contentType['fields'][$key]['type'] !== 'repeater'){
+                if ($contentType['fields'][$key]['type'] !== 'repeater') {
                     $subject[$key] = is_array($value) ? json_encode($value) : $value;
                 }
             }
@@ -142,18 +139,18 @@ class TranslateExtension extends SimpleExtension
     public function postHydrate(HydrationEvent $event)
     {
         $subject = $event->getSubject();
-        if(get_class($subject) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === "true"){
+        if (get_class($subject) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === 'true') {
             return;
         }
         $contentTypeName = $subject->getContentType();
 
-        $contentType = $this->app['config']->get('contenttypes/'.$contentTypeName);
+        $contentType = $this->app['config']->get('contenttypes/' . $contentTypeName);
         $localeSlug = $this->localeSlug;
 
-        if(isset($subject[$localeSlug.'_data'])){
-            $localeData = json_decode($subject[$localeSlug.'_data'], true);
+        if (isset($subject[$localeSlug . '_data'])) {
+            $localeData = json_decode($subject[$localeSlug . '_data'], true);
             foreach ($localeData as $key => $value) {
-                if ($contentType['fields'][$key]['type'] === 'repeater'){
+                if ($contentType['fields'][$key]['type'] === 'repeater') {
                     $subject[$key]->clear();
                     foreach ($value as $subValue) {
                         $subject[$key]->addFromArray($subValue);
@@ -170,36 +167,37 @@ class TranslateExtension extends SimpleExtension
      */
     public function preSave(StorageEvent $event)
     {
-        $contenttype = $this->app['config']->get('contenttypes/'.$event->getContentType());
+        $contenttype = $this->app['config']->get('contenttypes/' . $event->getContentType());
         $translateableFields = $this->getTranslatableFields($contenttype['fields']);
         $record = $event->getContent();
         $values = $record->serialize();
         $localeSlug = $this->localeSlug;
         $localeValues = [];
 
-        if(empty($translateableFields)){
+        if (empty($translateableFields)) {
             return;
         }
 
-        $record->set($localeSlug.'_slug', $values['slug']);
-        if($values['locale'] == array_keys($this->config['locales'])[0]){
-            $record->set($localeSlug.'_data', '[]');
+        $record->set($localeSlug . '_slug', $values['slug']);
+        if ($values['locale'] == array_keys($this->config['locales'])[0]) {
+            $record->set($localeSlug . '_data', '[]');
+
             return;
         }
 
-        if($values['id']){
+        if ($values['id']) {
             $defaultContent = $this->app['query']->getContent($event->getContentType(), ['id' => $values['id'], 'returnsingle' => true])->serialize();
         }
         foreach ($translateableFields as $field) {
             $localeValues[$field] = $values[$field];
-            if($values['id']){
+            if ($values['id']) {
                 $record->set($field, $defaultContent[$field]);
-            }else{
+            } else {
                 $record->set($field, '');
             }
         }
         $localeJson = json_encode($localeValues);
-        $record->set($localeSlug.'_data', $localeJson);
+        $record->set($localeSlug . '_data', $localeJson);
     }
 
     /**
@@ -210,14 +208,14 @@ class TranslateExtension extends SimpleExtension
     public function postSave(StorageEvent $event)
     {
         $subject = $event->getSubject();
-        if(get_class($subject) !== "Bolt\Storage\Entity\Content"){
+        if (get_class($subject) !== "Bolt\Storage\Entity\Content") {
             return;
         }
-        
+
         $localeSlug = $this->localeSlug;
-                
-        if(isset($subject[$localeSlug.'_data'])){
-            $localeData = json_decode($subject[$localeSlug.'_data']);
+
+        if (isset($subject[$localeSlug . '_data'])) {
+            $localeData = json_decode($subject[$localeSlug . '_data']);
             foreach ($localeData as $key => $value) {
                 $subject->set($key, $value);
             }
@@ -266,10 +264,11 @@ class TranslateExtension extends SimpleExtension
             function ($app) {
                 $frontend = new Frontend\LocalizedFrontend();
                 $frontend->connect($app);
+
                 return $frontend;
             }
         );
-        if($this->app['translate.config']['menu_override']){
+        if ($this->app['translate.config']['menu_override']) {
             $app['menu'] = $app->share(
                 function ($app) {
                     return new Frontend\LocalizedMenuBuilder($app);
@@ -291,6 +290,7 @@ class TranslateExtension extends SimpleExtension
                         return new Storage\ContentTypeTable($platform, $prefix, $config);
                     });
                 }
+
                 return $contentTables;
             }
         );
@@ -306,6 +306,7 @@ class TranslateExtension extends SimpleExtension
             'twig',
             function ($twig) use ($app) {
                 $twig->addGlobal('locales', $this->getCurrentLocaleStructure());
+
                 return $twig;
             }
         );
@@ -322,10 +323,11 @@ class TranslateExtension extends SimpleExtension
         foreach ($fields as $name => $field) {
             if (isset($field['is_translateable'])  && $field['is_translateable'] === true && $field['type'] === 'templateselect') {
                 $translatable[] = 'templatefields';
-            }elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
+            } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
                 $translatable[] = $name;
             }
         }
+
         return $translatable;
     }
 
@@ -342,13 +344,13 @@ class TranslateExtension extends SimpleExtension
             if ($this->config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
                 $repo = $this->app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
-                $qb->select($locale['slug'].'_slug')
-                    ->where($requestAttributes['_locale'].'_slug = ?')
+                $qb->select($locale['slug'] . '_slug')
+                    ->where($requestAttributes['_locale'] . '_slug = ?')
                     ->setParameter(0, $this->app['request']->get('slug'))
                     ->setMaxResults(1);
                 $result = $qb->execute()->fetch();
                 $newSlug = array_values($result)[0];
-                
+
                 if (!empty($newSlug)) {
                     $requestAttributes['slug'] = $newSlug;
                 }
@@ -373,15 +375,16 @@ class TranslateExtension extends SimpleExtension
      */
     public function localeSwitcher(array $args = [])
     {
-        $defaults = array(
-              'classes' => '',
-              'template' => '@bolt/frontend/_localeswitcher.twig'
-        );
+        $defaults = [
+              'classes'  => '',
+              'template' => '@bolt/frontend/_localeswitcher.twig',
+        ];
         $args = array_merge($defaults, $args);
 
         $html = $this->app['twig']->render($args['template'], [
-            'classes' => $args['classes']
+            'classes' => $args['classes'],
         ]);
+
         return new \Twig_Markup($html, 'UTF-8');
     }
 }

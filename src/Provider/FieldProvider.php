@@ -14,7 +14,7 @@ class FieldProvider implements ServiceProviderInterface
         $app['storage.typemap'] = array_merge(
             $app['storage.typemap'],
             [
-                'locale' => LocaleField::class
+                'locale' => LocaleField::class,
             ]
         );
 
@@ -28,7 +28,6 @@ class FieldProvider implements ServiceProviderInterface
                 }
             )
         );
-
     }
 
     /**
