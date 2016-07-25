@@ -13,8 +13,8 @@ class ContentTypeTable extends ContentType
      * ContentTypeTable constructor
      *
      * @param AbstractPlatform $platform
-     * @param string $tablePrefix
-     * @param array $config
+     * @param string           $tablePrefix
+     * @param array            $config
      */
     public function __construct(AbstractPlatform $platform, $tablePrefix, array $config)
     {
@@ -30,8 +30,8 @@ class ContentTypeTable extends ContentType
     {
         parent::addColumns();
         foreach ($this->config['locales'] as $locale) {
-            $this->table->addColumn($locale['slug'].'_slug', 'string', array('length' => 256, 'default' => ''));
-            $this->table->addColumn($locale['slug'].'_data', 'text', array('notnull' => false));
+            $this->table->addColumn($locale['slug'] . '_slug', 'string', ['length' => 256, 'default' => '']);
+            $this->table->addColumn($locale['slug'] . '_data', 'text', ['notnull' => false]);
         }
     }
 
@@ -42,7 +42,7 @@ class ContentTypeTable extends ContentType
     {
         parent::addIndexes();
         foreach ($this->config['locales'] as $locale) {
-            $this->table->addIndex([$locale['slug'].'_slug']);
+            $this->table->addIndex([$locale['slug'] . '_slug']);
         }
     }
 }
