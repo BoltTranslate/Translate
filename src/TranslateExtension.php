@@ -397,4 +397,14 @@ class TranslateExtension extends SimpleExtension
 
         return new \Twig_Markup($html, 'UTF-8');
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function getDefaultConfig()
+    {
+        return [
+            'locales' => [],
+        ];
+    }
 }
