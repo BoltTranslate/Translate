@@ -17,19 +17,17 @@ class TranslateExtension extends SimpleExtension
 {
     /**
      * @inheritdoc
-     *
-     * @param Application $app
      */
     protected function registerServices(Application $app)
     {
-        $this->app = $app;
-        $this->config = $this->getConfig();
         $this->registerTranslateServices($app);
         $this->registerOverrides($app);
+
         $app->before([$this, 'before']);
 
         // Set default localeSlug in the event before() is not called, e.g. a 404
-        $this->localeSlug = array_column($this->config['locales'], 'slug')[0];
+        $config = $this->getConfig();
+        $this->localeSlug = array_column($config['locales'], 'slug')[0];
     }
 
     /**
@@ -38,11 +36,13 @@ class TranslateExtension extends SimpleExtension
      */
     public function before()
     {
-        $defaultSlug = array_column($this->config['locales'], 'slug')[0];
+        $config = $this->getConfig();
+        $defaultSlug = array_column($config['locales'], 'slug')[0];
         $localeSlug = $this->app['request']->get('_locale', $defaultSlug);
-        if (isset($this->config['locales'][$localeSlug])) {
-            $this->localeSlug = $this->config['locales'][$localeSlug]['slug'];
-        } elseif (in_array($localeSlug, array_column($this->config['locales'], 'slug'))) {
+
+        if (isset($config['locales'][$localeSlug])) {
+            $this->localeSlug = $config['locales'][$localeSlug]['slug'];
+        } elseif (in_array($localeSlug, array_column($config['locales'], 'slug'))) {
             $this->localeSlug = $localeSlug;
         }
         $this->registerTwigGlobal();
@@ -178,8 +178,9 @@ class TranslateExtension extends SimpleExtension
             return;
         }
 
+        $config = $this->getConfig();
         $record->set($localeSlug . '_slug', $values['slug']);
-        if ($values['locale'] == array_keys($this->config['locales'])[0]) {
+        if ($values['locale'] == array_keys($config['locales'])[0]) {
             $record->set($localeSlug . '_data', '[]');
 
             return;
@@ -236,7 +237,7 @@ class TranslateExtension extends SimpleExtension
         );
         $app['translate.config'] = $app->share(
             function () {
-                return $this->config;
+                return $this->getConfig();
             }
         );
         $app['translate.slug'] = $app->share(
@@ -336,12 +337,13 @@ class TranslateExtension extends SimpleExtension
      */
     public function getCurrentLocaleStructure()
     {
-        $locales = $this->config['locales'];
+        $config = $this->getConfig();
+        $locales = $config['locales'];
 
         foreach ($locales as $iso => &$locale) {
             $requestAttributes = $this->app['request']->attributes->get('_route_params');
 
-            if ($this->config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
+            if ($config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $this->app['request']->get('slug')) {
                 $repo = $this->app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
                 $qb->select($locale['slug'] . '_slug')
