@@ -2,13 +2,9 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
-use Bolt\Events\HydrationEvent;
-use Bolt\Events\StorageEvent;
-use Bolt\Events\StorageEvents;
 use Bolt\Extension\SimpleExtension;
-use Bolt\Storage\Entity\Content;
-use Bolt\Storage\Field\Collection\RepeatingFieldCollection;
 use Silex\Application;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -60,6 +56,15 @@ class TranslateExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
+    protected function subscribe(EventDispatcherInterface $dispatcher)
+    {
+        $app = $this->getContainer();
+        $dispatcher->addSubscriber(new EventListener\StorageListener($app['config'], $this->getConfig(), $app['query'], $app['request_stack']));
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getServiceProviders()
     {
         return [
@@ -86,169 +91,6 @@ class TranslateExtension extends SimpleExtension
         return [
             'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]],
         ];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedEvents()
-    {
-        $parentEvents = parent::getSubscribedEvents();
-        $localEvents = [
-            StorageEvents::PRE_HYDRATE => [
-                ['preHydrate', 0],
-            ],
-            StorageEvents::POST_HYDRATE => [
-                ['postHydrate', 0],
-            ],
-            StorageEvents::PRE_SAVE => [
-                ['preSave', 0],
-            ],
-            StorageEvents::POST_SAVE => [
-                ['postSave', 0],
-            ],
-        ];
-
-        return $parentEvents + $localEvents;
-    }
-
-    /**
-     * StorageEvents::PRE_HYDRATE event callback.
-     *
-     * @param HydrationEvent $event
-     */
-    public function preHydrate(HydrationEvent $event)
-    {
-        $app = $this->getContainer();
-        $request = $app['request_stack']->getCurrentRequest();
-        if ($request === null) {
-            return;
-        }
-
-        /** @var Content $entity */
-        $entity = $event->getArgument('entity');
-        $subject = $event->getSubject();
-
-        if (!$entity instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
-            return;
-        }
-
-        $contentTypeName = $entity->getContenttype();
-        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
-
-        if (isset($subject[$this->localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
-            foreach ($localeData as $key => $value) {
-                if ($contentType['fields'][$key]['type'] !== 'repeater') {
-                    $subject[$key] = is_array($value) ? json_encode($value) : $value;
-                }
-            }
-        }
-    }
-
-    /**
-     * StorageEvents::POST_HYDRATE event callback.
-     *
-     * @param HydrationEvent $event
-     */
-    public function postHydrate(HydrationEvent $event)
-    {
-        $app = $this->getContainer();
-        $request = $app['request_stack']->getCurrentRequest();
-        if ($request === null) {
-            return;
-        }
-
-        /** @var Content $subject */
-        $subject = $event->getSubject();
-        if (!$subject instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
-            return;
-        }
-
-        $contentTypeName = $subject->getContenttype();
-        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
-
-        if (!isset($subject[$this->localeSlug . '_data'])) {
-            return;
-        }
-        $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
-        foreach ($localeData as $key => $value) {
-            if ($contentType['fields'][$key]['type'] !== 'repeater') {
-                continue;
-            }
-            /** @var RepeatingFieldCollection[] $subject */
-            $subject[$key]->clear();
-            foreach ($value as $subValue) {
-                $subject[$key]->addFromArray($subValue);
-            }
-        }
-    }
-
-    /**
-     * StorageEvents::PRE_SAVE event callback.
-     *
-     * @param StorageEvent $event
-     */
-    public function preSave(StorageEvent $event)
-    {
-        $app = $this->getContainer();
-        $contentType = $app['config']->get('contenttypes/' . $event->getContentType());
-        $translatableFields = $this->getTranslatableFields($contentType['fields']);
-        /** @var Content $record */
-        $record = $event->getContent();
-        $values = $record->serialize();
-        $localeValues = [];
-
-        if (empty($translatableFields)) {
-            return;
-        }
-
-        $config = $this->getConfig();
-        $record->set($this->localeSlug . '_slug', $values['slug']);
-        if ($values['locale'] == array_keys($config['locales'])[0]) {
-            $record->set($this->localeSlug . '_data', '[]');
-
-            return;
-        }
-
-        if ($values['id']) {
-            /** @var Content $defaultContent */
-            $defaultContent = $app['query']->getContent(
-                $event->getContentType(),
-                ['id' => $values['id'], 'returnsingle' => true]
-            );
-        }
-        foreach ($translatableFields as $field) {
-            $localeValues[$field] = $values[$field];
-            if ($values['id']) {
-                $record->set($field, $defaultContent->get($field));
-            } else {
-                $record->set($field, '');
-            }
-        }
-        $localeJson = json_encode($localeValues);
-        $record->set($this->localeSlug . '_data', $localeJson);
-    }
-
-    /**
-     * StorageEvents::POST_SAVE event callback.
-     *
-     * @param StorageEvent $event
-     */
-    public function postSave(StorageEvent $event)
-    {
-        $subject = $event->getSubject();
-        if (!$subject instanceof Content) {
-            return;
-        }
-        if (isset($subject[$this->localeSlug . '_data'])) {
-            return;
-        }
-
-        $localeData = json_decode($subject[$this->localeSlug . '_data']);
-        foreach ($localeData as $key => $value) {
-            $subject->set($key, $value);
-        }
     }
 
     /**
@@ -340,27 +182,6 @@ class TranslateExtension extends SimpleExtension
                 return $twig;
             }
         );
-    }
-
-    /**
-     * Helper to check for translatable fields in a contenttype
-     *
-     * @param array $fields
-     *
-     * @return array
-     */
-    private function getTranslatableFields($fields)
-    {
-        $translatable = [];
-        foreach ($fields as $name => $field) {
-            if (isset($field['is_translateable'])  && $field['is_translateable'] === true && $field['type'] === 'templateselect') {
-                $translatable[] = 'templatefields';
-            } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
-                $translatable[] = $name;
-            }
-        }
-
-        return $translatable;
     }
 
     /**
