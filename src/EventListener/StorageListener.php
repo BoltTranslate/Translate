@@ -2,10 +2,11 @@
 
 namespace Bolt\Extension\Animal\Translate\EventListener;
 
-use Bolt\Config;
+use Bolt\Config as BoltConfig;
 use Bolt\Events\HydrationEvent;
 use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
+use Bolt\Extension\Animal\Translate\Config\Config;
 use Bolt\Storage\Entity\Content;
 use Bolt\Storage\Field\Collection\RepeatingFieldCollection;
 use Bolt\Storage\Query\Query;
@@ -23,7 +24,7 @@ class StorageListener implements EventSubscriberInterface
     /** @var string */
     protected $localeSlug;
 
-    /** @var Config */
+    /** @var BoltConfig */
     private $boltConfig;
     /** @var Query $query */
     private $query;
@@ -35,12 +36,12 @@ class StorageListener implements EventSubscriberInterface
     /**
      * Constructor.
      *
-     * @param Config       $boltConfig
-     * @param array        $config
+     * @param BoltConfig   $boltConfig
+     * @param Config       $config
      * @param Query        $query
      * @param RequestStack $requestStack
      */
-    public function __construct(Config $boltConfig, array $config, Query $query, RequestStack $requestStack)
+    public function __construct(BoltConfig $boltConfig, Config $config, Query $query, RequestStack $requestStack)
     {
         $this->boltConfig = $boltConfig;
         $this->config = $config;
@@ -158,7 +159,7 @@ class StorageListener implements EventSubscriberInterface
         }
 
         $record->set($this->localeSlug . '_slug', $values['slug']);
-        if ($values['locale'] == array_keys($this->config['locales'])[0]) {
+        if ($values['locale'] == key($this->config->getLocales())) {
             $record->set($this->localeSlug . '_data', '[]');
 
             return;

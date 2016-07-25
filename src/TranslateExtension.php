@@ -18,6 +18,14 @@ class TranslateExtension extends SimpleExtension
     protected $localeSlug;
 
     /**
+     * @return string
+     */
+    public function getLocaleSlug()
+    {
+        return $this->localeSlug;
+    }
+
+    /**
      * @inheritdoc
      */
     protected function registerServices(Application $app)
@@ -107,7 +115,7 @@ class TranslateExtension extends SimpleExtension
         );
         $app['translate.config'] = $app->share(
             function () {
-                return $this->getConfig();
+                return new Config\Config($this->getConfig());
             }
         );
         $app['translate.slug'] = $app->share(
@@ -139,7 +147,7 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
-        if ($app['translate.config']['menu_override']) {
+        if ($app['translate.config']->isMenuOverride()) {
             $app['menu'] = $app->share(
                 function ($app) {
                     return new Frontend\LocalizedMenuBuilder($app);
@@ -253,11 +261,7 @@ class TranslateExtension extends SimpleExtension
     protected function getDefaultConfig()
     {
         return [
-            'locales'          => [],
-            'menu_override'    => true,
-            'routing_override' => true,
-            'translate_slugs'  => true,
-
+            'locales' => [],
         ];
     }
 }
