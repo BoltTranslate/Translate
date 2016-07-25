@@ -6,6 +6,7 @@ use Bolt\Events\HydrationEvent;
 use Bolt\Events\StorageEvent;
 use Bolt\Events\StorageEvents;
 use Bolt\Extension\SimpleExtension;
+use Bolt\Storage\Entity\Content;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -117,19 +118,25 @@ class TranslateExtension extends SimpleExtension
      */
     public function preHydrate(HydrationEvent $event)
     {
-        $entity = $event->getArgument('entity');
-        $subject = $event->getSubject();
-        if (get_class($entity) !== "Bolt\Storage\Entity\Content" || $this->app['request']->get('no_locale_hydrate') === 'true') {
+        $app = $this->getContainer();
+        $request = $app['request_stack']->getCurrentRequest();
+        if ($request === null) {
             return;
         }
 
-        $contentTypeName = $entity->getContentType();
+        /** @var Content $entity */
+        $entity = $event->getArgument('entity');
+        $subject = $event->getSubject();
 
-        $contentType = $this->app['config']->get('contenttypes/' . $contentTypeName);
-        $localeSlug = $this->localeSlug;
-        //$subject[$key]->addFromArray($value);
-        if (isset($subject[$localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$localeSlug . '_data'], true);
+        if (!$entity instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
+            return;
+        }
+
+        $contentTypeName = $entity->getContenttype();
+        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
+
+        if (isset($subject[$this->localeSlug . '_data'])) {
+            $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] !== 'repeater') {
                     $subject[$key] = is_array($value) ? json_encode($value) : $value;
