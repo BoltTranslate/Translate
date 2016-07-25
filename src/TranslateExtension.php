@@ -407,8 +407,9 @@ class TranslateExtension extends SimpleExtension
     /**
      * Twig helper to render a locale switcher on the frontend
      *
-     * @param String $classes
-     * @param String $template
+     * @param array $args
+     *
+     * @return \Twig_Markup
      */
     public function localeSwitcher(array $args = [])
     {
@@ -418,7 +419,7 @@ class TranslateExtension extends SimpleExtension
         ];
         $args = array_merge($defaults, $args);
 
-        $html = $this->app['twig']->render($args['template'], [
+        $html = $this->renderTemplate($args['template'], [
             'classes' => $args['classes'],
         ]);
 
