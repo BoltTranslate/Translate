@@ -2,13 +2,10 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
-use Bolt\Events\HydrationEvent;
-use Bolt\Events\StorageEvent;
-use Bolt\Events\StorageEvents;
+use Bolt\Extension\Animal\Translate\Config;
 use Bolt\Extension\SimpleExtension;
-use Bolt\Storage\Entity\Content;
-use Bolt\Storage\Field\Collection\RepeatingFieldCollection;
 use Silex\Application;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -18,9 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class TranslateExtension extends SimpleExtension
 {
-    /** @var string */
-    protected $localeSlug;
-
     /**
      * @inheritdoc
      */
@@ -30,10 +24,6 @@ class TranslateExtension extends SimpleExtension
         $this->registerOverrides($app);
 
         $app->before([$this, 'before']);
-
-        // Set default localeSlug in the event before() is not called, e.g. a 404
-        $config = $this->getConfig();
-        $this->localeSlug = array_column($config['locales'], 'slug')[0];
     }
 
     /**
@@ -45,16 +35,16 @@ class TranslateExtension extends SimpleExtension
      */
     public function before(Request $request, Application $app)
     {
-        $config = $this->getConfig();
-        $defaultSlug = array_column($config['locales'], 'slug')[0];
-        $localeSlug = $request->get('_locale', $defaultSlug);
-
-        if (isset($config['locales'][$localeSlug])) {
-            $this->localeSlug = $config['locales'][$localeSlug]['slug'];
-        } elseif (in_array($localeSlug, array_column($config['locales'], 'slug'))) {
-            $this->localeSlug = $localeSlug;
-        }
         $this->registerTwigGlobal($app);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function subscribe(EventDispatcherInterface $dispatcher)
+    {
+        $app = $this->getContainer();
+        $dispatcher->addSubscriber(new EventListener\StorageListener($app['config'], $app['translate.config'], $app['query'], $app['request_stack']));
     }
 
     /**
@@ -89,169 +79,6 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * {@inheritdoc}
-     */
-    public static function getSubscribedEvents()
-    {
-        $parentEvents = parent::getSubscribedEvents();
-        $localEvents = [
-            StorageEvents::PRE_HYDRATE => [
-                ['preHydrate', 0],
-            ],
-            StorageEvents::POST_HYDRATE => [
-                ['postHydrate', 0],
-            ],
-            StorageEvents::PRE_SAVE => [
-                ['preSave', 0],
-            ],
-            StorageEvents::POST_SAVE => [
-                ['postSave', 0],
-            ],
-        ];
-
-        return $parentEvents + $localEvents;
-    }
-
-    /**
-     * StorageEvents::PRE_HYDRATE event callback.
-     *
-     * @param HydrationEvent $event
-     */
-    public function preHydrate(HydrationEvent $event)
-    {
-        $app = $this->getContainer();
-        $request = $app['request_stack']->getCurrentRequest();
-        if ($request === null) {
-            return;
-        }
-
-        /** @var Content $entity */
-        $entity = $event->getArgument('entity');
-        $subject = $event->getSubject();
-
-        if (!$entity instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
-            return;
-        }
-
-        $contentTypeName = $entity->getContenttype();
-        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
-
-        if (isset($subject[$this->localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
-            foreach ($localeData as $key => $value) {
-                if ($contentType['fields'][$key]['type'] !== 'repeater') {
-                    $subject[$key] = is_array($value) ? json_encode($value) : $value;
-                }
-            }
-        }
-    }
-
-    /**
-     * StorageEvents::POST_HYDRATE event callback.
-     *
-     * @param HydrationEvent $event
-     */
-    public function postHydrate(HydrationEvent $event)
-    {
-        $app = $this->getContainer();
-        $request = $app['request_stack']->getCurrentRequest();
-        if ($request === null) {
-            return;
-        }
-
-        /** @var Content $subject */
-        $subject = $event->getSubject();
-        if (!$subject instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
-            return;
-        }
-
-        $contentTypeName = $subject->getContenttype();
-        $contentType = $app['config']->get('contenttypes/' . $contentTypeName);
-
-        if (!isset($subject[$this->localeSlug . '_data'])) {
-            return;
-        }
-        $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
-        foreach ($localeData as $key => $value) {
-            if ($contentType['fields'][$key]['type'] !== 'repeater') {
-                continue;
-            }
-            /** @var RepeatingFieldCollection[] $subject */
-            $subject[$key]->clear();
-            foreach ($value as $subValue) {
-                $subject[$key]->addFromArray($subValue);
-            }
-        }
-    }
-
-    /**
-     * StorageEvents::PRE_SAVE event callback.
-     *
-     * @param StorageEvent $event
-     */
-    public function preSave(StorageEvent $event)
-    {
-        $app = $this->getContainer();
-        $contentType = $app['config']->get('contenttypes/' . $event->getContentType());
-        $translatableFields = $this->getTranslatableFields($contentType['fields']);
-        /** @var Content $record */
-        $record = $event->getContent();
-        $values = $record->serialize();
-        $localeValues = [];
-
-        if (empty($translatableFields)) {
-            return;
-        }
-
-        $config = $this->getConfig();
-        $record->set($this->localeSlug . '_slug', $values['slug']);
-        if ($values['locale'] == array_keys($config['locales'])[0]) {
-            $record->set($this->localeSlug . '_data', '[]');
-
-            return;
-        }
-
-        if ($values['id']) {
-            /** @var Content $defaultContent */
-            $defaultContent = $app['query']->getContent(
-                $event->getContentType(),
-                ['id' => $values['id'], 'returnsingle' => true]
-            );
-        }
-        foreach ($translatableFields as $field) {
-            $localeValues[$field] = $values[$field];
-            if ($values['id']) {
-                $record->set($field, $defaultContent->get($field));
-            } else {
-                $record->set($field, '');
-            }
-        }
-        $localeJson = json_encode($localeValues);
-        $record->set($this->localeSlug . '_data', $localeJson);
-    }
-
-    /**
-     * StorageEvents::POST_SAVE event callback.
-     *
-     * @param StorageEvent $event
-     */
-    public function postSave(StorageEvent $event)
-    {
-        $subject = $event->getSubject();
-        if (!$subject instanceof Content) {
-            return;
-        }
-        if (isset($subject[$this->localeSlug . '_data'])) {
-            return;
-        }
-
-        $localeData = json_decode($subject[$this->localeSlug . '_data']);
-        foreach ($localeData as $key => $value) {
-            $subject->set($key, $value);
-        }
-    }
-
-    /**
      * Register translate services/values on the app container
      *
      * @param Application $app
@@ -265,12 +92,34 @@ class TranslateExtension extends SimpleExtension
         );
         $app['translate.config'] = $app->share(
             function () {
-                return $this->getConfig();
+                return new Config\Config($this->getConfig());
             }
         );
         $app['translate.slug'] = $app->share(
-            function () {
-                return $this->localeSlug;
+            function ($app) {
+                /** @var Config\Config $config */
+                $config = $app['translate.config'];
+                $request = $app['request_stack']->getCurrentRequest();
+                /** @var Config\Locale $locale */
+                $locale = current($config->getLocales());
+                $defaultSlug = $locale->getSlug();
+
+                if ($request === null) {
+                    return $defaultSlug;
+                }
+
+                $localeSlug = $request->get('_locale', $defaultSlug);
+                if ($config->getLocale($localeSlug) !== null) {
+                    return $config->getLocale($localeSlug)->getSlug();
+                }
+
+                foreach ($config->getLocales() as $locale) {
+                    if ($localeSlug = $locale->getSlug()) {
+                        return $localeSlug;
+                    }
+                }
+
+                return $defaultSlug;
             }
         );
     }
@@ -297,7 +146,7 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
-        if ($app['translate.config']['menu_override']) {
+        if ($app['translate.config']->isMenuOverride()) {
             $app['menu'] = $app->share(
                 function ($app) {
                     return new Frontend\LocalizedMenuBuilder($app);
@@ -305,11 +154,10 @@ class TranslateExtension extends SimpleExtension
             );
         }
 
-        $config = $this->getConfig();
         $app['schema.content_tables'] = $app->extend(
             'schema.content_tables',
-            function ($contentTables) use ($app, $config) {
-
+            function ($contentTables) use ($app) {
+                $config = $app['translate.config'];
                 $platform = $app['db']->getDatabasePlatform();
                 $prefix = $app['schema.prefix'];
                 $contentTypes = $app['config']->get('contenttypes');
@@ -343,27 +191,6 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
-     * Helper to check for translatable fields in a contenttype
-     *
-     * @param array $fields
-     *
-     * @return array
-     */
-    private function getTranslatableFields($fields)
-    {
-        $translatable = [];
-        foreach ($fields as $name => $field) {
-            if (isset($field['is_translateable'])  && $field['is_translateable'] === true && $field['type'] === 'templateselect') {
-                $translatable[] = 'templatefields';
-            } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
-                $translatable[] = $name;
-            }
-        }
-
-        return $translatable;
-    }
-
-    /**
      * Helper to get a the current locale structure
      *
      * @return array
@@ -371,19 +198,21 @@ class TranslateExtension extends SimpleExtension
     public function getCurrentLocaleStructure()
     {
         $app = $this->getContainer();
-        $config = $this->getConfig();
-        $locales = $config['locales'];
+        $config = $app['translate.config'];
+        $locales = $config->getLocales();
         $request = $app['request_stack']->getCurrentRequest();
         if ($request === null) {
             return $locales;
         }
 
-        foreach ($locales as $iso => &$locale) {
+        /** @var Config\Locale $locale */
+        foreach ($locales as $iso => $locale) {
             $requestAttributes = $request->attributes->get('_route_params');
-            if ($config['translate_slugs'] === true && $locale['slug'] !== $requestAttributes['_locale'] && $request->get('slug')) {
+            $requestLocale = isset($requestAttributes['_locale']) ? $requestAttributes['_locale'] : null;
+            if ($config->isTranslateSlugs() && $locale->getSlug() !== $requestLocale && $request->get('slug')) {
                 $repo = $app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
-                $qb->select($locale['slug'] . '_slug')
+                $qb->select($locale->getSlug() . '_slug')
                     ->where($requestAttributes['_locale'] . '_slug = ?')
                     ->setParameter(0, $request->get('slug'))
                 ;
@@ -393,11 +222,11 @@ class TranslateExtension extends SimpleExtension
                 }
             }
 
-            $requestAttributes['_locale'] = $locale['slug'];
-            $locale['url'] = $app['url_generator']->generate($request->get('_route'), $requestAttributes);
+            $requestAttributes['_locale'] = $locale->getSlug();
+            $locale->setUrl($app['url_generator']->generate($request->get('_route'), $requestAttributes));
 
-            if ($this->localeSlug === $locale['slug']) {
-                $locale['active'] = true;
+            if ($app['translate.slug'] === $locale->getSlug()) {
+                $locale->setActive(true);
             }
         }
 
