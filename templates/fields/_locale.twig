@@ -14,7 +14,6 @@
     {% set current    = option.get('slug') == app['translate.slug'] ? option : current %}
     {% set currentkey = option.get('slug') == app['translate.slug'] ? key : currentkey %}
 {% endfor %}
-<input name="locale" type="hidden" value="{{currentkey}}">
 <input name="_locale" type="hidden" value="{{current.get('slug')}}">
 <input name="no_locale_hydrate" type="hidden" value="true">
 
