@@ -114,7 +114,7 @@ class TranslateExtension extends SimpleExtension
                 }
 
                 foreach ($config->getLocales() as $locale) {
-                    if ($localeSlug = $locale->getSlug()) {
+                    if ($localeSlug == $locale->getSlug()) {
                         return $localeSlug;
                     }
                 }
