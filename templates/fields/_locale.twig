@@ -10,8 +10,8 @@
 {% endfor %}
 
 {% for key, option in locales %}
-    {% set current = option.slug == app.request.get('_locale') ? option : current %}
-    {% set currentkey = option.slug == app.request.get('_locale') ? key : currentkey %}
+    {% set current = option.get('slug') == app.request.get('_locale') ? option.get('slug') : current %}
+    {% set currentkey = option.get('slug') == app.request.get('_locale') ? key : currentkey %}
 {% endfor %}
 <input name="locale" type="hidden" value="{{currentkey}}">
 <input name="_locale" type="hidden" value="{{current.slug}}">
@@ -30,8 +30,8 @@
                 <li>
                     <a href="{{ url(
                                 app.request.get('_route'),
-                                app.request.get('_route_params')|merge({_locale: option.slug })
-                            )}}">{{ option.label }}</a>
+                                app.request.get('_route_params')|merge({_locale: option.get('slug') })
+                            )}}">{{ option.get('label') }}</a>
                 </li>
             {% endfor %}
             </ul>
