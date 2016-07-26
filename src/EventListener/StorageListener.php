@@ -204,9 +204,8 @@ class StorageListener implements EventSubscriberInterface
         }
 
         $localeSlug = $request->get('_locale');
-
         $subject = $event->getSubject();
-        
+
         if (!$subject instanceof Content) {
             return;
         }
