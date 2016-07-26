@@ -101,7 +101,7 @@ class TranslateExtension extends SimpleExtension
                 $config = $app['translate.config'];
                 $request = $app['request_stack']->getCurrentRequest();
                 /** @var Config\Locale $locale */
-                $locale = current($config->getLocales());
+                $locale = reset($config->getLocales());
                 $defaultSlug = $locale->getSlug();
 
                 if ($request === null) {
@@ -146,6 +146,25 @@ class TranslateExtension extends SimpleExtension
                 return $frontend;
             }
         );
+
+        $app['url_generator'] = $app->extend(
+            'url_generator',
+            function ($urlGenerator) use ($app) {
+                $requestContext = $urlGenerator->getContext();
+
+                if (is_null($requestContext->getParameter('_locale'))) {
+                    $config = $app['translate.config'];
+                    /** @var Config\Locale $locale */
+                    $locale = reset($config->getLocales());
+                    $defaultSlug = $locale->getSlug();
+
+                    $requestContext->setParameter('_locale', $defaultSlug);
+                }
+
+                return $urlGenerator;
+            }
+        );
+
         if ($app['translate.config']->isMenuOverride()) {
             $app['menu'] = $app->share(
                 function ($app) {
