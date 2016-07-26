@@ -17,9 +17,6 @@ class LocalizedFrontend extends Frontend
                 if ($name !== 'preview') {
                     $route['path'] = '/{_locale}' . $route['path'];
                     $route['requirements']['_locale'] = '^[a-z]{2}(_[A-Z]{2})?$';
-
-                    // Using the url generator on a 404 response requires a default _locale to be set
-                    $route['defaults']['_locale'] = $this->app['translate.slug'];
                 }
             }
             $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
