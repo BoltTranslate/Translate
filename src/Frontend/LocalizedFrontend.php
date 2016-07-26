@@ -13,13 +13,25 @@ class LocalizedFrontend extends Frontend
         $routes = $this->app['config']->get('routing', []);
 
         if ($this->app['translate.config']->isRoutingOverride()) {
+            /** @var Config\Config $config */
+            $config = $this->app['translate.config'];
+            foreach ($config->getLocales() as $locale) {
+                $requirements = $locale->getSlug() . '|' . $requirements;
+            }
+
             foreach ($routes as $name => &$route) {
                 if ($name !== 'preview') {
                     $route['path'] = '/{_locale}' . $route['path'];
-                    $route['requirements']['_locale'] = '^[a-z]{2}(_[A-Z]{2})?$';
+                    $route['requirements']['_locale'] = $requirements;
                 }
             }
-            $routes['homepageredir'] = ['path' => '/', 'defaults' => [ '_controller' => 'controller.frontend:homepageRedirect' ]];
+
+            $routes = array_merge([
+                    'homepageredir' => [
+                        'path' => '/',
+                        'defaults' => ['_controller' => 'controller.frontend:homepageRedirect']
+                    ]
+                ], $routes);
         }
 
         return $routes;
