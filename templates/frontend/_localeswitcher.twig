@@ -1,8 +1,8 @@
 <ul{% if classes %} class="{{ classes }}"{% endif %}>
-    {% for iso, locale in locales %}
-    <li{% if locale.active %} class="active"{% endif %}>
-        <a title="{{ locale.label }}" href="{{ locale.url }}">
-            {{ locale.label }}
+    {% for locale in locales %}
+    <li{% if locale.get('active') %} class="active"{% endif %}>
+        <a title="{{ locale.get('label') }}" href="{{ locale.get('url') }}">
+            {{ locale.get('label') }}
         </a>
     {% endfor %}
 </ul>
