@@ -75,7 +75,7 @@ class LocalizedMenuBuilder extends MenuBuilder
     private function resolvePathToContent(array $item)
     {
         if ($item['path'] === 'homepage') {
-            $item['link'] = $this->app['resources']->getUrl('root') . $this->prefix;
+            $item['link'] = rtrim($this->app['resources']->getUrl('root') . $this->prefix, '/');
 
             return $item;
         }
@@ -124,6 +124,8 @@ class LocalizedMenuBuilder extends MenuBuilder
         } catch (MethodNotAllowedException $e) {
             // Route is probably a GET and we're currently in a POST
         }
+
+
 
         return $item;
     }

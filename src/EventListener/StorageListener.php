@@ -21,9 +21,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
  */
 class StorageListener implements EventSubscriberInterface
 {
-    /** @var string */
-    protected $localeSlug;
-
     /** @var BoltConfig */
     private $boltConfig;
     /** @var Query $query */
@@ -82,19 +79,21 @@ class StorageListener implements EventSubscriberInterface
             return;
         }
 
+        $localeSlug = $request->get('_locale');
+
         /** @var Content $entity */
         $entity = $event->getArgument('entity');
         $subject = $event->getSubject();
 
-        if (!$entity instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
+        if (!$entity instanceof Content || $request->request->getBoolean('no_locale_hydrate')) {
             return;
         }
 
         $contentTypeName = $entity->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
 
-        if (isset($subject[$this->localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
+        if (isset($subject[$localeSlug . '_data'])) {
+            $localeData = json_decode($subject[$localeSlug . '_data'], true);
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] !== 'repeater') {
                     $subject[$key] = is_array($value) ? json_encode($value) : $value;
@@ -115,19 +114,21 @@ class StorageListener implements EventSubscriberInterface
             return;
         }
 
+        $localeSlug = $request->get('_locale');
+
         /** @var Content $subject */
         $subject = $event->getSubject();
-        if (!$subject instanceof Content || $request->query->getBoolean('no_locale_hydrate')) {
+        if (!$subject instanceof Content || $request->request->getBoolean('no_locale_hydrate')) {
             return;
         }
 
         $contentTypeName = $subject->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
 
-        if (!isset($subject[$this->localeSlug . '_data'])) {
+        if (!isset($subject[$localeSlug . '_data'])) {
             return;
         }
-        $localeData = json_decode($subject[$this->localeSlug . '_data'], true);
+        $localeData = json_decode($subject[$localeSlug . '_data'], true);
         foreach ($localeData as $key => $value) {
             if ($contentType['fields'][$key]['type'] !== 'repeater') {
                 continue;
@@ -147,6 +148,11 @@ class StorageListener implements EventSubscriberInterface
      */
     public function preSave(StorageEvent $event)
     {
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request === null) {
+            return;
+        }
+
         $contentType = $this->boltConfig->get('contenttypes/' . $event->getContentType());
         $translatableFields = $this->getTranslatableFields($contentType['fields']);
         /** @var Content $record */
@@ -158,10 +164,11 @@ class StorageListener implements EventSubscriberInterface
             return;
         }
 
-        $record->set($this->localeSlug . '_slug', $values['slug']);
-        if ($values['locale'] == key($this->config->getLocales())) {
-            $record->set($this->localeSlug . '_data', '[]');
+        $localeSlug = $request->get('_locale');
 
+        $record->set($localeSlug . '_slug', $values['slug']);
+        if ($values['_locale'] == reset($this->config->getLocales())->getSlug()) {
+            $record->set($localeSlug . '_data', '[]');
             return;
         }
 
@@ -181,7 +188,7 @@ class StorageListener implements EventSubscriberInterface
             }
         }
         $localeJson = json_encode($localeValues);
-        $record->set($this->localeSlug . '_data', $localeJson);
+        $record->set($localeSlug . '_data', $localeJson);
     }
 
     /**
@@ -191,15 +198,22 @@ class StorageListener implements EventSubscriberInterface
      */
     public function postSave(StorageEvent $event)
     {
-        $subject = $event->getSubject();
-        if (!$subject instanceof Content) {
-            return;
-        }
-        if (isset($subject[$this->localeSlug . '_data'])) {
+        $request = $this->requestStack->getCurrentRequest();
+        if ($request === null) {
             return;
         }
 
-        $localeData = json_decode($subject[$this->localeSlug . '_data']);
+        $localeSlug = $request->get('_locale');
+        $subject = $event->getSubject();
+
+        if (!$subject instanceof Content) {
+            return;
+        }
+        if (!isset($subject[$localeSlug . '_data'])) {
+            return;
+        }
+
+        $localeData = json_decode($subject[$localeSlug . '_data']);
         foreach ($localeData as $key => $value) {
             $subject->set($key, $value);
         }
@@ -216,7 +230,9 @@ class StorageListener implements EventSubscriberInterface
     {
         $translatable = [];
         foreach ($fields as $name => $field) {
-            if (isset($field['is_translateable'])  && $field['is_translateable'] === true && $field['type'] === 'templateselect') {
+            if (isset($field['is_translateable']) &&
+                $field['is_translateable'] === true &&
+                $field['type'] === 'templateselect') {
                 $translatable[] = 'templatefields';
             } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
                 $translatable[] = $name;

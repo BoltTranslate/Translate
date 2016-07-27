@@ -44,7 +44,14 @@ class TranslateExtension extends SimpleExtension
     protected function subscribe(EventDispatcherInterface $dispatcher)
     {
         $app = $this->getContainer();
-        $dispatcher->addSubscriber(new EventListener\StorageListener($app['config'], $app['translate.config'], $app['query'], $app['request_stack']));
+        $dispatcher->addSubscriber(
+            new EventListener\StorageListener(
+                $app['config'],
+                $app['translate.config'],
+                $app['query'],
+                $app['request_stack']
+            )
+        );
     }
 
     /**
@@ -114,7 +121,7 @@ class TranslateExtension extends SimpleExtension
                 }
 
                 foreach ($config->getLocales() as $locale) {
-                    if ($localeSlug == $locale->getSlug()) {
+                    if ($localeSlug === $locale->getSlug()) {
                         return $localeSlug;
                     }
                 }
@@ -147,23 +154,25 @@ class TranslateExtension extends SimpleExtension
             }
         );
 
-        $app['url_generator'] = $app->extend(
-            'url_generator',
-            function ($urlGenerator) use ($app) {
-                $requestContext = $urlGenerator->getContext();
+        if ($app['translate.config']->isUrlGeneratorOverride()) {
+            $app['url_generator'] = $app->extend(
+                'url_generator',
+                function ($urlGenerator) use ($app) {
+                    $requestContext = $urlGenerator->getContext();
 
-                if (is_null($requestContext->getParameter('_locale'))) {
-                    $config = $app['translate.config'];
-                    /** @var Config\Locale $locale */
-                    $locale = reset($config->getLocales());
-                    $defaultSlug = $locale->getSlug();
+                    if (is_null($requestContext->getParameter('_locale'))) {
+                        $config = $app['translate.config'];
+                        /** @var Config\Locale $locale */
+                        $locale = reset($config->getLocales());
+                        $defaultSlug = $locale->getSlug();
 
-                    $requestContext->setParameter('_locale', $defaultSlug);
+                        $requestContext->setParameter('_locale', $defaultSlug);
+                    }
+
+                    return $urlGenerator;
                 }
-
-                return $urlGenerator;
-            }
-        );
+            );
+        }
 
         if ($app['translate.config']->isMenuOverride()) {
             $app['menu'] = $app->share(
@@ -227,17 +236,17 @@ class TranslateExtension extends SimpleExtension
         /** @var Config\Locale $locale */
         foreach ($locales as $iso => $locale) {
             $requestAttributes = $request->attributes->get('_route_params');
-            $requestLocale = isset($requestAttributes['_locale']) ? $requestAttributes['_locale'] : null;
+            $requestLocale = $request->get('_locale');
             if ($config->isTranslateSlugs() && $locale->getSlug() !== $requestLocale && $request->get('slug')) {
                 $repo = $app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
                 $qb->select($locale->getSlug() . '_slug')
-                    ->where($requestAttributes['_locale'] . '_slug = ?')
+                    ->where($locale->getSlug() . '_slug = ?')
                     ->setParameter(0, $request->get('slug'))
                 ;
                 $newSlug = $repo->findOneWith($qb);
                 if ($newSlug) {
-                    $requestAttributes['slug'] = $newSlug;
+                    $requestAttributes['slug'] = $newSlug[$locale->getSlug() . '_slug'];
                 }
             }
 
