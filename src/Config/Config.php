@@ -110,4 +110,20 @@ class Config extends ParameterBag
     {
         $this->set('translate_slugs', $translateSlugs);
     }
+
+    /**
+     * @return boolean
+     */
+    public function isUrlGeneratorOverride()
+    {
+        return $this->get('url_generator_override', true);
+    }
+
+    /**
+     * @param boolean $urlGeneratorOverride
+     */
+    public function setUrlGeneratorOverride($urlGeneratorOverride)
+    {
+        $this->set('url_generator_override', $urlGeneratorOverride);
+    }
 }
