@@ -154,27 +154,26 @@ class TranslateExtension extends SimpleExtension
             }
         );
 
-<<<<<<< ad5143b99bd4b77fa332bd6150e0392ca6c466c1
-        $app['url_generator'] = $app->extend(
-            'url_generator',
-            function ($urlGenerator) use ($app) {
-                $requestContext = $urlGenerator->getContext();
+        if ($app['translate.config']->isUrlGeneratorOverride()) {
+            $app['url_generator'] = $app->extend(
+                'url_generator',
+                function ($urlGenerator) use ($app) {
+                    $requestContext = $urlGenerator->getContext();
 
-                if (is_null($requestContext->getParameter('_locale'))) {
-                    $config = $app['translate.config'];
-                    /** @var Config\Locale $locale */
-                    $locale = reset($config->getLocales());
-                    $defaultSlug = $locale->getSlug();
+                    if (is_null($requestContext->getParameter('_locale'))) {
+                        $config = $app['translate.config'];
+                        /** @var Config\Locale $locale */
+                        $locale = reset($config->getLocales());
+                        $defaultSlug = $locale->getSlug();
 
-                    $requestContext->setParameter('_locale', $defaultSlug);
+                        $requestContext->setParameter('_locale', $defaultSlug);
+                    }
+
+                    return $urlGenerator;
                 }
+            );
+        }
 
-                return $urlGenerator;
-            }
-        );
-
-=======
->>>>>>> fix typos, PSR2 warning, locale param in querystring
         if ($app['translate.config']->isMenuOverride()) {
             $app['menu'] = $app->share(
                 function ($app) {

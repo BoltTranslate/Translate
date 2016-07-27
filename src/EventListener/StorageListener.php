@@ -209,7 +209,7 @@ class StorageListener implements EventSubscriberInterface
         if (!$subject instanceof Content) {
             return;
         }
-        if (isset($subject[$localeSlug . '_data'])) {
+        if (!isset($subject[$localeSlug . '_data'])) {
             return;
         }
 
