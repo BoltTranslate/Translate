@@ -3,6 +3,7 @@
 namespace Bolt\Extension\Animal\Translate\Frontend;
 
 use Bolt\Controller\Frontend;
+use Bolt\Extension\Animal\Translate\Config\Config;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -13,8 +14,11 @@ class LocalizedFrontend extends Frontend
         $routes = $this->app['config']->get('routing', []);
 
         if ($this->app['translate.config']->isRoutingOverride()) {
-            /** @var Config\Config $config */
+            /** @var Config $config */
             $config = $this->app['translate.config'];
+
+            $requirements = '';
+
             foreach ($config->getLocales() as $locale) {
                 $requirements = $locale->getSlug() . '|' . $requirements;
             }

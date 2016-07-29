@@ -108,7 +108,8 @@ class TranslateExtension extends SimpleExtension
                 $config = $app['translate.config'];
                 $request = $app['request_stack']->getCurrentRequest();
                 /** @var Config\Locale $locale */
-                $locale = reset($config->getLocales());
+                $locale = $config->getLocales();
+                $locale = reset($locale);
                 $defaultSlug = $locale->getSlug();
 
                 if ($request === null) {
@@ -163,7 +164,8 @@ class TranslateExtension extends SimpleExtension
                     if (is_null($requestContext->getParameter('_locale'))) {
                         $config = $app['translate.config'];
                         /** @var Config\Locale $locale */
-                        $locale = reset($config->getLocales());
+                        $locale = $config->getLocales();
+                        $locale = reset($locale);
                         $defaultSlug = $locale->getSlug();
 
                         $requestContext->setParameter('_locale', $defaultSlug);
