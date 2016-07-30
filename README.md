@@ -1,6 +1,8 @@
 Translate
 =========
 
+[![SensioLabsInsight](https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df/mini.png)](https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df)
+
 This [bolt.cm](https://bolt.cm/) extension handles translation of content
 within bolt. It is recommended to be used in combination with the Labels
 extension.

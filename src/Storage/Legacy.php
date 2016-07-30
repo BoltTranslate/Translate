@@ -83,12 +83,15 @@ class Legacy extends Storage
             
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] === 'repeater') {
-                    // Hackish fix until #5533 gets fixed, after that L85-88 can be replaced by L89
+                    /* 
+                     * Hackish fix until #5533 gets fixed, after that the
+                     * following four (4) lines can be replaced with 
+                     * "$record[$key]->clear();"
+                    */
                     $originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
                     $originalMapping[$key]['type'] = 'repeater';
                     $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
                     $record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
-                    //$record[$key]->clear();
                     foreach ($value as $subValue) {
                         $record[$key]->addFromArray($subValue);
                     }
