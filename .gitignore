@@ -1,4 +1,3 @@
-.DS_*
 config.yml
 composer.lock
 vendor/
