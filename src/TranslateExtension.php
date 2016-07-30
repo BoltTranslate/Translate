@@ -159,8 +159,7 @@ class TranslateExtension extends SimpleExtension
         if ($app['translate.config']->isUrlGeneratorOverride()) {
             $app['url_generator'] = $app->extend(
                 'url_generator',
-                /** @var UrlGeneratorFragmentWrapper $urlGenerator */
-                function ($urlGenerator) use ($app) {
+                function (UrlGeneratorFragmentWrapper $urlGenerator) use ($app) {
                     $requestContext = $urlGenerator->getContext();
 
                     if (is_null($requestContext->getParameter('_locale'))) {
