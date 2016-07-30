@@ -58,13 +58,13 @@ class TranslateExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
-    public function getServiceProviders()
+    protected function registerFields()
     {
         return [
-            $this,
-            new Provider\FieldProvider(),
+            new Field\LocaleField()
         ];
     }
+
 
     /**
      * {@inheritdoc}
