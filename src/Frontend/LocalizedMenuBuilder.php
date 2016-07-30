@@ -4,6 +4,9 @@ namespace Bolt\Extension\Animal\Translate\Frontend;
 
 use Bolt\Menu\Menu;
 use Bolt\Menu\MenuBuilder;
+use Bolt\Translation\Translator as Trans;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 
 class LocalizedMenuBuilder extends MenuBuilder
 {
