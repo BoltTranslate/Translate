@@ -7,6 +7,7 @@ use Bolt\Extension\SimpleExtension;
 use Silex\Application;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Bolt\Routing\UrlGeneratorFragmentWrapper;
 
 /**
  * Translate extension class.
@@ -158,6 +159,7 @@ class TranslateExtension extends SimpleExtension
         if ($app['translate.config']->isUrlGeneratorOverride()) {
             $app['url_generator'] = $app->extend(
                 'url_generator',
+                /** @var UrlGeneratorFragmentWrapper $urlGenerator */
                 function ($urlGenerator) use ($app) {
                     $requestContext = $urlGenerator->getContext();
 
@@ -212,7 +214,7 @@ class TranslateExtension extends SimpleExtension
     {
         $app['twig'] = $app->extend(
             'twig',
-            function (\Twig_Environment $twig) use ($app) {
+            function (\Twig_Environment $twig) {
                 $twig->addGlobal('locales', $this->getCurrentLocaleStructure());
 
                 return $twig;
