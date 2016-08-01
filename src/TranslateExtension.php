@@ -108,27 +108,39 @@ class TranslateExtension extends SimpleExtension
                 /** @var Config\Config $config */
                 $config = $app['translate.config'];
                 $request = $app['request_stack']->getCurrentRequest();
-                /** @var Config\Locale $locale */
-                $locale = $config->getLocales();
-                $locale = reset($locale);
-                $defaultSlug = $locale->getSlug();
 
                 if ($request === null) {
+                    /** @var Config\Locale $locale */
+                    $locale = $config->getLocales();
+                    $locale = reset($locale);
+                    $defaultSlug = $locale->getSlug();
+
+                    return $defaultSlug;
+                } else {
+                    $localeNames = array();
+                    foreach ($config->getLocales() as $name => $locale) {
+                        /** @var Config\Locale $locale */
+                        $localeNames[$name] = $locale->getSlug();
+                        if (preg_match('/([a-z]{2})_[A-Z]{2}/', $name, $match)) {
+                            $localeNames[$match[1]] = $locale->getSlug();
+                        }
+                    }
+                    $defaultName = $request->getPreferredLanguage(array_keys($localeNames));
+                    $defaultSlug = $localeNames[$defaultName];
+
+                    $localeSlug = $request->get('_locale', $defaultSlug);
+                    if ($config->getLocale($localeSlug) !== null) {
+                        return $config->getLocale($localeSlug)->getSlug();
+                    }
+
+                    foreach ($config->getLocales() as $locale) {
+                        if ($localeSlug === $locale->getSlug()) {
+                            return $localeSlug;
+                        }
+                    }
+
                     return $defaultSlug;
                 }
-
-                $localeSlug = $request->get('_locale', $defaultSlug);
-                if ($config->getLocale($localeSlug) !== null) {
-                    return $config->getLocale($localeSlug)->getSlug();
-                }
-
-                foreach ($config->getLocales() as $locale) {
-                    if ($localeSlug === $locale->getSlug()) {
-                        return $localeSlug;
-                    }
-                }
-
-                return $defaultSlug;
             }
         );
     }
