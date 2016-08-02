@@ -21,8 +21,10 @@ extension.
 ## Configuration
 
  1. Modify the `locales` block in the extension configuration to suit your
-    needs. The first one is the default locale and must be the same as bolts
-    own locale:
+    needs. The locales block is in the distributed config file in the extension folder:
+    /animal/translate/config/config.yml.dist. Copy this file to /app/config/extensions and
+    give it a proper name like 'translate.animal.yml' The first one is the default locale 
+    and must be the same as bolts own locale which you've set in bolts' main config.yml:
 
     ```
     locales:
@@ -65,7 +67,12 @@ extension.
 
  4. Use the `localeswitcher` twig-function to render a locale switcher in your
     theme: `{{ localeswitcher() }}` or
-    `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}`
+    `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}` if you want
+    to use a custom template.
+    The base template being used is '_localeswitcher.twig', but you probably just
+    want to add a class. That's as simple as:
+
+    `{{ localeswitcher(classes = 'custom-class another-class') }}`
 
  5. (Optional) Activate/install the Labels extension, set your languages in
     it's config and mark any hardcoded text in your templates with
