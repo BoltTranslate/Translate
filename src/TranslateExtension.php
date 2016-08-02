@@ -108,15 +108,16 @@ class TranslateExtension extends SimpleExtension
                 /** @var Config\Config $config */
                 $config = $app['translate.config'];
                 $request = $app['request_stack']->getCurrentRequest();
+                /** @var Config\Locale $locale */
+                $locale = $config->getLocales();
+                $locale = reset($locale);
+                $defaultSlug = $locale->getSlug();
 
                 if ($request === null) {
-                    /** @var Config\Locale $locale */
-                    $locale = $config->getLocales();
-                    $locale = reset($locale);
-                    $defaultSlug = $locale->getSlug();
-
                     return $defaultSlug;
-                } else {
+                }
+
+                if ($config->isUseAcceptLanguageHeader()) {
                     $localeNames = array();
                     foreach ($config->getLocales() as $name => $locale) {
                         /** @var Config\Locale $locale */
@@ -127,20 +128,20 @@ class TranslateExtension extends SimpleExtension
                     }
                     $defaultName = $request->getPreferredLanguage(array_keys($localeNames));
                     $defaultSlug = $localeNames[$defaultName];
-
-                    $localeSlug = $request->get('_locale', $defaultSlug);
-                    if ($config->getLocale($localeSlug) !== null) {
-                        return $config->getLocale($localeSlug)->getSlug();
-                    }
-
-                    foreach ($config->getLocales() as $locale) {
-                        if ($localeSlug === $locale->getSlug()) {
-                            return $localeSlug;
-                        }
-                    }
-
-                    return $defaultSlug;
                 }
+
+                $localeSlug = $request->get('_locale', $defaultSlug);
+                if ($config->getLocale($localeSlug) !== null) {
+                    return $config->getLocale($localeSlug)->getSlug();
+                }
+
+                foreach ($config->getLocales() as $locale) {
+                    if ($localeSlug === $locale->getSlug()) {
+                        return $localeSlug;
+                    }
+                }
+
+                return $defaultSlug;
             }
         );
     }
@@ -176,23 +177,29 @@ class TranslateExtension extends SimpleExtension
 
                     if (is_null($requestContext->getParameter('_locale'))) {
                         $request = $app['request_stack']->getCurrentRequest();
+                        /** @var Config\Config $config */
+                        $config = $app['translate.config'];
 
-                        /* Only set _locale if request is not null */
-                        if ($request !== null) {
-                            $localeNames = array();
-                            /** @var Config\Config $config */
-                            $config = $app['translate.config'];
-
-                            foreach ($config->getLocales() as $name => $locale) {
-                                /** @var Config\Locale $locale */
-                                $localeNames[$name] = $locale->getSlug();
-                                if (preg_match('/([a-z]{2})_[A-Z]{2}/', $name, $match)) {
-                                    $localeNames[$match[1]] = $locale->getSlug();
+                        if ($config->isUseAcceptLanguageHeader()) {
+                            /* Only set _locale if request is not null */
+                            if ($request !== null) {
+                                $localeNames = array();
+                                foreach ($config->getLocales() as $name => $locale) {
+                                    /** @var Config\Locale $locale */
+                                    $localeNames[$name] = $locale->getSlug();
+                                    if (preg_match('/([a-z]{2})_[A-Z]{2}/', $name, $match)) {
+                                        $localeNames[$match[1]] = $locale->getSlug();
+                                    }
                                 }
+                                $defaultName = $request->getPreferredLanguage(array_keys($localeNames));
+                                $defaultSlug = $localeNames[$defaultName];
+                                $requestContext->setParameter('_locale', $defaultSlug);
                             }
-
-                            $defaultName = $request->getPreferredLanguage(array_keys($localeNames));
-                            $defaultSlug = $localeNames[$defaultName];
+                        } else {
+                            /** @var Config\Locale $locale */
+                            $locale = $config->getLocales();
+                            $locale = reset($locale);
+                            $defaultSlug = $locale->getSlug();
                             $requestContext->setParameter('_locale', $defaultSlug);
                         }
                     }
