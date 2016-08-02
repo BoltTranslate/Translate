@@ -69,6 +69,7 @@ extension.
     theme: `{{ localeswitcher() }}` or
     `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}` if you want
     to use a custom template.
+    
     The base template being used is '_localeswitcher.twig', but you probably just
     want to add a class. That's as simple as:
 
