@@ -126,4 +126,20 @@ class Config extends ParameterBag
     {
         $this->set('url_generator_override', $urlGeneratorOverride);
     }
+
+    /**
+     * @return boolean
+     */
+    public function isUseAcceptLanguageHeader()
+    {
+        return $this->getBoolean('use_accept_language_header', true);
+    }
+
+    /**
+     * @param boolean $useAcceptLanguageHeader
+     */
+    public function setUseAcceptLanguageHeader($useAcceptLanguageHeader)
+    {
+        $this->set('use_accept_language_header', $useAcceptLanguageHeader);
+    }
 }
