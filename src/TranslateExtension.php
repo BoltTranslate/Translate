@@ -194,8 +194,9 @@ class TranslateExtension extends SimpleExtension
                 $prefix = $app['schema.prefix'];
                 $contentTypes = $app['config']->get('contenttypes');
 
-                foreach (array_keys($contentTypes) as $contentType) {
-                    $contentTables[$contentType] = $app->share(function () use ($platform, $prefix, $config) {
+                foreach ($contentTypes as $contentType) {
+                    $tableName = $contentType['tablename'];
+                    $contentTables[$tableName] = $app->share(function () use ($platform, $prefix, $config) {
                         return new Storage\ContentTypeTable($platform, $prefix, $config);
                     });
                 }
