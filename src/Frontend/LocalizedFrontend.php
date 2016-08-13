@@ -62,6 +62,10 @@ class LocalizedFrontend extends Frontend
 
         $slug = $this->app['slugify']->slugify($slug);
 
+        if (is_numeric($slug) || !$this->app['translate.config']->isTranslateSlugs()) {
+            return parent::record($request, $contenttypeslug, $slug);
+        }
+
         $repo = $this->app['storage']->getRepository($contenttype['slug']);
         $qb = $repo->createQueryBuilder();
         $qb->select('slug')
@@ -70,10 +74,6 @@ class LocalizedFrontend extends Frontend
             ->setMaxResults(1);
 
         $result = $qb->execute()->fetch();
-
-        if (is_numeric($slug) || !$this->app['translate.config']->isTranslateSlugs()) {
-            return parent::record($request, $contenttypeslug, $slug);
-        }
 
         return parent::record($request, $contenttypeslug, $result['slug']);
     }
