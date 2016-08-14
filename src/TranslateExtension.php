@@ -246,7 +246,7 @@ class TranslateExtension extends SimpleExtension
                 $repo = $app['storage']->getRepository('pages');
                 $qb = $repo->createQueryBuilder();
                 $qb->select($locale->getSlug() . '_slug')
-                    ->where($locale->getSlug() . '_slug = ?')
+                    ->where($app['translate.slug'] . '_slug = ?')
                     ->setParameter(0, $request->get('slug'))
                 ;
                 $newSlug = $repo->findOneWith($qb);
