@@ -73,7 +73,7 @@ extension.
 
  6. (Optional) Translate your Boltforms by switching
     `{% form_theme form 'boltforms_custom.twig' %}` to
-    `{% form_theme form 'twig/boltforms_theme_translated.twig' %}` at the top
+    `{% form_theme form '@bolt/frontend/boltforms_theme_translated.twig' %}` at the top
     of a form template. This requires the Labels extension.
 
 ---
