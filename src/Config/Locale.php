@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Animal\Translate\Config;
 
+use ArrayAccess;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -9,8 +10,45 @@ use Symfony\Component\HttpFoundation\ParameterBag;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class Locale extends ParameterBag
+class Locale extends ParameterBag implements ArrayAccess
 {
+    /**
+     * @see ArrayAccess::offsetSet
+     *
+     * @param $offset
+     * @param $value
+     */
+    public function offsetSet($offset, $value) {
+        $this->set($offset, $value);
+    }
+
+    /**
+     * @see ArrayAccess::offsetUnset
+     *
+     * @param int $offset
+     */
+    public function offsetUnset($offset) {
+        $this->remove($offset);
+    }
+
+    /**
+     * @see ArrayAccess::offsetExists
+     *
+     * @param $offset
+     */
+    public function offsetExists($offset) {
+        return $this->has($offset);
+    }
+
+    /**
+     * @see ArrayAccess::offsetGet
+     *
+     * @param $offset
+     */
+    public function offsetGet($offset) {
+        return $this->get($offset);
+    }
+
     /**
      * @return string
      */
