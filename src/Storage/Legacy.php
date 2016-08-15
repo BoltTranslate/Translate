@@ -105,7 +105,7 @@ class Legacy extends Storage
                 if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater') {
                     /**
                      * Hackish fix until #5533 gets fixed, after that the
-                     * following four (4) lines can be replaced with 
+                     * following four (4) lines can be replaced with
                      * "$record[$key]->clear();"
                     */
                     $originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
