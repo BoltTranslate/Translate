@@ -130,6 +130,21 @@ class StorageListener implements EventSubscriberInterface
         }
         $localeData = json_decode($subject[$localeSlug . '_data'], true);
         foreach ($localeData as $key => $value) {
+            
+            if ($key === 'templatefields') {
+                $templateFields = $this->boltConfig->get('theme/templatefields/' . $subject['template'] . '/fields');
+                foreach ($templateFields as $key => $field) {
+                    if($field['type'] === 'repeater'){
+                        $repeaterData = json_decode($value[$key], true);
+                        /** @var RepeatingFieldCollection[] $subject */
+                        $subject['templatefields'][$key]->clear();
+                        foreach ($repeaterData as $subValue) {
+                            $subject['templatefields'][$key]->addFromArray($subValue);
+                        }
+                    }
+                }
+            }
+        
             if ($contentType['fields'][$key]['type'] !== 'repeater') {
                 continue;
             }
@@ -180,6 +195,16 @@ class StorageListener implements EventSubscriberInterface
                 ['id' => $values['id'], 'returnsingle' => true]
             );
         }
+
+        if (in_array('templatefields', $translatableFields)) {
+            $templateFields = $this->boltConfig->get('theme/templatefields/' . $values['template'] . '/fields');
+            foreach ($templateFields as $key => $field) {
+                if($field['type'] === 'repeater'){
+                    $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
+                }
+            }
+        }
+
         foreach ($translatableFields as $field) {
             $localeValues[$field] = $values[$field];
             if ($values['id']) {
