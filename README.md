@@ -21,10 +21,8 @@ extension.
 ## Configuration
 
  1. Modify the `locales` block in the extension configuration to suit your
-    needs. The locales block is in the distributed config file in the extension folder:
-    /animal/translate/config/config.yml.dist. Copy this file to /app/config/extensions and
-    give it a proper name like 'translate.animal.yml' The first one is the default locale 
-    and must be the same as bolts own locale which you've set in bolts' main config.yml:
+    needs. The first one is the default locale and must be the same as bolts
+    own locale which you've set in bolts' main config.yml:
 
     ```
     locales:
