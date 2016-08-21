@@ -20,9 +20,10 @@ extension.
 
 ## Configuration
 
- 1. Modify the `locales` block in the extension configuration to suit your
-    needs. The first one is the default locale and must be the same as bolts
-    own locale which you've set in bolts' main config.yml:
+ 1. Modify the `locales` block in the extension configuration (which you can
+    find under the `Extend` screen in bolt's backend) to suit your needs. The
+    first one is the default locale and must be the same as bolts own locale
+    which you've set in bolts' main config.yml:
 
     ```
     locales:
