@@ -45,14 +45,16 @@ class TranslateExtension extends SimpleExtension
     protected function subscribe(EventDispatcherInterface $dispatcher)
     {
         $app = $this->getContainer();
-        $dispatcher->addSubscriber(
-            new EventListener\StorageListener(
-                $app['config'],
-                $app['translate.config'],
-                $app['query'],
-                $app['request_stack']
-            )
-        );
+        if (count($app['translate.config']->getLocales()) !== 0) {
+            $dispatcher->addSubscriber(
+                new EventListener\StorageListener(
+                    $app['config'],
+                    $app['translate.config'],
+                    $app['query'],
+                    $app['request_stack']
+                )
+            );
+        }
     }
 
     /**
