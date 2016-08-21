@@ -33,7 +33,7 @@ class ContentTypeTable extends ContentType
         /** @var Config\Locale $locale */
         foreach ($this->config->getLocales() as $locale) {
             $this->table->addColumn($locale->getSlug() . '_slug', 'string', ['length'  => 191, 'default' => '']);
-            $this->table->addColumn($locale->getSlug() . '_data', 'text',   ['notnull' => false]);
+            $this->table->addColumn($locale->getSlug() . '_data', 'text', ['notnull' => false]);
         }
     }
 

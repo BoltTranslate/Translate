@@ -21,7 +21,7 @@ class Config extends ParameterBag
         parent::__construct($config);
         foreach ($config['locales'] as $name => $parameters) {
             $this->parameters['locales'][$name] = new Locale($parameters);
-         }
+        }
     }
 
     /**

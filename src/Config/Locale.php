@@ -18,7 +18,8 @@ class Locale extends ParameterBag implements ArrayAccess
      * @param $offset
      * @param $value
      */
-    public function offsetSet($offset, $value) {
+    public function offsetSet($offset, $value)
+    {
         $this->set($offset, $value);
     }
 
@@ -27,7 +28,8 @@ class Locale extends ParameterBag implements ArrayAccess
      *
      * @param int $offset
      */
-    public function offsetUnset($offset) {
+    public function offsetUnset($offset)
+    {
         $this->remove($offset);
     }
 
@@ -36,7 +38,8 @@ class Locale extends ParameterBag implements ArrayAccess
      *
      * @param $offset
      */
-    public function offsetExists($offset) {
+    public function offsetExists($offset)
+    {
         return $this->has($offset);
     }
 
@@ -45,7 +48,8 @@ class Locale extends ParameterBag implements ArrayAccess
      *
      * @param $offset
      */
-    public function offsetGet($offset) {
+    public function offsetGet($offset)
+    {
         return $this->get($offset);
     }
 
