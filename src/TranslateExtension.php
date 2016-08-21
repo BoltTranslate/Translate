@@ -107,6 +107,9 @@ class TranslateExtension extends SimpleExtension
             function ($app) {
                 /** @var Config\Config $config */
                 $config = $app['translate.config'];
+                if (count($config->getLocales()) === 0) {
+                    return;
+                }
                 $request = $app['request_stack']->getCurrentRequest();
                 /** @var Config\Locale $locale */
                 $locale = $config->getLocales();
@@ -153,57 +156,59 @@ class TranslateExtension extends SimpleExtension
      */
     private function registerOverrides(Application $app)
     {
-        $app['storage.legacy'] = $app->extend(
-            'storage.legacy',
-            function ($storage) use ($app) {
-                return new Storage\Legacy($app);
-            }
-        );
-
-        $app['controller.frontend'] = $app->share(
-            function ($app) {
-                $frontend = new Frontend\LocalizedFrontend();
-                $frontend->connect($app);
-
-                return $frontend;
-            }
-        );
-
-        if ($app['translate.config']->isUrlGeneratorOverride()) {
-            $app['url_generator'] = $app->extend(
-                'url_generator',
-                function (UrlGeneratorInterface $urlGenerator) use ($app) {
-                    return new Routing\LocalizedUrlGenerator($urlGenerator, $app);
+        if (count($app['translate.config']->getLocales()) !== 0) {
+            $app['storage.legacy'] = $app->extend(
+                'storage.legacy',
+                function ($storage) use ($app) {
+                    return new Storage\Legacy($app);
                 }
             );
-        }
 
-        if ($app['translate.config']->isMenuOverride()) {
-            $app['menu'] = $app->share(
+            $app['controller.frontend'] = $app->share(
                 function ($app) {
-                    return new Frontend\LocalizedMenuBuilder($app);
+                    $frontend = new Frontend\LocalizedFrontend();
+                    $frontend->connect($app);
+
+                    return $frontend;
+                }
+            );
+
+            if ($app['translate.config']->isUrlGeneratorOverride()) {
+                $app['url_generator'] = $app->extend(
+                    'url_generator',
+                    function (UrlGeneratorInterface $urlGenerator) use ($app) {
+                        return new Routing\LocalizedUrlGenerator($urlGenerator, $app);
+                    }
+                );
+            }
+
+            if ($app['translate.config']->isMenuOverride()) {
+                $app['menu'] = $app->share(
+                    function ($app) {
+                        return new Frontend\LocalizedMenuBuilder($app);
+                    }
+                );
+            }
+
+            $app['schema.content_tables'] = $app->extend(
+                'schema.content_tables',
+                function ($contentTables) use ($app) {
+                    $config = $app['translate.config'];
+                    $platform = $app['db']->getDatabasePlatform();
+                    $prefix = $app['schema.prefix'];
+                    $contentTypes = $app['config']->get('contenttypes');
+
+                    foreach ($contentTypes as $contentType) {
+                        $tableName = $contentType['tablename'];
+                        $contentTables[$tableName] = $app->share(function () use ($platform, $prefix, $config) {
+                            return new Storage\ContentTypeTable($platform, $prefix, $config);
+                        });
+                    }
+
+                    return $contentTables;
                 }
             );
         }
-
-        $app['schema.content_tables'] = $app->extend(
-            'schema.content_tables',
-            function ($contentTables) use ($app) {
-                $config = $app['translate.config'];
-                $platform = $app['db']->getDatabasePlatform();
-                $prefix = $app['schema.prefix'];
-                $contentTypes = $app['config']->get('contenttypes');
-
-                foreach ($contentTypes as $contentType) {
-                    $tableName = $contentType['tablename'];
-                    $contentTables[$tableName] = $app->share(function () use ($platform, $prefix, $config) {
-                        return new Storage\ContentTypeTable($platform, $prefix, $config);
-                    });
-                }
-
-                return $contentTables;
-            }
-        );
     }
 
     /**
