@@ -243,15 +243,21 @@ class TranslateExtension extends SimpleExtension
             $requestAttributes = $request->attributes->get('_route_params');
             $requestLocale = $request->get('_locale');
             if ($config->isTranslateSlugs() && $locale->getSlug() !== $requestLocale && $request->get('slug')) {
-                $repo = $app['storage']->getRepository('pages');
-                $qb = $repo->createQueryBuilder();
-                $qb->select($locale->getSlug() . '_slug')
-                    ->where($app['translate.slug'] . '_slug = ?')
-                    ->setParameter(0, $request->get('slug'))
-                ;
-                $newSlug = $repo->findOneWith($qb);
-                if ($newSlug) {
-                    $requestAttributes['slug'] = $newSlug[$locale->getSlug() . '_slug'];
+                foreach ($app['config']->get('contenttypes') as $key => $ct) {
+                    if ($request->get('contenttypeslug') !== $ct['slug'] && $request->get('contenttypeslug') !== $ct['singular_slug']) {
+                        continue;
+                    }
+
+                    $repo = $app['storage']->getRepository($ct['slug']);
+                    $qb = $repo->createQueryBuilder();
+                    $qb->select($locale->getSlug() . '_slug')
+                        ->where($request->get('_locale') . '_slug = ?')
+                        ->setParameter(0, $request->get('slug'))
+                    ;
+                    $newSlug = $repo->findOneWith($qb);
+                    if ($newSlug) {
+                        $requestAttributes['slug'] = $newSlug[$locale->getSlug() . '_slug'];
+                    }
                 }
             }
 
