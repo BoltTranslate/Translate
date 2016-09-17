@@ -191,25 +191,6 @@ class TranslateExtension extends SimpleExtension
                     }
                 );
             }
-
-            $app['schema.content_tables'] = $app->extend(
-                'schema.content_tables',
-                function ($contentTables) use ($app) {
-                    $config = $app['translate.config'];
-                    $platform = $app['db']->getDatabasePlatform();
-                    $prefix = $app['schema.prefix'];
-                    $contentTypes = $app['config']->get('contenttypes');
-
-                    foreach ($contentTypes as $contentType) {
-                        $tableName = $contentType['tablename'];
-                        $contentTables[$tableName] = $app->share(function () use ($platform, $prefix, $config) {
-                            return new Storage\ContentTypeTable($platform, $prefix, $config);
-                        });
-                    }
-
-                    return $contentTables;
-                }
-            );
         }
     }
 
@@ -257,13 +238,13 @@ class TranslateExtension extends SimpleExtension
 
                     $repo = $app['storage']->getRepository($ct['slug']);
                     $qb = $repo->createQueryBuilder();
-                    $qb->select($locale->getSlug() . '_slug')
-                        ->where($request->get('_locale') . '_slug = ?')
+                    $qb->select($locale->getSlug() . 'slug')
+                        ->where($request->get('_locale') . 'slug = ?')
                         ->setParameter(0, $request->get('slug'))
                     ;
                     $newSlug = $repo->findOneWith($qb);
                     if ($newSlug) {
-                        $requestAttributes['slug'] = $newSlug[$locale->getSlug() . '_slug'];
+                        $requestAttributes['slug'] = $newSlug[$locale->getSlug() . 'slug'];
                     }
                 }
             }
