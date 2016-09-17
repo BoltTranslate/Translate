@@ -7,6 +7,9 @@ This [bolt.cm](https://bolt.cm/) extension handles translation of content
 within bolt. It is recommended to be used in combination with the Labels
 extension.
 
+**Warning: the old (Bolt 3.0) versions of this extension are not compatible
+with the Bolt 3.1+ version**
+
 ![Screenshot, Backend](https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png)
 
 ## Installation
@@ -64,7 +67,26 @@ extension.
     [...]
     ```
 
- 4. Use the `localeswitcher` twig-function to render a locale switcher in your
+ 4. Add the hidden fields to all the contenttypes that have translateable
+    fields, two for each locale: one called `your_localedata` and one called
+    `your_localeslug`. So for the above `locales` example your would put:
+
+    ```
+    [...]
+    dedata:
+        type: hidden
+    deslug:
+        type: hidden
+        index: true
+    endata:
+        type: hidden
+    enslug:
+        type: hidden
+        index: true
+    [...]
+    ```
+
+ 5. Use the `localeswitcher` twig-function to render a locale switcher in your
     theme: `{{ localeswitcher() }}` or
     `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}` if you want
     to use a custom template. The base template being used is '_localeswitcher.twig'.
@@ -77,11 +99,11 @@ extension.
 
     `{{ localeswitcher(classes = 'custom-class another-class') }}`
 
- 5. (Optional) Activate/install the Labels extension, set your languages in
+ 6. (Optional) Activate/install the Labels extension, set your languages in
     it's config and mark any hardcoded text in your templates with
     `{{ l("Your text here") }}`.
 
- 6. (Optional) Translate your Boltforms by switching
+ 7. (Optional) Translate your Boltforms by switching
     `{% form_theme form 'boltforms_custom.twig' %}` to
     `{% form_theme form '@bolt/frontend/boltforms_theme_translated.twig' %}` at the top
     of a form template. This requires the Labels extension.

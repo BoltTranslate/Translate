@@ -69,7 +69,7 @@ class LocalizedFrontend extends Frontend
         $repo = $this->app['storage']->getRepository($contenttype['slug']);
         $qb = $repo->createQueryBuilder();
         $qb->select('slug')
-            ->where($localeSlug . '_slug = ?')
+            ->where($localeSlug . 'slug = ?')
             ->setParameter(0, $slug)
             ->setMaxResults(1);
 

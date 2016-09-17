@@ -92,8 +92,8 @@ class StorageListener implements EventSubscriberInterface
         $contentTypeName = $entity->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
 
-        if (isset($subject[$localeSlug . '_data'])) {
-            $localeData = json_decode($subject[$localeSlug . '_data'], true);
+        if (isset($subject[$localeSlug . 'data'])) {
+            $localeData = json_decode($subject[$localeSlug . 'data'], true);
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] !== 'repeater') {
                     $subject[$key] = is_array($value) ? json_encode($value) : $value;
@@ -121,14 +121,13 @@ class StorageListener implements EventSubscriberInterface
         if (!$subject instanceof Content || $request->request->getBoolean('no_locale_hydrate')) {
             return;
         }
-
         $contentTypeName = $subject->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
 
-        if (!isset($subject[$localeSlug . '_data'])) {
+        if (!isset($subject[$localeSlug . 'data'])) {
             return;
         }
-        $localeData = json_decode($subject[$localeSlug . '_data'], true);
+        $localeData = json_decode($subject[$localeSlug . 'data'], true);
         foreach ($localeData as $key => $value) {
             if ($key === 'templatefields') {
                 $templateFields = $this->boltConfig->get('theme/templatefields/' . $subject['template'] . '/fields');
@@ -180,10 +179,10 @@ class StorageListener implements EventSubscriberInterface
 
         $localeSlug = $request->get('_locale');
 
-        $record->set($localeSlug . '_slug', $values['slug']);
+        $record->set($localeSlug . 'slug', $values['slug']);
         $locales = $this->config->getLocales();
         if ($values['_locale'] == reset($locales)->getSlug()) {
-            $record->set($localeSlug . '_data', '[]');
+            $record->set($localeSlug . 'data', '[]');
             return;
         }
 
@@ -213,7 +212,7 @@ class StorageListener implements EventSubscriberInterface
             }
         }
         $localeJson = json_encode($localeValues);
-        $record->set($localeSlug . '_data', $localeJson);
+        $record->set($localeSlug . 'data', $localeJson);
     }
 
     /**
@@ -234,11 +233,12 @@ class StorageListener implements EventSubscriberInterface
         if (!$subject instanceof Content) {
             return;
         }
-        if (!isset($subject[$localeSlug . '_data'])) {
+
+        if (!isset($subject[$localeSlug . 'data'])) {
             return;
         }
 
-        $localeData = json_decode($subject[$localeSlug . '_data']);
+        $localeData = json_decode($subject[$localeSlug . 'data']);
         foreach ($localeData as $key => $value) {
             $subject->set($key, $value);
         }
