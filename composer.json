@@ -36,9 +36,6 @@
     },
     "extra": {
         "bolt-icon": "icon-language.png",
-        "bolt-class": "Bolt\\Extension\\Animal\\Translate\\TranslateExtension",
-        "branch-alias": {
-            "dev-master": "3.0.x-dev"
-        }
+        "bolt-class": "Bolt\\Extension\\Animal\\Translate\\TranslateExtension"
     }
 }
