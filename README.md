@@ -76,12 +76,12 @@ with the Bolt 3.1+ version**
     dedata:
         type: hidden
     deslug:
-        type: hidden
+        type: locale_data
         index: true
     endata:
         type: hidden
     enslug:
-        type: hidden
+        type: locale_data
         index: true
     [...]
     ```
