@@ -63,7 +63,8 @@ class TranslateExtension extends SimpleExtension
     protected function registerFields()
     {
         return [
-            new Field\LocaleField()
+            new Field\LocaleField(),
+            new Field\LocaleDataField()
         ];
     }
 
