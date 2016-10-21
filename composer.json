@@ -14,13 +14,16 @@
         "Frontend",
         "i18n"
     ],
-    "authors": [{
-        "name": "Svante Richter",
-        "email": "svante.richter@gmail.com"
-    }, {
-        "name": "Animal Design OG",
-        "email": "studio@animal.at"
-    }],
+    "authors": [
+        {
+            "name": "Svante Richter",
+            "email": "svante.richter@gmail.com"
+        },
+        {
+            "name": "Animal Design OG",
+            "email": "studio@animal.at"
+        }
+    ],
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {
