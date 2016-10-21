@@ -251,8 +251,9 @@ class TranslateExtension extends SimpleExtension
             }
 
             $requestAttributes['_locale'] = $locale->getSlug();
-            $locale->setUrl($app['url_generator']->generate($request->get('_route'), $requestAttributes));
-
+            if ($request->get('_route')) {
+                $locale->setUrl($app['url_generator']->generate($request->get('_route'), $requestAttributes));
+            }
             if ($app['translate.slug'] === $locale->getSlug()) {
                 $locale->setActive(true);
             }
