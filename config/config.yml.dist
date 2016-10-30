@@ -35,4 +35,4 @@ translate_slugs: true
 # Enabling this will redirect visitors on `/` to the preferred locale based on
 # the Accept-Language header. Disabling this will always redirect `/` to the
 # first locale set in `locales` above.
-use_accept_language_header: true
+use_accept_language_header: false
