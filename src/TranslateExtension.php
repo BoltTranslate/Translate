@@ -212,7 +212,7 @@ class TranslateExtension extends SimpleExtension
                 function (array $resources, $app) {
                     foreach ($app['translate.config']->getLocales() as $name => $locale) {
                         // $app['locale'] contains default locale at this point
-                        if ($locale != $app['locale'] && !in_array($locale,  $app['locale_fallbacks'])) {
+                        if ($locale !== $app['locale'] && !in_array($locale,  $app['locale_fallbacks'])) {
                             $resources = array_merge(\Bolt\Provider\TranslationServiceProvider::addResources($app, $name), $resources);
                         }
                     }
