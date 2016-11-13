@@ -5,6 +5,7 @@ namespace Bolt\Extension\Animal\Translate;
 use Bolt\Extension\Animal\Translate\Config;
 use Bolt\Extension\SimpleExtension;
 use Silex\Application;
+use Silex\LazyUrlMatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -51,6 +52,17 @@ class TranslateExtension extends SimpleExtension
                     $app['config'],
                     $app['translate.config'],
                     $app['query'],
+                    $app['request_stack']
+                )
+            );
+            $urlMatcher = new LazyUrlMatcher(function () use ($app) {
+                    return $app['url_matcher'];
+                    });
+            $dispatcher->addSubscriber(
+                new EventListener\LocaleListener(
+                    $app['translate.config'],
+                    $app,
+                    $urlMatcher,
                     $app['request_stack']
                 )
             );
@@ -192,6 +204,21 @@ class TranslateExtension extends SimpleExtension
                     }
                 );
             }
+
+            // Load resources for all languages
+            $app['translator.resources'] = $app->extend(
+                'translator.resources',
+                // Note: is called before request stack is available.
+                function (array $resources, $app) {
+                    foreach ($app['translate.config']->getLocales() as $name => $locale) {
+                        // $app['locale'] contains default locale at this point
+                        if ($locale != $app['locale'] && !in_array($locale,  $app['locale_fallbacks'])) {
+                            $resources = array_merge(\Bolt\Provider\TranslationServiceProvider::addResources($app, $name), $resources);
+                        }
+                    }
+                    return $resources;
+                }
+            );
         }
     }
 
