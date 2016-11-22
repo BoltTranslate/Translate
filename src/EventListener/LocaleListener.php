@@ -31,7 +31,16 @@ class LocaleListener extends BaseLocaleListener
 
        $request = $event->getRequest();
 
-       if ($localeSlug = $request->get('_locale')) {
+       if ($this->config->isTranslateDashboard()) {
+           // If the dashboard is translated, we need to get _locale from routing attributes (frontend) and from the query (backend).
+           $localeSlug = $request->get('_locale');
+       }
+       else {
+           // If the dashboard is not translated, we only need to check routing attributes.
+           $localeSlug = $request->attributes->get('_locale');
+       }
+
+       if ($localeSlug) {
            /** @var Config\Locale $locale */
            $locales = $this->config->getLocales();
 

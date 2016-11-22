@@ -36,3 +36,6 @@ translate_slugs: true
 # the Accept-Language header. Disabling this will always redirect `/` to the
 # first locale set in `locales` above.
 use_accept_language_header: false
+
+# Enable/disable translation of the dashboard.
+translate_dashboard: false
