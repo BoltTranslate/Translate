@@ -29,14 +29,20 @@ class LocaleListener extends BaseLocaleListener
    {
        parent::onKernelRequest($event);
 
-       $localeSlug = $event->getRequest()->getLocale();
+       $request = $event->getRequest();
 
-       /** @var Config\Locale $locale */
-       $locales = $this->config->getLocales();
+       if ($localeSlug = $request->get('_locale')) {
+           /** @var Config\Locale $locale */
+           $locales = $this->config->getLocales();
 
-       foreach ($locales as $name => $locale) {
-           if ($locale->getSlug() === $localeSlug) {
-               $this->app['locale'] = $name;
+           foreach ($locales as $name => $locale) {
+               if ($locale->getSlug() === $localeSlug) {
+                   // Override $request locale
+                   $request->setLocale($name);
+
+                   // Reset $app['locale']
+                   $this->app['locale'] = $name;
+               }
            }
        }
    }
