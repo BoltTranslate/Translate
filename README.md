@@ -92,9 +92,9 @@ with the Bolt 3.1+ version**
     to use a custom template. The base template being used is '_localeswitcher.twig'.
 
     The {{ localeswitcher }} function generates an unordered list
-    with the labels of the languages you've set in the config file. 
+    with the labels of the languages you've set in the config file.
 
-    If you only want to a custom class to the unordered list don't make a custom template. 
+    If you only want to a custom class to the unordered list don't make a custom template.
     Adding a class is as simple as:
 
     `{{ localeswitcher(classes = 'custom-class another-class') }}`
@@ -107,6 +107,27 @@ with the Bolt 3.1+ version**
     `{% form_theme form 'boltforms_custom.twig' %}` to
     `{% form_theme form '@bolt/frontend/boltforms_theme_translated.twig' %}` at the top
     of a form template. This requires the Labels extension.
+
+ 8. (Optional) Translate your menu labels by chaning `{{ menu(template = 'partials/_sub_menu.twig') }}`
+    to `{{ menu(template = '@bolt/frontend/_sub_menu_translated.twig') }}` in your template.
+    You can then have locale specific menu labels by adding them like this:
+
+    ```
+    [...]
+    main:
+        - label: Home
+          title: This is the first menu item.
+          entitle: Dies ist der erste Menüpunkt.
+          path: homepage
+          class: first
+          delabel: Startseite
+        - label: Second item
+          path: entry/1
+          delabel: Zweite Position
+    [...]
+    ```
+
+    If no title/label is set for the current locale it will use the unprefixed ones.
 
 ---
 
@@ -128,7 +149,7 @@ If you want to output the localeswitcher (or some part of it) anywhere you have
 access to an array called `locales` in basically any template that you use.
 Using this you can craft basically any locale selector you want, see #30 for
 more info. To see the structure please dump it by using `{{ dump(locales) }}`.
-The array `locales` can be ordered based on the active locale by using the 
+The array `locales` can be ordered based on the active locale by using the
 `|order()` filter, like this: `{% for locale in locales|order('-active') %}`.
 
 ### Overrides
