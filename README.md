@@ -113,17 +113,16 @@ with the Bolt 3.1+ version**
     You can then have locale specific menu labels by adding them like this:
 
     ```
-    [...]
     main:
         - label: Home
+          delabel: Startseite
           title: This is the first menu item.
-          entitle: Dies ist der erste Menüpunkt.
+          detitle: Dies ist der erste Menüpunkt.
           path: homepage
           class: first
-          delabel: Startseite
         - label: Second item
-          path: entry/1
           delabel: Zweite Position
+          path: entry/1
     [...]
     ```
 
