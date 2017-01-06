@@ -92,7 +92,7 @@ class StorageListener implements EventSubscriberInterface
         $contentTypeName = $entity->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
 
-        if (isset($subject[$localeSlug . 'data'])) {
+        if (isset($subject[$localeSlug . 'data']) && is_array($subject[$localeSlug . 'data'])) {
             $localeData = json_decode($subject[$localeSlug . 'data'], true);
             foreach ($localeData as $key => $value) {
                 if ($contentType['fields'][$key]['type'] !== 'repeater') {

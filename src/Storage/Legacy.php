@@ -80,7 +80,7 @@ class Legacy extends Storage
         $values = $this->localeValues;
         $localeSlug = $app['translate.slug'];
 
-        if (isset($values[$localeSlug . 'data'])) {
+        if (isset($values[$localeSlug . 'data']) && is_array($values[$localeSlug . 'data'])) {
             $localeData = json_decode($values[$localeSlug . 'data'], true);
             foreach ($localeData as $key => $value) {
                 if ($key === 'templatefields') {
