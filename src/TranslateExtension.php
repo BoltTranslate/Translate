@@ -244,8 +244,10 @@ class TranslateExtension extends SimpleExtension
                         ->setParameter(0, $request->get('slug'))
                     ;
                     $newSlug = $repo->findOneWith($qb);
-                    if ($newSlug) {
+                    if ($newSlug && !empty($newSlug[$locale->getSlug() . 'slug'])) {
                         $requestAttributes['slug'] = $newSlug[$locale->getSlug() . 'slug'];
+                    } else {
+                        $requestAttributes['slug'] = $request->get('slug');
                     }
                 }
             }
