@@ -132,6 +132,10 @@ with the Bolt 3.1+ version**
 
 ## Extras/Info
 
+### Repeater Filetypes
+
+When using repeater fields, the get-syntax (`repeaterfield`.get(`fieldname`)) must be used. This is partly because of a bug in the Bolt core and we won't fix it until Bolt 4.0 is released. See [this issue](https://github.com/AnimalDesign/bolt-translate/issues/90) for more information.
+
 ### Localeswitcher in menu
 
 If you want to include the localeswitcher in your menu you can edit the `_sub_menu.twig`
