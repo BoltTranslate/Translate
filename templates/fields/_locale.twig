@@ -30,7 +30,12 @@
                     <a href="{{ url(
                                 app.request.get('_route'),
                                 app.request.get('_route_params')|merge({_locale: option.get('slug') })
-                            )}}">{{ option.get('label') }}</a>
+                            )}}">
+                    {% if key == currentkey %}<strong>{% endif %}
+                    {{ option.get('label') }}
+                    {% if key == currentkey %}<em>(current)</em></strong>{% endif %}
+                </a>
+
                 </li>
             {% endfor %}
             </ul>
@@ -79,6 +84,10 @@
         padding: 5px 12px;
         line-height: 1.42857;
         margin-bottom: -1px;
+        margin-right: 12px;
+        background-color: #FDFDFA;
+        border-color: #9DABB5;
+        border-bottom: 1px solid #FDFDFA;
     }
     #locale-select button a {
         border: 0;
