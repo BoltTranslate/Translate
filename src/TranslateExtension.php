@@ -2,6 +2,9 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
+use Bolt\Asset\Widget\Widget;
+use Bolt\Asset\Target;
+use Bolt\Controller\Zone;
 use Bolt\Extension\Animal\Translate\Config;
 use Bolt\Extension\SimpleExtension;
 use Silex\Application;
@@ -87,6 +90,28 @@ class TranslateExtension extends SimpleExtension
         return [
             'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]],
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerAssets()
+    {
+        $asset = new Widget();
+        $asset->setZone(Zone::BACKEND)
+            ->setLocation(Target::WIDGET_BACK_OVERVIEW_ASIDE_TOP)
+            ->setCallback([$this, 'callbackWidget'])
+            ->setDefer(false)
+        ;
+
+        return [
+            $asset,
+        ];
+    }
+
+    public function callbackWidget()
+    {
+        return $this->renderTemplate('backend/widget.twig');
     }
 
     /**
