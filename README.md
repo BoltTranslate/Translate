@@ -1,16 +1,14 @@
 Translate
 =========
 
-[![SensioLabsInsight](https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df/mini.png)](https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df)
+[![SensioLabsInsight][sensio.png]][sensio]
 
-This [bolt.cm](https://bolt.cm/) extension handles translation of content
-within bolt. It is recommended to be used in combination with the Labels
-extension.
+This [bolt.cm](https://bolt.cm/) extension handles translation of content within
+bolt. It is recommended to be used in combination with the Labels extension.
 
-**Warning: the old (Bolt 3.0) versions of this extension are not compatible
-with the Bolt 3.1+ version**
-
-![Screenshot, Backend](https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png)
+**Warning: the old (Bolt 3.0) versions of this extension are not compatible with
+the Bolt 3.1+ version**
+![Screenshot, Backend][screenshot]
 
 ## Installation
 
@@ -38,7 +36,8 @@ with the Bolt 3.1+ version**
             slug: de
     ```
 
- 2. Add the locale field to the contenttypes you want translated in `contenttypes.yml`:
+ 2. Add the locale field to the contenttypes you want translated in
+    `contenttypes.yml`:
 
     ```
     pages:
@@ -69,7 +68,7 @@ with the Bolt 3.1+ version**
 
  4. Add the hidden fields to all the contenttypes that have translateable
     fields, two for each locale: one called `your_localedata` and one called
-    `your_localeslug`. So for the above `locales` example your would put:
+    `your_localeslug`. So for the above `locales` example you would put:
 
     ```
     [...]
@@ -91,11 +90,11 @@ with the Bolt 3.1+ version**
     `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}` if you want
     to use a custom template. The base template being used is '_localeswitcher.twig'.
 
-    The {{ localeswitcher }} function generates an unordered list
-    with the labels of the languages you've set in the config file.
+    The `{{ localeswitcher }}`` function generates an unordered list with the
+    labels of the languages you've set in the config file.
 
-    If you only want to a custom class to the unordered list don't make a custom template.
-    Adding a class is as simple as:
+    If you only want to a custom class to the unordered list don't make a custom
+    template. Adding a class is as simple as:
 
     `{{ localeswitcher(classes = 'custom-class another-class') }}`
 
@@ -134,7 +133,9 @@ with the Bolt 3.1+ version**
 
 ### Repeater Filetypes
 
-When using repeater fields, the get-syntax (`repeaterfield`.get(`fieldname`)) must be used. This is partly because of a bug in the Bolt core and we won't fix it until Bolt 4.0 is released. See [this issue](https://github.com/AnimalDesign/bolt-translate/issues/90) for more information.
+When using repeater fields, the get-syntax (`repeaterfield`.get(`fieldname`))
+must be used. This is partly because of a bug in the Bolt core and we won't fix
+it until Bolt 4.0 is released. See [this issue](issue90) for more information.
 
 ### Localeswitcher in menu
 
@@ -172,3 +173,11 @@ Started by [ANIMAL](http://animal.at), finished/ported to Bolt 3 by SahAssar
 ## License
 
 This Bolt extension is open-sourced software licensed under the MIT License.
+
+The [Flagkit][flagkit] icons are licensed under the MIT License.
+
+[issue90]: https://github.com/AnimalDesign/bolt-translate/issues/90
+[flagkit]: https://github.com/madebybowtie/FlagKit
+[screenshot]: https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png
+[sensio.png]: https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df/mini.png
+[sensio]: https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df
