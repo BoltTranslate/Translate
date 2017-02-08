@@ -1,4 +1,3 @@
-{% set locales = app['translate.config'].getLocales() %}
 {% set currentkey = locales|keys|first %}
 {% set current = locales|first %}
 {% set translatable = [] %}
@@ -21,7 +20,7 @@
         {% if app.request.get('id') is not empty %}
         <div class="dropdown pull-right" id="locale-select">
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
-                <span class="selected">{{ current.get('label') }}</span>
+                <span class="selected">{{ flag_icon(currentkey) }} {{ current.get('label') }}</span>
                 <span class="caret"></span>
             </button>
             <ul class="dropdown-menu">
@@ -31,6 +30,7 @@
                                 app.request.get('_route'),
                                 app.request.get('_route_params')|merge({_locale: option.get('slug') })
                             )}}">
+                    {{ flag_icon(key) }}
                     {% if key == currentkey %}<strong>{% endif %}
                     {{ option.get('label') }}
                     {% if key == currentkey %}<em>(current)</em></strong>{% endif %}

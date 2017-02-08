@@ -25,4 +25,9 @@ class LocaleField implements FieldInterface
     {
         return ['default' => ''];
     }
+
+    public function load()
+    {
+        return null;
+    }
 }

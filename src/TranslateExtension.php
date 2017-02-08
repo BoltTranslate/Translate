@@ -2,6 +2,9 @@
 
 namespace Bolt\Extension\Animal\Translate;
 
+use Bolt\Asset\Widget\Widget;
+use Bolt\Asset\Target;
+use Bolt\Controller\Zone;
 use Bolt\Extension\Animal\Translate\Config;
 use Bolt\Extension\SimpleExtension;
 use Silex\Application;
@@ -86,7 +89,30 @@ class TranslateExtension extends SimpleExtension
     {
         return [
             'localeswitcher' => ['localeSwitcher', ['is_variadic' => true]],
+            'flag_icon' => ['flagIcon', ['is_safe' => ['html']]],
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerAssets()
+    {
+        $asset = new Widget();
+        $asset->setZone(Zone::BACKEND)
+            ->setLocation(Target::WIDGET_BACK_OVERVIEW_ASIDE_TOP)
+            ->setCallback([$this, 'callbackWidget'])
+            ->setDefer(false)
+        ;
+
+        return [
+            $asset,
+        ];
+    }
+
+    public function callbackWidget()
+    {
+        return $this->renderTemplate('backend/widget.twig');
     }
 
     /**
@@ -287,12 +313,47 @@ class TranslateExtension extends SimpleExtension
     }
 
     /**
+     * Twig function to insert a nice SVG flag icon.
+     */
+    public function flagIcon($locale = '', $width = 21, $height = 16, $margin = '3px')
+    {
+        $config = $this->getConfig();
+
+        if (!$config['show_flags']) {
+            return;
+        }
+
+        $country = explode('_', $locale); //strtolower(end(split('_', 'en_gb')));
+
+        if (!empty(end($country))) {
+            $country = strtolower(end($country));
+        }
+
+        try {
+            $flag_icon = $this->renderTemplate('@bolt/flag_icons/' . $country . '.svg');
+            $flag_image = sprintf(
+                '<img src="data:image/svg+xml;base64,%s" width="%s" height="%s" alt="Flag of %s" style="vertical-align: middle; display: inline-block; margin-bottom: %s;">',
+                base64_encode($flag_icon),
+                $width,
+                $height,
+                $country,
+                $margin
+            );
+        } catch(\Exception $e) {
+            $flag_image = null;
+        }
+
+        return $flag_image;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function getDefaultConfig()
     {
         return [
             'locales' => [],
+            'show_flags' => true
         ];
     }
 }
