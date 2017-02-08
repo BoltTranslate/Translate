@@ -39,7 +39,6 @@
     },
     "extra": {
         "bolt-icon": "icon-language.png",
-        "bolt-assets": "web",
         "bolt-class": "Bolt\\Extension\\Animal\\Translate\\TranslateExtension"
     }
 }
