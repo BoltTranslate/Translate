@@ -1,12 +1,5 @@
-{% macro flag(key) %}
-    {% set country = key|split('_')|last|upper|default(false) %}
-    {% if country %}
-        <img src='/extensions/vendor/animal/translate/{{ asset('flags/' ~ country ~ '@2x.png', 'extensions') }}' width='21' height='16' style='margin-bottom: 1px;'>
-    {% endif %}
-{% endmacro %}
-
-{% import _self as macro %}
-
+{# Only output the widget if the contenttype is translatable. So, it must have a 'locale' field. #}
+{% if app.config.get('contenttypes/'~ app.request.get('contenttypeslug') ~ "/fields/locale") %}
 <div class="panel panel-default panel-news">
     <div class="panel-heading">
         <i class="fa fa-fw fa-language"></i>
@@ -25,7 +18,7 @@
 
         <p>Currently selected:
             <strong>
-                {{ macro.flag(currentkey) }} {{ current.get('label') }}({{ current.get('label_for_menu') }})
+                {{ flag_icon(currentkey) }} {{ current.get('label') }}({{ current.get('slug') }})
             </strong>
         <p>
 
@@ -41,12 +34,11 @@
                                 app.request.get('_route'),
                                 app.request.get('_route_params')|merge({_locale: option.get('slug') })
                             )}}">
-                    {{ macro.flag(key) }}
-                    {% if key == currentkey %}<strong>{% endif %}
-                    {{ option.get('label') }}
-                    {% if key == currentkey %}<em>(current)</em></strong>{% endif %}
-                </a>
-
+                        {{ flag_icon(key) }}
+                        {% if key == currentkey %}<strong>{% endif %}
+                        {{ option.get('label') }}
+                        {% if key == currentkey %}<em>(current)</em></strong>{% endif %}
+                    </a>
                 </li>
             {% endfor %}
             </ul>
@@ -54,3 +46,4 @@
 
     </div>
 </div>
+{% endif %}
