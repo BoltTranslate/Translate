@@ -259,7 +259,7 @@ class TranslateExtension extends SimpleExtension
             $requestLocale = $request->get('_locale');
             if ($config->isTranslateSlugs() && $locale->getSlug() !== $requestLocale && $request->get('slug')) {
                 foreach ($app['config']->get('contenttypes') as $key => $ct) {
-                    if ($request->get('contenttypeslug') !== $ct['slug'] && $request->get('contenttypeslug') !== $ct['singular_slug']) {
+                    if (($request->get('contenttypeslug') !== $ct['slug'] && $request->get('contenttypeslug') !== $ct['singular_slug']) || !isset($ct['fields']['locale'])) {
                         continue;
                     }
 
