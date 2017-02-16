@@ -62,7 +62,7 @@ class LocalizedFrontend extends Frontend
 
         $slug = $this->app['slugify']->slugify($slug);
 
-        if (is_numeric($slug) || !$this->app['translate.config']->isTranslateSlugs()) {
+        if (is_numeric($slug) || !$this->app['translate.config']->isTranslateSlugs() || !isset($contenttype['fields']['locale'])) {
             return parent::record($request, $contenttypeslug, $slug);
         }
 
