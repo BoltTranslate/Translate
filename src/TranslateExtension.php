@@ -249,7 +249,7 @@ class TranslateExtension extends SimpleExtension
         $config = $app['translate.config'];
         $locales = $config->getLocales();
         $request = $app['request_stack']->getCurrentRequest();
-        if ($request === null) {
+        if ($request === null || !Zone::isFrontend($request)) {
             return $locales;
         }
 
