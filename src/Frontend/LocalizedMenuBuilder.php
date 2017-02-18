@@ -19,7 +19,7 @@ class LocalizedMenuBuilder extends MenuBuilder
         $prop->setAccessible(true);
         $this->app = $prop->getValue($this);
         
-        if (isset($this->app['translate.slug'])) {
+        if (isset($this->app['translate.slug']) && $this->app['translate.config']->isRoutingOverride()) {
             $this->prefix = $this->app['translate.slug'] . '/';
         }
         
