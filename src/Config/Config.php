@@ -132,7 +132,7 @@ class Config extends ParameterBag
      */
     public function isUseAcceptLanguageHeader()
     {
-        return $this->getBoolean('use_accept_language_header', true);
+        return $this->getBoolean('use_accept_language_header', false);
     }
 
     /**
@@ -141,5 +141,21 @@ class Config extends ParameterBag
     public function setUseAcceptLanguageHeader($useAcceptLanguageHeader)
     {
         $this->set('use_accept_language_header', $useAcceptLanguageHeader);
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isTranslateDashboard()
+    {
+        return $this->getBoolean('translate_dashboard', false);
+    }
+
+    /**
+     * @param boolean $translateDashboard
+     */
+    public function setTranslateDashboard($translateDashboard)
+    {
+        $this->set('translate_dashboard', $translateDashboard);
     }
 }
