@@ -131,6 +131,53 @@ the Bolt 3.1+ version**
 
 ## Extras/Info
 
+### Example ContentType definition
+
+Assuming your locales are en_GB and de_AT like in the above example your pages
+ContentType should look something like this:
+
+```
+pages:
+    name: Pages
+    singular_name: Page
+    fields:
+        title:
+            type: text
+            class: large
+            group: content
+            is_translateable: true
+        slug:
+            type: slug
+            uses: title
+            is_translateable: true
+        image:
+            type: image
+            is_translateable: true
+        teaser:
+            type: html
+            height: 150px
+            is_translateable: true
+        body:
+            type: html
+            height: 300px
+            is_translateable: true
+        template:
+            type: templateselect
+            filter: '*.twig'
+        dedata:
+            type: hidden
+        deslug:
+            type: locale_data
+            index: true
+        endata:
+            type: hidden
+        enslug:
+            type: locale_data
+            index: true
+    taxonomy: [ groups ]
+    recordsperpage: 100
+```
+
 ### Repeater Filetypes
 
 When using repeater fields, the get-syntax (`repeaterfield`.get(`fieldname`))
