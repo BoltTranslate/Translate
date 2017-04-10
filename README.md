@@ -71,17 +71,18 @@ the Bolt 3.1+ version**
     `your_localeslug`. So for the above `locales` example you would put:
 
     ```
+    fields:
     [...]
-    dedata:
-        type: hidden
-    deslug:
-        type: locale_data
-        index: true
-    endata:
-        type: hidden
-    enslug:
-        type: locale_data
-        index: true
+        dedata:
+            type: hidden
+        deslug:
+            type: locale_data
+            index: true
+        endata:
+            type: hidden
+        enslug:
+            type: locale_data
+            index: true
     [...]
     ```
 
