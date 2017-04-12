@@ -188,11 +188,13 @@ it until Bolt 4.0 is released. See [this issue](issue90) for more information.
 ### Localeswitcher in menu
 
 If you want to include the localeswitcher in your menu you can edit the `_sub_menu.twig`
-file and add the following right before the closing `<ul>`:
+file and add the following right before the closing `<ul>`. 
+As you can see, you can add css classes to the localewitcher `<ul>`:
 
 ```
 <li>Language
     {{ localeswitcher(classes = 'menu submenu vertical') }}
+    </li>
 ```
 
 ### Localeswitcher anywhere/anyhow
