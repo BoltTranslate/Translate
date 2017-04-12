@@ -26,7 +26,7 @@
             <ul class="dropdown-menu">
                 {% for key, option in locales %}
                 <li>
-                    <a href="{{ url(
+                    <a href="{{ path(
                                 app.request.get('_route'),
                                 app.request.get('_route_params')|merge({_locale: option.get('slug') })
                             )}}">
