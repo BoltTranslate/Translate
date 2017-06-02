@@ -35,7 +35,7 @@ class LocalizedUrlGenerator implements UrlGeneratorInterface, ConfigurableRequir
      */
     public function generate($name, $parameters = [], $referenceType = UrlGeneratorInterface::ABSOLUTE_PATH)
     {
-        if (!isset($parameters['_locale']) && $name !== "thumb") {
+        if (empty($parameters['_locale']) && $name !== "thumb") {
             $parameters['_locale'] = $this->app['translate.slug'];
         }
 
