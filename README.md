@@ -91,7 +91,7 @@ the Bolt 3.1+ version**
     `{{ localeswitcher(template = '_my_localeswitcher_template.twig') }}` if you want
     to use a custom template. The base template being used is '_localeswitcher.twig'.
 
-    The `{{ localeswitcher }}`` function generates an unordered list with the
+    The `{{ localeswitcher }}` function generates an unordered list with the
     labels of the languages you've set in the config file.
 
     If you only want to a custom class to the unordered list don't make a custom
