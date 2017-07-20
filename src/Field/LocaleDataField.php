@@ -3,8 +3,9 @@
 namespace Bolt\Extension\Animal\Translate\Field;
 
 use Bolt\Storage\Field\FieldInterface;
+use Bolt\Storage\Field\Type\FieldTypeBase;
 
-class LocaleDataField implements FieldInterface
+class LocaleDataField extends FieldTypeBase implements FieldInterface
 {
     public function getName()
     {
