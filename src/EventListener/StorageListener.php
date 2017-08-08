@@ -133,7 +133,7 @@ class StorageListener implements EventSubscriberInterface
         $localeData = json_decode($subject[$localeSlug . 'data'], true);
         foreach ($localeData as $key => $value) {
             if ($key === 'templatefields') {
-                $templateFields = $this->boltConfig->get('theme/templatefields/' . $subject['template'] . '/fields');
+                $templateFields = $this->boltConfig->get('theme/templatefields/' . ($subject['template'] == Null ? $contentType['record_template'] : $subject['template'] ) . '/fields') . '/fields');
                 foreach ($templateFields as $key => $field) {
                     if ($field['type'] === 'repeater') {
                         $repeaterData = json_decode($value[$key], true);
