@@ -86,7 +86,7 @@ class Legacy extends Storage
 			if ($localeData !== null) {
 				foreach ($localeData as $key => $value) {
 					if ($key === 'templatefields') {
-						$templateFields = $app['config']->get('theme/templatefields/' . $record['template'] . '/fields');
+						$templateFields = $app['config']->get('theme/templatefields/' . ( $record['template']==Null ? $contentType['record_template']: $record['template'] ) ) . '/fields');
 						foreach ($templateFields as $key => $field) {
 							if ($field['type'] === 'repeater') {
 								$localeData = json_decode($value[$key], true);
