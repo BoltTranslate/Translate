@@ -198,7 +198,7 @@ class StorageListener implements EventSubscriberInterface
         }
 
         if (in_array('templatefields', $translatableFields)) {
-            $templateFields = $this->boltConfig->get('theme/templatefields/' . ($values['template'] === Null ? $contentType["record_template"] : $values['template']) . '/fields');
+            $templateFields = $this->boltConfig->get('theme/templatefields/' . ($values['template'] == Null ? $contentType["record_template"] : $values['template']) . '/fields');
             foreach ($templateFields as $key => $field) {
                 if ($field['type'] === 'repeater') {
                     $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
