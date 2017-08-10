@@ -142,6 +142,10 @@ class StorageListener implements EventSubscriberInterface
                         foreach ($repeaterData as $subValue) {
                             $subject['templatefields'][$key]->addFromArray($subValue);
                         }
+                    } else {
+                        if (isset($subject['templatefields'][$key])) {
+                            $subject['templatefields'][$key]= $value[$key];
+                        }
                     }
                 }
             }
