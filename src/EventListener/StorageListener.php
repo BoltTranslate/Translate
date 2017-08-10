@@ -99,7 +99,11 @@ class StorageListener implements EventSubscriberInterface
 				foreach ($localeData as $key => $value) {
 					if (isset($contentType['fields'][$key]['type']) && $contentType['fields'][$key]['type'] !== 'repeater') {
 						$subject[$key] = is_array($value) ? json_encode($value) : $value;
-					}
+					}  elseif ( $key == 'templatefields') {
+						foreach ($value as $i => $field) {
+							$templatefields[$i]= is_array($field) ? json_encode($field) : $field;
+						}
+						$subject[$key] = json_encode($templatefields);
 				}
 			}
         }
@@ -141,10 +145,6 @@ class StorageListener implements EventSubscriberInterface
                         $subject['templatefields'][$key]->clear();
                         foreach ($repeaterData as $subValue) {
                             $subject['templatefields'][$key]->addFromArray($subValue);
-                        }
-                    } else {
-                        if (isset($subject['templatefields'][$key])) {
-                            $subject['templatefields'][$key]= $value[$key];
                         }
                     }
                 }
