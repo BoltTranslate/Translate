@@ -21,7 +21,7 @@
         {{ (item.submenu|default(false) and withsubmenus) ? ' is-dropdown-submenu-parent' -}}
         {{ item|current ? ' active' }}">
 
-        <a href="{{ item.link }}" title='{{ item[app.request.get('_locale')~'title']|default(item.title)|default('')|escape }}' class='{{ item.class|default('') }}'>
+        <a href="{{ item.link }}" title='{{ item[app.request.get('_locale')~'title']|default(item.title|default(''))|escape }}' class='{{ item.class|default('') }}'>
             {{- item[app.request.get('_locale')~'label']|default(item.label)|default('-') -}}
         </a>
 
