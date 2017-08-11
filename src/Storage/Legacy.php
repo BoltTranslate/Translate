@@ -87,22 +87,24 @@ class Legacy extends Storage
 				foreach ($localeData as $key => $value) {
 					if ($key === 'templatefields') {
 						$templateFields = $app['config']->get('theme/templatefields/' . ($values['template'] == Null ? $contentType["record_template"] : $values['template']) . '/fields');
-						foreach ($templateFields as $key => $field) {
-							if ($field['type'] === 'repeater') {
-								$localeData = json_decode($value[$key], true);
-								$originalMapping = null;
-								$originalMapping[$key]['fields'] = $templateFields[$key]['fields'];
-								$originalMapping[$key]['type'] = 'repeater';
+						if ( is_array($templateFields) ) {
+							foreach ($templateFields as $key => $field) {
+								if ($field['type'] === 'repeater') {
+									$localeData = json_decode($value[$key], true);
+									$originalMapping = null;
+									$originalMapping[$key]['fields'] = $templateFields[$key]['fields'];
+									$originalMapping[$key]['type'] = 'repeater';
 								
-								$mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
-								$repeater = new RepeatingFieldCollection($app['storage'], $mapping);
-								$repeater->setName($key);
+									$mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
+									$repeater = new RepeatingFieldCollection($app['storage'], $mapping);
+									$repeater->setName($key);
 								
-								foreach ($localeData as $subValue) {
-									$repeater->addFromArray($subValue);
+									foreach ($localeData as $subValue) {
+										$repeater->addFromArray($subValue);
+									}
+								
+									$record['templatefields'][$key] = $repeater;
 								}
-								
-								$record['templatefields'][$key] = $repeater;
 							}
 						}
 					}
