@@ -138,13 +138,15 @@ class StorageListener implements EventSubscriberInterface
         foreach ($localeData as $key => $value) {
             if ($key === 'templatefields') {
                 $templateFields = $this->boltConfig->get('theme/templatefields/' . ($subject['template'] == Null ? $contentType['record_template'] : $subject['template'] ) . '/fields') . '/fields');
-                foreach ($templateFields as $key => $field) {
-                    if ($field['type'] === 'repeater') {
-                        $repeaterData = json_decode($value[$key], true);
-                        /** @var RepeatingFieldCollection[] $subject */
-                        $subject['templatefields'][$key]->clear();
-                        foreach ($repeaterData as $subValue) {
-                            $subject['templatefields'][$key]->addFromArray($subValue);
+                if (is_array($templateFields)){
+                    foreach ($templateFields as $key => $field) {
+                        if ($field['type'] === 'repeater') {
+                            $repeaterData = json_decode($value[$key], true);
+                            /** @var RepeatingFieldCollection[] $subject */
+                            $subject['templatefields'][$key]->clear();
+                            foreach ($repeaterData as $subValue) {
+                                $subject['templatefields'][$key]->addFromArray($subValue);
+                            }
                         }
                     }
                 }
@@ -203,9 +205,11 @@ class StorageListener implements EventSubscriberInterface
 
         if (in_array('templatefields', $translatableFields)) {
             $templateFields = $this->boltConfig->get('theme/templatefields/' . ($values['template'] == Null ? $contentType["record_template"] : $values['template']) . '/fields');
-            foreach ($templateFields as $key => $field) {
-                if ($field['type'] === 'repeater') {
-                    $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
+            if (is_array($templateFields)){
+	            foreach ($templateFields as $key => $field) {
+                    if ($field['type'] === 'repeater') {
+                        $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
+                    }
                 }
             }
         }
