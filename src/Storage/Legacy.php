@@ -85,7 +85,7 @@ class Legacy extends Storage
 			
 			if ($localeData !== null) {
 				foreach ($localeData as $key => $value) {
-					if ($key === 'templatefields') {
+					if ($key === 'templatefields' && !( $record['template']==Null && !isset($contentType['record_template']) )) {
 						if (isset($record['template']) && $record['template']==Null) {
 							$templateFields = $app['config']->get('theme/templatefields/' .  $contentType['record_template'] . '/fields');
 						} else {
