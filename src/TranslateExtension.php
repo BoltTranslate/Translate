@@ -195,6 +195,7 @@ class TranslateExtension extends SimpleExtension
                 return $defaultSlug;
             }
         );        
+        
         $app['translate.locales'] = $app->share(
             function ($app) {
                 $config = $app['translate.config'];
