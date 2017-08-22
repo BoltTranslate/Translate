@@ -221,6 +221,13 @@ can add the following to the `<head>` of your site:
 {% endfor %}
 ```
 
+### Flag icons
+
+There is a built in function to output flags for use in localeswitchers or
+other places. It is called with `{{ flag_icon(key) }}` where key is a country
+code (like `gb` or `de`). The flags are then embedded in an SVG format. A list
+of available flags can be seen [here](https://github.com/AnimalDesign/bolt-translate/tree/master/templates/flag_icons).
+
 ### Subdomain based routing
 
 If you prefer to have your site locale based around the subdomain instead you
