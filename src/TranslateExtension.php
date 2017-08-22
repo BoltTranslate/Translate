@@ -203,7 +203,6 @@ class TranslateExtension extends SimpleExtension
                 } else {
                    return $config->getLocales();
                 }
-
             }
         );         
     }
@@ -411,7 +410,7 @@ class TranslateExtension extends SimpleExtension
         $labels = [];
         $config = $this->getConfig();
         foreach ($config['locales'] as $language) {
-            $labels[] = array($language['slug'].'label' => $language['slug'].'label');
+            $labels[] = array('key' => $language['slug'] . 'label', 'value' => '', 'delete' => false);
         }
         $event->setFields($labels);
     }
