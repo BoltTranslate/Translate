@@ -195,7 +195,7 @@ class StorageListener implements EventSubscriberInterface
 
         $record->set($localeSlug . 'slug', $values['slug']);
         $locales = $this->config->getLocales();
-        if ($values['_locale'] == reset($locales)->getSlug()) {
+        if (isset($values['_locale']) && $values['_locale'] == reset($locales)->getSlug()) {
             $record->set($localeSlug . 'data', '[]');
             return;
         }
