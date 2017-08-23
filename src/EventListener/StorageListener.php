@@ -99,7 +99,11 @@ class StorageListener implements EventSubscriberInterface
 				foreach ($localeData as $key => $value) {
 					if (isset($contentType['fields'][$key]['type']) && $contentType['fields'][$key]['type'] !== 'repeater') {
 						$subject[$key] = is_array($value) ? json_encode($value) : $value;
-					}
+					}  elseif ( $key == 'templatefields') {
+						foreach ($value as $i => $field) {
+							$templatefields[$i]= is_array($field) ? json_encode($field) : $field;
+						}
+						$subject[$key] = json_encode($templatefields);
 				}
 			}
         }
@@ -132,15 +136,21 @@ class StorageListener implements EventSubscriberInterface
         }
         $localeData = json_decode($subject[$localeSlug . 'data'], true);
         foreach ($localeData as $key => $value) {
-            if ($key === 'templatefields') {
-                $templateFields = $this->boltConfig->get('theme/templatefields/' . $subject['template'] . '/fields');
-                foreach ($templateFields as $key => $field) {
-                    if ($field['type'] === 'repeater') {
-                        $repeaterData = json_decode($value[$key], true);
-                        /** @var RepeatingFieldCollection[] $subject */
-                        $subject['templatefields'][$key]->clear();
-                        foreach ($repeaterData as $subValue) {
-                            $subject['templatefields'][$key]->addFromArray($subValue);
+            if ($key === 'templatefields' && !( $subject['template']==Null && !isset($contentType['record_template']) )) {
+		if ( isset($subject['template']) && $subject['template']==Null) {
+			$templateFields = $this->boltConfig->get('theme/templatefields/' .  $contentType['record_template'] . '/fields');
+		} else {
+			$templateFields = $this->boltConfig->get('theme/templatefields/' . $subject['template'] . '/fields');
+		}
+                if (is_array($templateFields)){
+                    foreach ($templateFields as $key => $field) {
+                        if ($field['type'] === 'repeater') {
+                            $repeaterData = json_decode($value[$key], true);
+                            /** @var RepeatingFieldCollection[] $subject */
+                            $subject['templatefields'][$key]->clear();
+                            foreach ($repeaterData as $subValue) {
+                                $subject['templatefields'][$key]->addFromArray($subValue);
+                            }
                         }
                     }
                 }
@@ -197,11 +207,17 @@ class StorageListener implements EventSubscriberInterface
             );
         }
 
-        if (in_array('templatefields', $translatableFields)) {
-            $templateFields = $this->boltConfig->get('theme/templatefields/' . $values['template'] . '/fields');
-            foreach ($templateFields as $key => $field) {
-                if ($field['type'] === 'repeater') {
-                    $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
+        if (in_array('templatefields', $translatableFields) && !( $record['template']==Null && !isset($contentType['record_template']) )) {
+	    if ( isset($record['template']) && $record['template']==Null) {
+		$templateFields = $this->boltConfig->get('theme/templatefields/' .  $contentType['record_template'] . '/fields');
+	    } else {
+		$templateFields = $this->boltConfig->get('theme/templatefields/' . $record['template'] . '/fields');
+	    }
+            if (is_array($templateFields)){
+	            foreach ($templateFields as $key => $field) {
+                    if ($field['type'] === 'repeater') {
+                        $values['templatefields'][$key] = json_encode($values['templatefields'][$key]);
+                    }
                 }
             }
         }
