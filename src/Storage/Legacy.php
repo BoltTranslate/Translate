@@ -82,54 +82,54 @@ class Legacy extends Storage
 
         if (isset($values[$localeSlug . 'data'])) {
             $localeData = json_decode($values[$localeSlug . 'data'], true);
-			
-			if ($localeData !== null) {
-				foreach ($localeData as $key => $value) {
-					if ($key === 'templatefields' && !( $record['template']==Null && !isset($contentType['record_template']) )) {
-						if (isset($record['template']) && $record['template']==Null) {
-							$templateFields = $app['config']->get('theme/templatefields/' .  $contentType['record_template'] . '/fields');
-						} else {
-							$templateFields = $app['config']->get('theme/templatefields/' . $record['template'] . '/fields');
-						}
-						if ( is_array($templateFields) ) {
-							foreach ($templateFields as $key => $field) {
-								if ($field['type'] === 'repeater') {
-									$localeData = json_decode($value[$key], true);
-									$originalMapping = null;
-									$originalMapping[$key]['fields'] = $templateFields[$key]['fields'];
-									$originalMapping[$key]['type'] = 'repeater';
-								
-									$mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
-									$repeater = new RepeatingFieldCollection($app['storage'], $mapping);
-									$repeater->setName($key);
-								
-									foreach ($localeData as $subValue) {
-										$repeater->addFromArray($subValue);
-									}
-								
-									$record['templatefields'][$key] = $repeater;
-								}
-							}
-						}
-					}
-					if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater') {
-						/**
-						* Hackish fix until #5533 gets fixed, after that the
-						* following five (5) lines can be replaced with
-						* "$record[$key]->clear();"
-						*/
-						$originalMapping=[];
-						$originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
-						$originalMapping[$key]['type'] = 'repeater';
-						$mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
-						$record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
-						
-						foreach ($value as $subValue) {
-							$record[$key]->addFromArray($subValue);
-						}
-					}
-				}
-			}
+
+            if ($localeData !== null) {
+                foreach ($localeData as $key => $value) {
+                    if ($key === 'templatefields' && !( $record['template']==Null && !isset($contentType['record_template']) )) {
+                        if (isset($record['template']) && $record['template']==Null) {
+                            $templateFields = $app['config']->get('theme/templatefields/' .  $contentType['record_template'] . '/fields');
+                        } else {
+                            $templateFields = $app['config']->get('theme/templatefields/' . $record['template'] . '/fields');
+                        }
+                        if ( is_array($templateFields) ) {
+                            foreach ($templateFields as $key => $field) {
+                                if ($field['type'] === 'repeater') {
+                                    $localeData = json_decode($value[$key], true);
+                                    $originalMapping = null;
+                                    $originalMapping[$key]['fields'] = $templateFields[$key]['fields'];
+                                    $originalMapping[$key]['type'] = 'repeater';
+
+                                    $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
+                                    $repeater = new RepeatingFieldCollection($app['storage'], $mapping);
+                                    $repeater->setName($key);
+
+                                    foreach ($localeData as $subValue) {
+                                        $repeater->addFromArray($subValue);
+                                    }
+
+                                    $record['templatefields'][$key] = $repeater;
+                                }
+                            }
+                        }
+                    }
+                    if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater') {
+                        /**
+                        * Hackish fix until #5533 gets fixed, after that the
+                        * following five (5) lines can be replaced with
+                        * "$record[$key]->clear();"
+                        */
+                        $originalMapping=[];
+                        $originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
+                        $originalMapping[$key]['type'] = 'repeater';
+                        $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
+                        $record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
+
+                        foreach ($value as $subValue) {
+                            $record[$key]->addFromArray($subValue);
+                        }
+                    }
+                }
+            }
         }
     }
 }
