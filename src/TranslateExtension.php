@@ -411,7 +411,7 @@ class TranslateExtension extends SimpleExtension
         $labels = [];
         $config = $this->getConfig();
         foreach ($config['locales'] as $language) {
-            $labels[] = array('key' => $language['slug'] . 'label', 'value' => '', 'delete' => false);
+            $labels[] = array('key' => $language['slug'] . 'label', 'value' => '');
         }
         $event->setFields($labels);
     }
