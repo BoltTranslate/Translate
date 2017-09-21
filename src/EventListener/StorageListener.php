@@ -146,7 +146,7 @@ class StorageListener implements EventSubscriberInterface
                 }
             }
 
-            if (!isset($contentType['fields'][$key]['type']) || $contentType['fields'][$key]['type'] !== 'repeater') {
+            if (!isset($contentType['fields'][$key]['type']) || $contentType['fields'][$key]['type'] !== 'repeater' || $value === null) {
                 continue;
             }
             /** @var RepeatingFieldCollection[] $subject */

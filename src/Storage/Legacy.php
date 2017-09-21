@@ -106,7 +106,7 @@ class Legacy extends Storage
 							}
 						}
 					}
-					if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater') {
+					if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater' && $value !== null) {
 						/**
 						* Hackish fix until #5533 gets fixed, after that the
 						* following five (5) lines can be replaced with
