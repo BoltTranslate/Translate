@@ -53,8 +53,7 @@ the Bolt 3.1+ version**
     ```
 
  3. Add the `is_translateable` argument to all fields you want to be
-    translatable. To translate templatefields you simply tag the templateselect
-    with `is_translateable` and all the templatefields will be translateable.
+    translatable.
 
     ```
     [...]
@@ -64,8 +63,18 @@ the Bolt 3.1+ version**
         group: content
         is_translateable: true
     [...]
-    ```
 
+    ```
+    To translate templatefields you simply tag the templateselect
+    with `is_translateable` and all the templatefields will be translateable.
+    ```
+    [...]
+    templateselect:
+        type: templateselect
+        is_translateable: true
+        filter: '*.twig'
+    [...] 
+    ```
  4. Add the hidden fields to all the contenttypes that have translateable
     fields, two for each locale: one called `your_localedata` and one called
     `your_localeslug`. So for the above `locales` example you would put:
