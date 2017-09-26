@@ -131,7 +131,7 @@ class StorageListener implements EventSubscriberInterface
         }
         $contentTypeName = $subject->getContenttype();
         $contentType = $this->boltConfig->get('contenttypes/' . $contentTypeName);
-
+ 
         if (!isset($subject[$localeSlug . 'data'])) {
             return;
         }
@@ -181,7 +181,7 @@ class StorageListener implements EventSubscriberInterface
         }
 
         $contentType = $this->boltConfig->get('contenttypes/' . $event->getContentType());
-        $translatableFields = $this->getTranslatableFields($contentType['fields']);
+        $translatableFields = $this->getTranslatableFields($contentType);
         /** @var Content $record */
         $record = $event->getContent();
         $values = $record->serialize();
@@ -271,20 +271,41 @@ class StorageListener implements EventSubscriberInterface
      *
      * @return array
      */
-    private function getTranslatableFields($fields)
+    private function getTranslatableFields($contentType)
     {
         $translatable = [];
-        if (is_array($fields)) {
-            foreach ($fields as $name => $field) {
+        $translatableTemplateFields = false;
+
+        // Check if one the contenttype fields has translatable set to true
+        if( is_array($contentType['templatefields']) ) {
+            foreach($contentType['templatefields'] as $template) {
+                foreach ($template['fields'] as $name => $field) {
+                    if (isset($field['is_translateable']) && $field['is_translateable'] === true) {
+                        $translatableTemplateFields = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (is_array($contentType['fields'])) {
+
+            foreach ($contentType['fields'] as $name => $field) {
+                // @decrecated
                 if (isset($field['is_translateable']) &&
                     $field['is_translateable'] === true &&
-                    $field['type'] === 'templateselect'
+                    $field['type'] === 'templateselect' &&
+                    $translatableTemplateFields === false
                 ) {
                     $translatable[] = 'templatefields';
                 } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
                     $translatable[] = $name;
                 }
             }
+        }
+
+        if ($translatableTemplateFields === true) {
+            $translatable[] = 'templatefields';
         }
 
         return $translatable;
