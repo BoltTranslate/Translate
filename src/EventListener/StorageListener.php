@@ -276,12 +276,17 @@ class StorageListener implements EventSubscriberInterface
         $translatable = [];
         if (is_array($fields)) {
             foreach ($fields as $name => $field) {
-                if (isset($field['is_translateable']) &&
-                    $field['is_translateable'] === true &&
+                // Remove is_translateable when it is no longer supported
+                if (isset($field['is_translateable'])) {
+                    $field['translatable'] = $field['is_translateable'];
+                }
+                
+                if (isset($field['translatable']) &&
+                    $field['translatable'] === true &&
                     $field['type'] === 'templateselect'
                 ) {
                     $translatable[] = 'templatefields';
-                } elseif (isset($field['is_translateable']) && $field['is_translateable'] === true) {
+                } elseif (isset($field['translatable']) && $field['translatable'] === true) {
                     $translatable[] = $name;
                 }
             }

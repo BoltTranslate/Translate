@@ -3,7 +3,8 @@
 {% set translatable = [] %}
 
 {% for name, field in context.contenttype.fields %}
-    {% if field.is_translateable is defined and field.is_translateable == true %}
+    {# Remove is_translateable when it is no longer supported #}
+    {% if (field.translatable is defined and field.translatable == true) or (field.is_translateable is defined and field.is_translateable == true) %}
         {% set translatable = translatable|merge(['#'~name, '[name="'~name~'"]', '[name^="'~name~'[0]"]', '[name="'~name~'[file]"]']) %}
     {% endif %}
 {% endfor %}
