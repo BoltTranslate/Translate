@@ -30,7 +30,7 @@ url_generator_override: true
 
 # Enable/disable translated slugs.
 # Enabling this will use translated slugs instead of using the same slug for
-# all languages. Only set to false if you also don't set your slugs to `is_translateable`.
+# all languages. Only set to false if you also don't set your slugs to `translatable`.
 translate_slugs: true
 
 # Enable/disable using Accept-Language header to determine the locale for
