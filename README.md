@@ -52,8 +52,12 @@ the Bolt 3.1+ version**
     [...]
     ```
 
- 3. Add the `is_translateable` argument to all fields you want to be
+ 3. Add the `translatable` argument to all fields you want to be
     translatable.
+
+    **Note: In older versions the config `translatable` was misspelled as
+    `is_translateable`. The old way is still supported, but deprecated and
+    will be removed in a future version.**
 
     ```
     [...]
@@ -61,21 +65,21 @@ the Bolt 3.1+ version**
         type: text
         class: large
         group: content
-        is_translateable: true
+        translatable: true
     [...]
 
     ```
     To translate templatefields you simply tag the templateselect
-    with `is_translateable` and all the templatefields will be translateable.
+    with `translatable` and all the templatefields will be translatable.
     ```
     [...]
     templateselect:
         type: templateselect
-        is_translateable: true
+        translatable: true
         filter: '*.twig'
     [...] 
     ```
- 4. Add the hidden fields to all the contenttypes that have translateable
+ 4. Add the hidden fields to all the contenttypes that have translatable
     fields, two for each locale: one called `your_localedata` and one called
     `your_localeslug`. So for the above `locales` example you would put:
 
@@ -155,22 +159,22 @@ pages:
             type: text
             class: large
             group: content
-            is_translateable: true
+            translatable: true
         slug:
             type: slug
             uses: title
-            is_translateable: true
+            translatable: true
         image:
             type: image
-            is_translateable: true
+            translatable: true
         teaser:
             type: html
             height: 150px
-            is_translateable: true
+            translatable: true
         body:
             type: html
             height: 300px
-            is_translateable: true
+            translatable: true
         template:
             type: templateselect
             filter: '*.twig'
