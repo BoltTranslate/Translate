@@ -100,6 +100,7 @@ class StorageListener implements EventSubscriberInterface
                     if (isset($contentType['fields'][$key]['type']) && $contentType['fields'][$key]['type'] !== 'repeater') {
                         $subject[$key] = is_array($value) ? json_encode($value) : $value;
                     } elseif ($key == 'templatefields') {
+                        $templatefields = [];
                         foreach ($value as $fieldName => $field) {
                             $templatefields[$fieldName] = is_array($field) ? json_encode($field) : $field;
                         }
