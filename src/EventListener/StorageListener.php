@@ -163,8 +163,10 @@ class StorageListener implements EventSubscriberInterface
             }
             /** @var RepeatingFieldCollection[] $subject */
             $subject[$key]->clear();
-            foreach ($value as $subValue) {
-                $subject[$key]->addFromArray($subValue);
+            if (is_array($value)) {
+                foreach ($value as $subValue) {
+                    $subject[$key]->addFromArray($subValue);
+                }
             }
         }
     }
