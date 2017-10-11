@@ -225,7 +225,7 @@ class StorageListener implements EventSubscriberInterface
         }
 
         foreach ($translatableFields as $field) {
-            $localeValues[$field] = $values[$field];
+            $localeValues[$field] = isset($values[$field]) ? $values[$field] : null;
             if ($values['id']) {
                 $record->set($field, $defaultContent->get($field));
             } else {
