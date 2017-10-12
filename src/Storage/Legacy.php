@@ -124,8 +124,10 @@ class Legacy extends Storage
                         $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
                         $record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
 
-                        foreach ($value as $subValue) {
-                            $record[$key]->addFromArray($subValue);
+                        if (is_array($value)) {
+                            foreach ($value as $subValue) {
+                                $record[$key]->addFromArray($subValue);
+                            }
                         }
                     }
                 }
