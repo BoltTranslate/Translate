@@ -1,5 +1,5 @@
 <ul{% if classes %} class="{{ classes }}"{% endif %}>
-    {% for locale in locales %}
+    {% for locale in locales|default([]) %}
     <li{% if locale.get('active') %} class="active"{% endif %}>
         <a title="{{ locale.get('label') }}" href="{{ locale.get('url') }}">
             {{ locale.get('label') }}
