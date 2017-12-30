@@ -1,0 +1,15 @@
+# This is the Couscous configuration file, used to generate the documentation
+# See couscous.io for details.
+
+template:
+    url: https://github.com/CouscousPHP/Template-Light.git
+    index: index.md
+
+include:
+    - docs
+
+branch: gh-pages
+baseUrl: https://bolttranslate.github.io/translate
+
+title: Translate
+subTitle: A Bolt extension for multilingual content
