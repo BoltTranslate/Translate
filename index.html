@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Translate</title>
+
+        <link rel="stylesheet" href="https://bolttranslate.github.io/translate/css/main.css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,700" rel="stylesheet">
+    </head>
+    <body>
+
+        <div class="docs">
+            <aside class="docs__sidebar">
+                <div class="docs__sidebar--brand">
+                    <div class="brand">
+                        <a class="brand--text" href="https://bolttranslate.github.io/translate/">
+                            Translate
+                        </a>
+                    </div>
+                </div>
+
+                
+                <div class="docs__sidebar--footer">
+                    <p class="text-muted">
+                        Website generated with <a href="http://couscous.io" title="Markdown website generator">Couscous</a>
+                    </p>
+                </div>
+            </aside>
+            <main class="docs__main">
+                <header class="docs__main--header">
+
+                                        <div class="column is-8">
+                        <form action="https://bolttranslate.github.io/translate/search.html" class="control has-icons-right">
+                            <input class="input" type="text" name="q" id="tipue_search_input" pattern=".{3,}" title="At least 3 characters" placeholder="Search…" required>
+                            <span class="icon is-small is-right">
+                                <i class="icon-search"></i>
+                            </span>
+                        </form>
+                    </div>
+
+                                            <a href="https://github.com/bolttranslate/translate">
+                            <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+                        </a>
+                    
+                </header>
+
+                <div class="docs__main--breadcrumbs">
+                    <div class="pagetitle">
+                        A Bolt extension for multilingual content
+                    </div>
+                </div>
+
+                <div class="docs__main--body">
+
+                    <section id="content" class="content">
+                        <h1 id="translate-documentation">Translate documentation</h1>
+<p>This <a href="https://bolt.cm/">bolt.cm</a> extension handles translation of content
+within Bolt. It is recommended to be used in combination with the
+<a href="https://bolttranslate.github.io/labels">Labels</a> extension.</p>
+<p><img src="https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png" alt="Screenshot, Backend" /></p>
+<ul>
+<li><a href="installation.html">Installation</a></li>
+<li><a href="configuration.html">Configuration</a></li>
+</ul>
+<p>Other information:</p>
+<ul>
+<li><a href="example.html">Example ContentType definition</a></li>
+<li><a href="repeaters.html">Repeater Filetypes</a></li>
+<li><a href="localeswitcher-in-menu.html">Localeswitcher in menu</a></li>
+<li><a href="localeswitcher-anywhere.html">Localeswitcher anywhere/anyhow</a></li>
+<li><a href="overrides.html">Overrides</a></li>
+<li><a href="search-engines.html">Making sure search engines find out about translations</a></li>
+<li><a href="flag-icons.html">Flag icons</a></li>
+<li><a href="homepage-redirect.html">Homepage Redirect</a></li>
+<li><a href="subdomain-routing.html">Subdomain based routing</a></li>
+<li><a href="about-license.html">About and License</a></li>
+</ul>
+                    </section>
+
+                </div>
+            </main>
+
+        </div>
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+        <script>
+        var tipuesearch_pages = [];
+        </script>
+
+
+        <script src="https://bolttranslate.github.io/translate/tipuesearch/tipuesearch_set.js"></script>
+        <script src="https://bolttranslate.github.io/translate/tipuesearch/tipuesearch.min.js"></script>
+        <script src="https://bolttranslate.github.io/translate/js/bundle.js"></script>
+
+        <script>
+
+            hljs.initHighlightingOnLoad();
+
+            $(document).ready(function() {
+                $('#tipue_search_input').tipuesearch({
+                    'mode': 'live',
+                    'liveDescription': '#content',
+                    'liveContent': '#content'
+                });
+            });
+
+        </script>
+
+    </body>
+</html>
