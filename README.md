@@ -77,7 +77,7 @@ the Bolt 3.1+ version**
         type: templateselect
         translatable: true
         filter: '*.twig'
-    [...] 
+    [...]
     ```
  4. Add the hidden fields to all the contenttypes that have translatable
     fields, two for each locale: one called `your_localedata` and one called
@@ -240,6 +240,28 @@ There is a built in function to output flags for use in localeswitchers or
 other places. It is called with `{{ flag_icon(key) }}` where key is a country
 code (like `gb` or `de`). The flags are then embedded in an SVG format. A list
 of available flags can be seen [here](https://github.com/AnimalDesign/bolt-translate/tree/master/templates/flag_icons).
+
+### Selectively disable automatic routing override on a route basis
+
+You might want to benefit from the global automatic routing override (using `routing_override: true` in the plugin configuration) but need to exclude specific URLs from being overridden with a locale. To do so, simply add the following requirement to the route you want to exclude from automatic locale routing:
+
+```
+    requirements:
+        _locale: none
+```
+
+For example, you have old pages URLs that you want to keep as is while using the automatic routing override for the other routes. The following route will serve a page under `/{slug}` without a locale present (automatic routing would expect `/{_locale}/{slug}` instead):
+```
+oldpages:
+    path: /{slug}
+    defaults:
+        _controller: controller.frontend:record
+        contenttypeslug: page
+    requirements:
+        _locale: none
+```
+
+If the resulting content is translated, the default locale will be served.
 
 ### Subdomain based routing
 
