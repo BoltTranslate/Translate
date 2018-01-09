@@ -1,5 +1,4 @@
-                                                                                                                                                                            
-<!DOCTYPE html>
+                                                                                                                                                                            <!DOCTYPE html>
 <html lang="en">
     <head>
         <meta charset="utf-8">
@@ -8,11 +7,12 @@
         <title>Configuration &raquo; Translate</title>
 
         <link rel="stylesheet" href="https://bolttranslate.github.io/Translate/css/main.css">
-        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,700" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro|Source+Sans+Pro:300,400,600,700" rel="stylesheet">
+        <script defer src="https://use.fontawesome.com/releases/v5.0.2/js/all.js"></script>
     </head>
     <body>
 
-        <div class="docs">
+        <div class="docs columns is-gapless is-desktop">
             <aside class="docs__sidebar">
                 <div class="docs__sidebar--brand">
                     <div class="brand">
@@ -20,10 +20,29 @@
                             Translate
                         </a>
                     </div>
+                    <button class="button button-bars is-primary is-hidden-desktop">
+                        <span class="icon">
+                        <i class="fa fa-bars"></i>
+                        </span>
+                    </button>
+                    <button class="button button-search is-primary is-hidden-desktop">
+                        <span class="icon">
+                        <i class="fa fa-search"></i>
+                        </span>
+                    </button>
                 </div>
 
+                                                <div class="docs__sidebar--search">
+                    <form action="https://bolttranslate.github.io/Translate/search.html" class="control has-icons-right">
+                        <input class="input" type="text" name="q" id="tipue_search_input" pattern=".{3,}" title="At least 3 characters" placeholder="Search…" required>
+                        <span class="icon is-small is-right">
+                            <i class="icon-search"></i>
+                        </span>
+                    </form>
+                </div>
                 
-                    <nav id="sidebar" class="docs__sidebar--menu menu" role="navigation">
+                                <div class="docs__sidebar--menu">
+                    <nav id="sidebar" class="menu" role="navigation">
                         <ul class="menu-list">
                                                                                                                             <li class="">
                                     <a href="https://bolttranslate.github.io/Translate/installation.html" class="">
@@ -87,60 +106,48 @@
                                 </li>
                                                     </ul>
                     </nav>
-
+                </div>
                 
-                <div class="docs__sidebar--footer">
+                <div class="docs__sidebar--footer is-hidden-touch">
                     <p class="text-muted">
-                        Website generated with <a href="http://couscous.io" title="Markdown website generator">Couscous</a>
+                        Generated with ease by: <br>
+                        <a href="http://couscous.io" title="Markdown website generator">Couscous</a> |
+                        <a href="https://github.com/bolt/Extension-docs-template" title="Bolt extension documentation template">Bolt template</a>.
                     </p>
                 </div>
             </aside>
             <main class="docs__main">
                 <header class="docs__main--header">
-
-                                                            <div class="column is-8">
-                        <form action="https://bolttranslate.github.io/Translate/search.html" class="control has-icons-right">
-                            <input class="input" type="text" name="q" id="tipue_search_input" pattern=".{3,}" title="At least 3 characters" placeholder="Search…" required>
-                            <span class="icon is-small is-right">
-                                <i class="icon-search"></i>
-                            </span>
-                        </form>
-                    </div>
-                    
-                                            <a href="https://github.com/bolttranslate/Translate">
-                            <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
-                        </a>
-                    
-                </header>
-
-                <div class="docs__main--breadcrumbs">
                     <div class="pagetitle">
                         Configuration
                     </div>
-                </div>
+
+                                            <a href="https://github.com/bolttranslate/Translate" class="is-hidden-touch">
+                            <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png">
+                        </a>
+                                    </header>
 
                 <div class="docs__main--body">
-
                     <section id="content" class="content">
                         <h2 id="configuration">Configuration</h2>
 <ol>
-<li>
-<p>Modify the <code>locales</code> block in the extension configuration (which you can
+<li>Modify the <code>locales</code> block in the extension configuration (which you can
 find under the <code>Extend</code> screen in bolt's backend) to suit your needs. The
 first one is the default locale and must be the same as bolts own locale
-which you've set in bolts' main config.yml:</p>
-<pre><code>locales:
+which you've set in bolts' main config.yml:</li>
+</ol>
+<pre><code class="language-yaml">locales:
     en_GB:
         label: English
         slug: en
     de_AT:
         label: Deutsch
         slug: de</code></pre>
-</li>
-<li>
-<p>Add the locale field to the contenttypes you want translated in
-<code>contenttypes.yml</code>:</p>
-<pre><code>pages:
+<ol start="2">
+<li>Add the locale field to the contenttypes you want translated in
+<code>contenttypes.yml</code>:</li>
+</ol>
+<pre><code class="language-yaml">pages:
     name: Pages
     slug: pages
     singular_name: Page
@@ -150,35 +157,36 @@ which you've set in bolts' main config.yml:</p>
             type: locale
             group: content
 [...]</code></pre>
-</li>
+<ol start="3">
 <li>
 <p>Add the <code>translatable</code> argument to all fields you want to be
 translatable.</p>
 <p><strong>Note: In older versions the config <code>translatable</code> was misspelled as
 <code>is_translateable</code>. The old way is still supported, but deprecated and
 will be removed in a future version.</strong></p>
-<pre><code>[...]
+</li>
+</ol>
+<pre><code class="language-yaml">[...]
 title:
     type: text
     class: large
     group: content
     translatable: true
-[...]
-</code></pre>
-<p>To translate templatefields you simply tag the templateselect
-with <code>translatable</code> and all the templatefields will be translatable.</p>
-<pre><code>[...]
+[...]</code></pre>
+<pre><code>To translate templatefields you simply tag the templateselect
+with `translatable` and all the templatefields will be translatable.</code></pre>
+<pre><code class="language-yaml">[...]
 templateselect:
     type: templateselect
     translatable: true
     filter: '*.twig'
 [...]</code></pre>
-</li>
-<li>
-<p>Add the hidden fields to all the contenttypes that have translatable
+<ol start="4">
+<li>Add the hidden fields to all the contenttypes that have translatable
 fields, two for each locale: one called <code>your_localedata</code> and one called
-<code>your_localeslug</code>. So for the above <code>locales</code> example you would put:</p>
-<pre><code>fields:
+<code>your_localeslug</code>. So for the above <code>locales</code> example you would put:</li>
+</ol>
+<pre><code class="language-yaml">fields:
 [...]
     dedata:
         type: hidden
@@ -191,7 +199,7 @@ fields, two for each locale: one called <code>your_localedata</code> and one cal
         type: locale_data
         index: true
 [...]</code></pre>
-</li>
+<ol start="5">
 <li>
 <p>Use the <code>localeswitcher</code> twig-function to render a locale switcher in your
 theme: <code>{{ localeswitcher() }}</code> or
@@ -214,29 +222,25 @@ it's config and mark any hardcoded text in your templates with
 <code>{% form_theme form '@bolt/frontend/boltforms_theme_translated.twig' %}</code> at the top
 of a form template. This requires the Labels extension.</p>
 </li>
-<li>
-<p>(Optional) Translate your menu labels by chaning <code>{{ menu(template = 'partials/_sub_menu.twig') }}</code>
+<li>(Optional) Translate your menu labels by chaning <code>{{ menu(template = 'partials/_sub_menu.twig') }}</code>
 to <code>{{ menu(template = '@bolt/frontend/_sub_menu_translated.twig') }}</code> in your template.
-You can then have locale specific menu labels by adding them like this:</p>
-<pre><code>main:
-    - label: Home
-      delabel: Startseite
-      title: This is the first menu item.
-      detitle: Dies ist der erste Menüpunkt.
-      path: homepage
-      class: first
-    - label: Second item
-      delabel: Zweite Position
-      path: entry/1
-[...]</code></pre>
-<p>If no title/label is set for the current locale it will use the unprefixed ones.</p>
-</li>
+You can then have locale specific menu labels by adding them like this:</li>
 </ol>
+<pre><code class="language-yaml">main:
+    - label: Home
+        delabel: Startseite
+        title: This is the first menu item.
+        detitle: Dies ist der erste Menüpunkt.
+        path: homepage
+        class: first
+    - label: Second item
+        delabel: Zweite Position
+        path: entry/1
+[...]</code></pre>
+<pre><code>If no title/label is set for the current locale it will use the unprefixed ones.</code></pre>
                     </section>
-
                 </div>
             </main>
-
         </div>
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -244,14 +248,10 @@ You can then have locale specific menu labels by adding them like this:</p>
         <script>
         var tipuesearch_pages = ["https://bolttranslate.github.io/Translate/installation.html", "https://bolttranslate.github.io/Translate/configuration.html", "https://bolttranslate.github.io/Translate/example.html", "https://bolttranslate.github.io/Translate/repeaters.html", "https://bolttranslate.github.io/Translate/localeswitcher-in-menu.html", "https://bolttranslate.github.io/Translate/localeswitcher-anywhere.html", "https://bolttranslate.github.io/Translate/overrides.html", "https://bolttranslate.github.io/Translate/search-engines.html", "https://bolttranslate.github.io/Translate/flag-icons.html", "https://bolttranslate.github.io/Translate/homepage-redirect.html", "https://bolttranslate.github.io/Translate/subdomain-routing.html", "https://bolttranslate.github.io/Translate/about-license.html"];
         </script>
-
-
         <script src="https://bolttranslate.github.io/Translate/tipuesearch/tipuesearch_set.js"></script>
         <script src="https://bolttranslate.github.io/Translate/tipuesearch/tipuesearch.min.js"></script>
         <script src="https://bolttranslate.github.io/Translate/js/bundle.js"></script>
-
         <script>
-
             $(document).ready(function() {
                 $('#tipue_search_input').tipuesearch({
                     'mode': 'live',
@@ -259,7 +259,6 @@ You can then have locale specific menu labels by adding them like this:</p>
                     'liveContent': '#content'
                 });
             });
-
         </script>
 
     </body>
