@@ -4,7 +4,7 @@ Example ContentType definition
 Assuming your locales are en_GB and de_AT like in the above example your pages
 ContentType should look something like this:
 
-```
+```yaml
 pages:
     name: Pages
     singular_name: Page

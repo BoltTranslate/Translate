@@ -13,7 +13,7 @@ functionality, you'll need to add the entry manually. The entry should be
 placed at the bottom of your custom routing rules (to avoid conflicts), and
 look something like this:
 
-```
+```yaml
 homepageredir:
     path:               /
     defaults:           { _controller: 'controller.frontend:homepageRedirect'}
