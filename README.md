@@ -11,7 +11,7 @@ View the full documentation online: [Translate docs][docs].
 
 ![Screenshot, Backend][screenshot]
 
-[docs]: https://bolttranslate.github.io/translate
+[docs]: https://bolttranslate.github.io/Translate
 [labels]: https://bolttranslate.github.io/labels
 [screenshot]: https://cloud.githubusercontent.com/assets/343392/10799822/23900e48-7daf-11e5-86ad-c7f7730a0b13.png
 [sensio.png]: https://insight.sensiolabs.com/projects/aeda0c78-7b25-427e-aa90-39b21ab1f8df/mini.png
