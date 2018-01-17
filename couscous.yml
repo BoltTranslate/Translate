@@ -1,0 +1,46 @@
+# This is the Couscous configuration file, used to generate the documentation
+# See couscous.io for details.
+
+template:
+    # The following assumes you have a checkout of the template folder in ../couscous-template
+    directory: ../couscous-template/public
+    # url: https://github.com/bolt/Extension-docs-template
+    index: index.md
+
+include:
+    - docs
+
+branch: gh-pages
+baseUrl: https://bolttranslate.github.io/Translate
+
+title: Translate
+subTitle: A Bolt extension for multilingual content
+github:
+    user: bolttranslate
+    repo: Translate
+
+menu:
+    installation.md:
+        label: Installation
+    configuration.md:
+        label: Configuration
+    example.md:
+        label: Example ContentType
+    repeaters.md:
+        label: Repeater Filetypes
+    localeswitcher-in-menu.md:
+        label: Localeswitcher in menu
+    localeswitcher-anywhere.md:
+        label: Localeswitcher anywhere
+    overrides.md:
+        label: Overrides
+    search-engines.md:
+        label: Search engines
+    flag-icons.md:
+        label: Flag icons
+    homepage-redirect.md:
+        label: Homepage Redirect
+    subdomain-routing.md:
+        label: Subdomain based routing
+    about-license.md:
+        label: About and License
