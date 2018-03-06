@@ -6,12 +6,14 @@ use Bolt\Asset\Widget\Widget;
 use Bolt\Asset\Target;
 use Bolt\Controller\Zone;
 use Bolt\Extension\Animal\Translate\Config;
+use Bolt\Extension\Animal\Translate\Storage\Schema\Builder\ContentTranslationTables;
 use Bolt\Extension\SimpleExtension;
 use Silex\Application;
 use Silex\LazyUrlMatcher;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use Bolt\Extension\Animal\Translate\Storage\Schema\Manager;
 
 /**
  * Translate extension class.
@@ -245,6 +247,44 @@ class TranslateExtension extends SimpleExtension
                     return $resources;
                 }
             );
+
+            $app['schema'] = $app->share(function($app) {
+                return new Manager($app);
+            });
+
+            $app['schema.content_translation_tables'] = $app->share(
+                function (Application $app) {
+                    /** @var \Doctrine\DBAL\Platforms\AbstractPlatform $platform */
+                    $platform = $app['db']->getDatabasePlatform();
+                    $prefix = $app['schema.prefix'];
+
+                    $contentTypes = $app['config']->get('contenttypes');
+                    $acne = new \Pimple();
+
+                    foreach (array_keys($contentTypes) as $contentType) {
+                        $tableName = $contentTypes[$contentType]['tablename'];
+                        $acne[$tableName] = $app->share(
+                            function () use ($platform, $prefix) {
+                                return new Storage\Schema\Tables\ContentTypeTranslation($platform, $prefix);
+                            }
+                        );
+                    }
+
+                    return $acne;
+                }
+            );
+
+            $app['trans.schema.builder'] = $app->share(function($app) {
+                return new ContentTranslationTables(
+                    $app['db'],
+                    $app['schema'],
+                    $app['schema.content_translation_tables'],
+                    $app['schema.charset'],
+                    $app['schema.collate'],
+                    $app['logger.system'],
+                    $app['logger.flash']
+                );
+            });
         }
     }
 
