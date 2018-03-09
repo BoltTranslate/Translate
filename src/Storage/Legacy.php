@@ -45,7 +45,8 @@ class Legacy extends Storage
         } else {
             $content = new Content($app, $contenttype, $values);
         }
-
+        
+        $content['originalValues'] = $this->localeValues;
         return $content;
     }
 
