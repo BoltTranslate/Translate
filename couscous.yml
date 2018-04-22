@@ -16,8 +16,10 @@ baseUrl: https://bolttranslate.github.io/Translate
 title: Translate
 subTitle: A Bolt extension for multilingual content
 github:
-    user: bolttranslate
+    user: BoltTranslate
     repo: Translate
+    editlink: https://github.com/BoltTranslate/Translate/edit/master/docs/
+
 
 menu:
     installation.md:
