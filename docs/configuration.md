@@ -89,7 +89,7 @@ fields:
     The `{{ localeswitcher }}` function generates an unordered list with the
     labels of the languages you've set in the config file.
 
-    If you only want to a custom class to the unordered list don't make a custom
+    If you only want to add a custom class to the unordered list don't make a custom
     template. Adding a class is as simple as:
 
     `{{ localeswitcher(classes = 'custom-class another-class') }}`
