@@ -11,7 +11,7 @@ class Legacy extends Storage
     /**
      * Override to set localized values before hydration in legacy storage
      */
-    public function getContentObject($contenttype, $values = [])
+    public function getContentObject($contenttype, $values = [], $isRootType = true)
     {
         $reflection = new \ReflectionClass($this);
         $prop = $reflection->getParentClass()->getProperty('app');
