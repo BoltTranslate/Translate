@@ -24,7 +24,10 @@ class LocalizedFrontend extends Frontend
             }
 
             foreach ($routes as $name => &$route) {
-                if ($name !== 'preview' && $route['requirements']['_locale'] != 'none') {
+                if (
+                    $name !== 'preview'
+                    && (!isset($route['requirements']['_locale']) || $route['requirements']['_locale'] != 'none')
+                ) {
                     $route['path'] = '/{_locale}' . $route['path'];
                     $route['requirements']['_locale'] = $requirements;
                 }
