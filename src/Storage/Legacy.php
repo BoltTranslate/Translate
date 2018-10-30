@@ -113,6 +113,27 @@ class Legacy extends Storage
                             }
                         }
                     }
+
+                    /** 
+                    *Fix for field type blocks
+                    */
+                    if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'block'  && $value !== null) {
+                        $originalMapping=[];
+                        $originalMapping[$key]['fields'] = $contentType['fields'][$key]['fields'];
+                        $originalMapping[$key]['type'] = 'block';
+                        $mapping = $app['storage.metadata']->getRepeaterMapping($originalMapping);
+                        $record[$key] = new RepeatingFieldCollection($app['storage'], $mapping);
+                        foreach ($value as $group => $block) {
+                            foreach ($block as $blockName => $fields) {
+                                $fields = $fields;
+                                array_shift($fields);
+                                if (is_array($fields)) {
+                                    $record[$key]->addFromArray($fields, $group, null, $blockName);
+                                }
+                            }
+                        }
+                    }
+
                     if (isset($contentType['fields'][$key]) && $contentType['fields'][$key]['type'] === 'repeater'  && $value !== null) {
                         /**
                         * Hackish fix until #5533 gets fixed, after that the
