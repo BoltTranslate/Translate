@@ -18,7 +18,7 @@
 
 <fieldset class="locale">
     <div class="col-sm-12">
-        {% if app.request.get('id') is not empty %}
+        {% if app.request.get('id') is not empty or app['translate.config'].ShowSwitcherOnNew %}
         <div class="dropdown pull-right" id="locale-select">
             <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" type="button">
                 <span class="selected">{{ flag_icon(currentkey) }} {{ current.get('label') }}</span>

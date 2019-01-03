@@ -158,4 +158,20 @@ class Config extends ParameterBag
     {
         $this->set('translate_dashboard', $translateDashboard);
     }
+
+    /**
+     * @return boolean
+     */
+    public function isShowSwitcherOnNew()
+    {
+        return $this->getBoolean('show_switcher_on_new', false);
+    }
+
+    /**
+     * @param boolean $switcherOnNew
+     */
+    public function setShowSwitcherOnNew($switcherOnNew)
+    {
+        $this->set('show_switcher_on_new', $switcherOnNew);
+    }
 }
