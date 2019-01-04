@@ -136,7 +136,13 @@ class StorageListener implements EventSubscriberInterface
         if (!isset($subject[$localeSlug . 'data'])) {
             return;
         }
+
         $localeData = json_decode($subject[$localeSlug . 'data'], true);
+
+        if (empty($localeData)) {
+            return;
+        }
+
         foreach ($localeData as $key => $value) {
             if ($key === 'templatefields' && !($subject['template'] === null && !isset($contentType['record_template']))) {
                 if (isset($subject['template']) && $subject['template'] === null) {
