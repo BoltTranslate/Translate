@@ -16,7 +16,7 @@
 {% block messages_error %}
     {% if messages.error and app.request.get(formname) %}
         {% for error in messages.error %}
-            <p class="boltform-error">{{ l(error) }}</p>
+            <p class="boltform-error">{{ app.request.get('_locale') is null ? error : l(error) }}</p>
         {% endfor %}
     {% endif %}
 {% endblock %}
@@ -24,7 +24,7 @@
 {% block messages_info %}
     {% if messages.info and app.request.get(formname) %}
         {% for info in messages.info %}
-            <p class="boltform-info boltform-message">{{ l(info) }}</p>
+            <p class="boltform-info boltform-message">{{ app.request.get('_locale') is null ? info : l(info) }}</p>
         {% endfor %}
     {% endif %}
 {% endblock %}
