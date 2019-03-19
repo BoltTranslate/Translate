@@ -101,7 +101,7 @@ fields:
  7. (Optional) Translate your Boltforms by switching
     `{% form_theme form 'boltforms_custom.twig' %}` to
     `{% form_theme form '@bolt/frontend/boltforms_theme_translated.twig' %}` at the top
-    of a form template. For feedback translation, also add `{% form_theme messages '@bolt/frontend/boltforms_messages_translated.twig' %}`. This requires the Labels extension.
+    of a form template. For feedback translation, also add `{% form_theme messages '@bolt/frontend/boltforms_messages_translated.twig' %}` and `{% form_theme messages '@bolt/frontend/boltforms_recaptcha_translated.twig' %}`. This requires the Labels extension.
 
  8. (Optional) Translate your menu labels by changing `{{ menu(template = 'partials/_sub_menu.twig') }}`
     to `{{ menu(template = '@bolt/frontend/_sub_menu_translated.twig') }}` in your template.
