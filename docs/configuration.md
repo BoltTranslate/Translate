@@ -38,7 +38,7 @@ pages:
     **Note: In older versions the config `translatable` was misspelled as
     `is_translateable`. The old way is still supported, but deprecated and
     will be removed in a future version. Also note that you should use `true` 
-    and not `1` here**
+    and not `1` here.**
 
 ```yaml
 [...]
