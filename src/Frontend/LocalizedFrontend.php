@@ -79,7 +79,7 @@ class LocalizedFrontend extends Frontend
 
         $result = $qb->execute()->fetch();
 
-        if (null !== $result['slug']) {
+        if ($result['slug'] !== null) {
             return parent::record($request, $contenttypeslug, $result['slug']);
         } else {
             $this->abort(Response::HTTP_NOT_FOUND, "Page $contenttypeslug/$slug not found.");
