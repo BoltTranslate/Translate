@@ -77,6 +77,24 @@
                 );
         {% endif %}
     });
+    
+    var localeTab = document.querySelector('#locale-select');
+
+    if (localeTab !== null) {
+        var links = localeTab.querySelectorAll('a');
+
+        window.onhashchange = function (){
+            var tab = window.location.hash.substr(1);
+
+            Array.prototype.forEach.call(links, function(link) {
+                var origHref = link.getAttribute('href').split('#')[0];
+
+                if (tab.length>0) {
+                    link.setAttribute('href', origHref + '#' + tab);
+                }
+            });
+        };
+    }
 </script>
 
 <style>
