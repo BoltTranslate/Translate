@@ -83,3 +83,13 @@
         {%- endif -%}
     {%- endfor -%}
 {%- endblock widget_attributes -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <ul class="boltform-error">
+            {%- for error in errors -%}
+                <li class="boltform-error">{{ app.request.get('_locale') is null ? error.message : l(error.message)}}</li>
+            {%- endfor -%}
+        </ul>
+    {%- endif -%}
+{%- endblock form_errors -%}
