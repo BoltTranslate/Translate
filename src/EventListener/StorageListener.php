@@ -266,6 +266,10 @@ class StorageListener implements EventSubscriberInterface
         }
 
         $localeData = json_decode($subject[$localeSlug . 'data']);
+        if (is_null($localeData)) {
+            $localeData = [];
+        }
+
         foreach ($localeData as $key => $value) {
             $subject->set($key, $value);
         }
