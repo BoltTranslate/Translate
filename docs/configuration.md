@@ -19,6 +19,9 @@ locales:
  2. Add the locale field to the contenttypes you want translated in
     `contenttypes.yml`:
 
+    **Note: The slug of the contenttype must match the key used in
+    `contenttypes.yml`. In this example below it is `pages`.**
+
 ```yaml
 pages:
     name: Pages
