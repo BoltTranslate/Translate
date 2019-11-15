@@ -20,7 +20,10 @@ locales:
     `contenttypes.yml`:
 
     **Note: The slug of the contenttype must match the key used in
-    `contenttypes.yml`. In this example below it is `pages`.**
+    `contenttypes.yml` and be in the same format as a slugified bolt
+    contenttype slug. That generally means no uppercase and no special
+    characters. It is safest to stick to [a-z] only.  In this example
+    below it is `pages`.**
 
 ```yaml
 pages:
