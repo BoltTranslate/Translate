@@ -188,6 +188,11 @@ class StorageListener implements EventSubscriberInterface
         }
 
         $contentType = $this->boltConfig->get('contenttypes/' . $event->getContentType());
+
+        if ($contentType === null) {
+            return;
+        }
+
         $translatableFields = $this->getTranslatableFields($contentType['fields']);
         /** @var Content $record */
         $record = $event->getContent();
