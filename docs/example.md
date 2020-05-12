@@ -14,6 +14,8 @@ pages:
             class: large
             group: content
             translatable: true
+        locale:
+            type: locale
         slug:
             type: slug
             uses: title
