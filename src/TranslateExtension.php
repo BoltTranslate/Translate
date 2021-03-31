@@ -15,8 +15,6 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 /**
  * Translate extension class.
- *
- * @author Svante Richter <svante.richter@gmail.com>
  */
 class TranslateExtension extends SimpleExtension
 {

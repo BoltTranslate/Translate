@@ -16,7 +16,6 @@ use Symfony\Component\HttpFoundation\RequestStack;
 /**
  * Storage event subscriber.
  *
- * @author Svante Richter <svante.richter@gmail.com>
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
 class StorageListener implements EventSubscriberInterface
