@@ -186,7 +186,8 @@ class StorageListener implements EventSubscriberInterface
             return;
         }
 
-        $contentType = $this->boltConfig->get('contenttypes/' . $event->getContentType());
+        $subject = $event->getSubject();
+        $contentType = $this->boltConfig->get('contenttypes/' . $subject->getContentType());
 
         if ($contentType === null) {
             return;
@@ -214,7 +215,7 @@ class StorageListener implements EventSubscriberInterface
         if ($values['id']) {
             /** @var Content $defaultContent */
             $defaultContent = $this->query->getContent(
-                $event->getContentType(),
+                $subject->getContentType(),
                 ['id' => $values['id'], 'returnsingle' => true]
             );
         }
